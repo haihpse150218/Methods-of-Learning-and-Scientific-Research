@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAN NCKH - Ke Hoach Nghien Cuu Khoa Hoc</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #080d1a 0%, #0f1a30 50%, #0a1225 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        h1 {
+            font-size: 2.4em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5, #7b2ff7, #00d2ff);
+            background-size: 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: flow 4s infinite;
+        }
+        .header .sub {
+            color: #5a7a9a;
+            margin-top: 8px;
+            font-size: 0.95em;
+        }
+        .header .tag {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 20px;
+            border-radius: 20px;
+            background: rgba(0,210,255,0.1);
+            border: 1px solid rgba(0,210,255,0.3);
+            color: #00d2ff;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+        @keyframes flow {
+            0%,100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .section { max-width: 1250px; margin: 0 auto 55px; }
+        .sec-title {
+            font-size: 1.35em;
+            margin-bottom: 22px;
+            padding-left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .sec-title .num {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #fff; font-size: 0.9em;
+            flex-shrink: 0;
+        }
+        .sec-title .text { font-weight: 700; }
+        .sec-title .duration {
+            padding: 3px 12px;
+            border-radius: 14px;
+            font-size: 0.6em;
+            font-weight: 600;
+        }
+
+        /* Phase colors */
+        .p0 .num { background: linear-gradient(135deg, #607d8b, #78909c); }
+        .p0 .text { color: #90a4ae; }
+        .p0 .duration { background: rgba(96,125,139,0.2); color: #90a4ae; }
+
+        .p1 .num { background: linear-gradient(135deg, #ff6b35, #ff8c42); }
+        .p1 .text { color: #ff8c42; }
+        .p1 .duration { background: rgba(255,107,53,0.2); color: #ff8c42; }
+
+        .p2 .num { background: linear-gradient(135deg, #2196f3, #42a5f5); }
+        .p2 .text { color: #42a5f5; }
+        .p2 .duration { background: rgba(33,150,243,0.2); color: #42a5f5; }
+
+        .p3 .num { background: linear-gradient(135deg, #4caf50, #66bb6a); }
+        .p3 .text { color: #66bb6a; }
+        .p3 .duration { background: rgba(76,175,80,0.2); color: #66bb6a; }
+
+        .p4 .num { background: linear-gradient(135deg, #ffc107, #ffb300); }
+        .p4 .text { color: #ffc107; }
+        .p4 .duration { background: rgba(255,193,7,0.2); color: #ffc107; }
+
+        .p5 .num { background: linear-gradient(135deg, #9c27b0, #ab47bc); }
+        .p5 .text { color: #ab47bc; }
+        .p5 .duration { background: rgba(156,39,176,0.2); color: #ab47bc; }
+
+        .p6 .num { background: linear-gradient(135deg, #e91e63, #f06292); }
+        .p6 .text { color: #f06292; }
+        .p6 .duration { background: rgba(233,30,99,0.2); color: #f06292; }
+
+        .p7 .num { background: linear-gradient(135deg, #00bcd4, #26c6da); }
+        .p7 .text { color: #26c6da; }
+        .p7 .duration { background: rgba(0,188,212,0.2); color: #26c6da; }
+
+        /* ===== TASK CARDS ===== */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .task-row {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+        .task-check {
+            width: 54px;
+            min-width: 54px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 16px;
+        }
+        .checkbox {
+            width: 26px; height: 26px;
+            border: 2px solid #3a5a7a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: transparent;
+            flex-shrink: 0;
+            background: rgba(0,0,0,0.2);
+        }
+        .checkbox:hover { border-color: #00d2ff; }
+        .checkbox.checked {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: #fff;
+        }
+        .task-line {
+            width: 2px;
+            flex: 1;
+            margin-top: 6px;
+            background: rgba(42,74,106,0.3);
+        }
+
+        .task-card {
+            flex: 1;
+            background: linear-gradient(145deg, #141e32, #111a2c);
+            border: 1px solid #1e3450;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-left: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .task-card:hover {
+            border-color: #2a5a8a;
+            background: linear-gradient(145deg, #182640, #141e35);
+        }
+        .task-card.done {
+            opacity: 0.5;
+            border-color: #1a3a2a;
+        }
+        .task-card.done .task-title { text-decoration: line-through; }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .task-title {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #e0e6ed;
+        }
+        .task-priority {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65em;
+            font-weight: 700;
+        }
+        .pri-must { background: rgba(233,30,99,0.2); color: #f06292; }
+        .pri-should { background: rgba(255,193,7,0.2); color: #ffc107; }
+        .pri-nice { background: rgba(76,175,80,0.2); color: #66bb6a; }
+
+        .task-desc {
+            color: #6a8aaa;
+            font-size: 0.82em;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .task-deliverable {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .deliverable-tag {
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            font-weight: 600;
+            background: rgba(0,210,255,0.08);
+            border: 1px solid rgba(0,210,255,0.2);
+            color: #5aafcf;
+        }
+
+        /* ===== SUBTASK LIST ===== */
+        .subtasks {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(42,74,106,0.2);
+        }
+        .subtasks li {
+            padding: 4px 0 4px 24px;
+            position: relative;
+            color: #7a9aba;
+            font-size: 0.8em;
+            line-height: 1.5;
+        }
+        .subtasks li::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 10px;
+            width: 12px; height: 12px;
+            border: 2px solid #2a4a6a;
+            border-radius: 3px;
+        }
+
+        /* ===== GANTT-LIKE TIMELINE ===== */
+        .timeline-section {
+            max-width: 1250px;
+            margin: 0 auto 55px;
+        }
+        .timeline-title {
+            font-size: 1.35em;
+            color: #00d2ff;
+            margin-bottom: 20px;
+            padding-left: 16px;
+            border-left: 4px solid #00d2ff;
+        }
+        .gantt {
+            overflow-x: auto;
+        }
+        .gantt-table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+        .gantt-table th {
+            background: #111a2c;
+            color: #5a7a9a;
+            padding: 10px 8px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #1a2a3a;
+        }
+        .gantt-table td {
+            padding: 8px;
+            border: 1px solid #1a2a3a;
+            font-size: 0.78em;
+            vertical-align: middle;
+        }
+        .gantt-table .phase-name {
+            color: #b0c4de;
+            font-weight: 600;
+            min-width: 180px;
+            white-space: nowrap;
+        }
+        .gantt-bar {
+            height: 22px;
+            border-radius: 4px;
+            min-width: 100%;
+        }
+        .gb-0 { background: linear-gradient(90deg, #607d8b, #78909c); }
+        .gb-1 { background: linear-gradient(90deg, #ff6b35, #ff8c42); }
+        .gb-2 { background: linear-gradient(90deg, #2196f3, #42a5f5); }
+        .gb-3 { background: linear-gradient(90deg, #4caf50, #66bb6a); }
+        .gb-4 { background: linear-gradient(90deg, #ffc107, #ffb300); }
+        .gb-5 { background: linear-gradient(90deg, #9c27b0, #ab47bc); }
+        .gb-6 { background: linear-gradient(90deg, #e91e63, #f06292); }
+        .gb-7 { background: linear-gradient(90deg, #00bcd4, #26c6da); }
+
+        /* ===== TIPS ===== */
+        .tip-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-top: 12px;
+        }
+        .tip-card h4 {
+            color: #ffc107;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .tip-card p {
+            color: #7b8fa8;
+            font-size: 0.83em;
+            line-height: 1.6;
+        }
+
+        /* ===== WARNING ===== */
+        .warn-card {
+            background: rgba(233,30,99,0.06);
+            border: 1px solid rgba(233,30,99,0.2);
+            border-left: 4px solid #e91e63;
+            border-radius: 0 12px 12px 0;
+            padding: 16px 20px;
+            margin-top: 12px;
+        }
+        .warn-card h4 { color: #f06292; font-size: 0.88em; margin-bottom: 6px; }
+        .warn-card p { color: #8a6a7a; font-size: 0.82em; line-height: 1.6; }
+
+        /* ===== OUTPUT SUMMARY ===== */
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .output-card {
+            background: linear-gradient(145deg, #141e32, #111a2c);
+            border: 1px solid #1e3450;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .output-card:hover { border-color: #00d2ff; transform: translateY(-3px); }
+        .output-icon { font-size: 2em; margin-bottom: 8px; }
+        .output-card .o-name { color: #e0e6ed; font-size: 0.88em; font-weight: 600; }
+        .output-card .o-desc { color: #5a7a9a; font-size: 0.75em; margin-top: 4px; }
+
+        .footer {
+            text-align: center;
+            color: #3a5a7a;
+            font-size: 0.78em;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #1a2540;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .task-check { width: 40px; min-width: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>PLAN NGHIEN CUU KHOA HOC</h1>
+    <p class="sub">Ke hoach chi tiet tung buoc khi bat dau mot de tai NCKH</p>
+    <span class="tag">7 GIAI DOAN &bull; 42 NHIEM VU &bull; INTERACTIVE CHECKLIST</span>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 0: CHUAN BI -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p0">
+        <span class="num">0</span>
+        <span class="text">GIAI DOAN CHUAN BI</span>
+        <span class="duration">Tuan 1</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Xac dinh linh vuc quan tam</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Suy nghi ve linh vuc ban dam me, co kien thuc nen tang, va co kha nang tiep can tai lieu/du lieu.</div>
+                <ul class="subtasks">
+                    <li>Liet ke 3-5 linh vuc ban quan tam nhat</li>
+                    <li>Danh gia kha nang tiep can tai lieu cho moi linh vuc</li>
+                    <li>Trao doi voi giang vien huong dan de chon linh vuc phu hop</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Tao tai khoan cac co so du lieu khoa hoc</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Dang ky va lam quen voi cac cong cu tim kiem tai lieu.</div>
+                <ul class="subtasks">
+                    <li>Google Scholar (scholar.google.com)</li>
+                    <li>Scopus / Web of Science (qua thu vien truong)</li>
+                    <li>IEEE Xplore / ScienceDirect / Springer</li>
+                    <li>ResearchGate / Academia.edu</li>
+                    <li>Cong cu quan ly trich dan: Zotero / Mendeley / EndNote</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Chuan bi cong cu lam viec</span>
+                    <span class="task-priority pri-should">NEN LAM</span>
+                </div>
+                <div class="task-desc">Cai dat phan mem can thiet cho qua trinh NC.</div>
+                <ul class="subtasks">
+                    <li>Microsoft Word / LaTeX (viet bao cao)</li>
+                    <li>SPSS / R / Python (phan tich du lieu)</li>
+                    <li>PowerPoint (thuyet trinh)</li>
+                    <li>Tao thu muc luu tru co cau truc: /TaiLieu, /DuLieu, /BanNhap, /HinhAnh</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 1: PHAT HIEN VAN DE -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p1">
+        <span class="num">1</span>
+        <span class="text">PHAT HIEN VAN DE NGHIEN CUU</span>
+        <span class="duration">Tuan 2-3</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Doc luot 20-30 bai bao trong linh vuc</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Doc nhanh Abstract + Conclusion de nam tong quan linh vuc. Tap trung bai 3-5 nam gan nhat.</div>
+                <ul class="subtasks">
+                    <li>Doc 5 bai survey/review de co buc tranh tong the</li>
+                    <li>Doc 15-25 bai NC cu the lien quan</li>
+                    <li>Ghi chu: Tac gia | Nam | PP | Ket qua | Han che</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Xac dinh Research Gap</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Tim khoang trong chua duoc giai quyet tu cac NC truoc. Ap dung 5 cach phat hien van de (theo slide).</div>
+                <ul class="subtasks">
+                    <li>PP cu con nhuoc diem gi? => Co the cai tien?</li>
+                    <li>2 PP co uu/nhuoc diem doi nghich? => Tich hop?</li>
+                    <li>Co van de/bai toan moi chua ai giai quyet?</li>
+                    <li>Du lieu cu co the nhin tu goc do moi?</li>
+                    <li>Co the nang cap do kho/quy mo bai toan?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Dat cau hoi nghien cuu (Research Questions)</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Viet 1 cau hoi chinh + 2-4 cau hoi phu. Cau hoi phai don gian, cu the, co the tra loi duoc.</div>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Danh sach 3-5 cau hoi NC</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Viet ten de tai (nhap)</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Ten de tai ngan gon, co tu khoa chinh, the hien ro noi dung va pham vi NC. Viet 3-5 phuong an roi chon.</div>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Ten de tai (ban nhap)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tip-card">
+        <h4>MUO GIAI DOAN 1</h4>
+        <p>Quan sat -> Dat cau hoi -> Tim gap -> Hinh thanh van de NC. Nen trao doi voi giang vien huong dan som de duoc dinh huong dung.</p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 2: XAY DUNG GIA THUYET -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p2">
+        <span class="num">2</span>
+        <span class="text">XAY DUNG GIA THUYET NGHIEN CUU</span>
+        <span class="duration">Tuan 3-4</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Xay dung gia thuyet NC (H0 va H1)</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Gia thuyet = cau tra loi uom thu cho cau hoi NC. Phai co moi quan he nhan-qua, co the kiem chung.</div>
+                <ul class="subtasks">
+                    <li>Viet gia thuyet theo cau truc: "Neu [A] thi [B]"</li>
+                    <li>Kiem tra: Phu hop ly thuyet? Co tham khao? Kiem chung duoc?</li>
+                    <li>Xac dinh bien doc lap va bien phu thuoc</li>
+                    <li>Viet H0 (khong co anh huong) va H1 (co anh huong)</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: 2-5 gia thuyet NC</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Xac dinh muc tieu NC</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Muc tieu tong quat (1) + Muc tieu cu the (3-5, theo SMART). Muc tieu phai lien ket voi cau hoi va gia thuyet.</div>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Muc tieu tong quat + cu the</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Xac dinh doi tuong va pham vi NC</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">NC ai/cai gi? O dau? Thoi gian nao? Gioi han gi? Khong lam gi?</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 3: TONG QUAN TAI LIEU -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p3">
+        <span class="num">3</span>
+        <span class="text">THU THAP & VIET TONG QUAN TAI LIEU</span>
+        <span class="duration">Tuan 4-7</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Tim tai lieu he thong bang tu khoa</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Su dung tu khoa chinh + tu khoa phu + Boolean operators (AND, OR, NOT).</div>
+                <ul class="subtasks">
+                    <li>Tim tren Google Scholar (tat ca ngon ngu)</li>
+                    <li>Tim tren Scopus/WoS (bai bao quoc te uy tin)</li>
+                    <li>Tim tren IEEE/ScienceDirect/Springer (theo nganh)</li>
+                    <li>Tim tu thu vien truong (CSDL noi bo)</li>
+                    <li>Loc: 5 nam gan nhat, bai duoc trich dan nhieu</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Doc sau va ghi chu 30-50 bai bao</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Doc ky tung bai. Ghi chu theo bang mau thong nhat.</div>
+                <ul class="subtasks">
+                    <li>Tac gia, nam xuat ban, tap chi/hoi nghi</li>
+                    <li>Muc tieu NC cua bai</li>
+                    <li>PP su dung</li>
+                    <li>Ket qua chinh</li>
+                    <li>Han che / huong phat trien</li>
+                    <li>Lien quan den NC cua minh nhu the nao?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Tong hop va viet Literature Review</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Khong phai liet ke tung bai. Phai tong hop theo chu de, so sanh, va chi ra research gap.</div>
+                <ul class="subtasks">
+                    <li>Nhom bai bao theo chu de/PP/ket qua</li>
+                    <li>So sanh va danh gia cac PP khac nhau</li>
+                    <li>Chi ro han che chung cua cac NC truoc</li>
+                    <li>Ket luan bang research gap => dan vao NC cua minh</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Chuong Tong quan tai lieu (5-15 trang)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Xay dung co so ly thuyet & Mo hinh NC</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Trinh bay cac ly thuyet nen tang, xay dung mo hinh NC (conceptual framework) the hien moi quan he giua cac bien.</div>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Mo hinh NC (hinh ve)</span>
+                    <span class="deliverable-tag">OUTPUT: Co so ly thuyet (3-5 trang)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 4: DE CUONG NCKH -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p4">
+        <span class="num">4</span>
+        <span class="text">VIET DE CUONG NCKH (RESEARCH PROPOSAL)</span>
+        <span class="duration">Tuan 7-9</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Viet de cuong day du 12 muc</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">De cuong la ban ke hoach chi tiet cho toan bo NC. Phai co logic: Van de => Muc tieu => Cau hoi => Gia thuyet => PP => Noi dung.</div>
+                <ul class="subtasks">
+                    <li>1. Ten de tai (chinh thuc)</li>
+                    <li>2. Ly do chon de tai / Dat van de</li>
+                    <li>3. Muc tieu NC (tong quat + cu the)</li>
+                    <li>4. Cau hoi NC</li>
+                    <li>5. Gia thuyet NC (H0, H1)</li>
+                    <li>6. Doi tuong va pham vi NC</li>
+                    <li>7. Tong quan tai lieu</li>
+                    <li>8. Co so ly thuyet + Mo hinh NC</li>
+                    <li>9. PP NC (dinh tinh/dinh luong/hon hop)</li>
+                    <li>10. Noi dung NC du kien (cac chuong)</li>
+                    <li>11. Ke hoach thuc hien (Gantt chart)</li>
+                    <li>12. Tai lieu tham khao (APA/IEEE)</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: De cuong NCKH (15-25 trang)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Thiet ke PP nghien cuu chi tiet</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Chon PP: Dinh tinh / Dinh luong / Hon hop</li>
+                    <li>Xac dinh co mau va PP chon mau</li>
+                    <li>Thiet ke cong cu (bang hoi / phong van / thi nghiem)</li>
+                    <li>Xac dinh PP phan tich du lieu (SPSS, R, Python...)</li>
+                    <li>Pilot test (thu nghiem cong cu truoc)</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Bang hoi / Protocol thi nghiem</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Bao ve de cuong / Xin y kien giang vien</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">Trinh bay de cuong truoc giang vien huong dan hoac hoi dong. Chinh sua theo gop y.</div>
+            </div>
+        </div>
+    </div>
+    <div class="warn-card">
+        <h4>LUU Y</h4>
+        <p>De cuong la "xuong song" cua toan bo NC. Dau tu thoi gian lam ky giai doan nay se giup cac buoc sau di nhanh va dung huong hon nhieu.</p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 5: THU THAP DU LIEU -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p5">
+        <span class="num">5</span>
+        <span class="text">THU THAP DU LIEU</span>
+        <span class="duration">Tuan 9-14</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Thuc hien thu thap du lieu</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li><strong>Dinh luong:</strong> Phat bang hoi (online: Google Forms / offline: in giay)</li>
+                    <li><strong>Dinh tinh:</strong> Phong van sau (ghi am, ghi chep)</li>
+                    <li><strong>Thuc nghiem:</strong> Chay thi nghiem / mo phong theo protocol</li>
+                    <li><strong>Thu cap:</strong> Thu thap bao cao, thong ke tu co quan</li>
+                    <li>Theo doi tien do thu thap hang tuan</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Lam sach va ma hoa du lieu</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Loai bo phieu tra loi khong hop le / thieu thong tin</li>
+                    <li>Ma hoa du lieu vao Excel / SPSS / CSV</li>
+                    <li>Kiem tra du lieu bi loi, bat thuong (outliers)</li>
+                    <li>Sao luu du lieu (it nhat 2 noi)</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Bo du lieu sach (dataset)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 6: PHAN TICH & THAO LUAN -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p6">
+        <span class="num">6</span>
+        <span class="text">PHAN TICH DU LIEU & THAO LUAN</span>
+        <span class="duration">Tuan 14-18</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Phan tich thong ke</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Thong ke mo ta (trung binh, do lech chuan, tan suat)</li>
+                    <li>Kiem dinh do tin cay (Cronbach's Alpha >= 0.7)</li>
+                    <li>Phan tich nhan to (EFA/CFA neu can)</li>
+                    <li>Kiem dinh gia thuyet (t-test, ANOVA, chi-square, hoi quy)</li>
+                    <li>Phan tich hoi quy / tuong quan / SEM</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Trinh bay ket qua bang BANG va HINH</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Tao bang thong ke ro rang, co tieu de, don vi</li>
+                    <li>Ve bieu do phu hop (bar, line, pie, scatter)</li>
+                    <li>Danh so thu tu bang va hinh lien tuc</li>
+                    <li>Mo ta ket qua bang van ban duoi moi bang/hinh</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Viet phan thao luan</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Gia thuyet nao duoc chap nhan? Gia thuyet nao bi bac bo?</li>
+                    <li>So sanh ket qua voi NC truoc (giong/khac gi? tai sao?)</li>
+                    <li>Giai thich ly do ket qua nhu vay</li>
+                    <li>Y nghia ly thuyet va thuc tien cua ket qua</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Chuong Ket qua & Thao luan (10-20 trang)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 7: VIET BAO CAO & HOAN THANH -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p7">
+        <span class="num">7</span>
+        <span class="text">VIET BAO CAO, KET LUAN & HOAN THANH</span>
+        <span class="duration">Tuan 18-22</span>
+    </h2>
+    <div class="tasks-grid">
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Viet day du luan van / bao cao</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Chuong 1: Gioi thieu (dat van de, muc tieu, pham vi)</li>
+                    <li>Chuong 2: Tong quan tai lieu & Co so ly thuyet</li>
+                    <li>Chuong 3: Phuong phap nghien cuu</li>
+                    <li>Chuong 4: Ket qua va thao luan</li>
+                    <li>Chuong 5: Ket luan va kien nghi</li>
+                    <li>Tai lieu tham khao + Phu luc</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Viet Ket luan & Kien nghi</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Tom tat ket qua chinh (tra loi tung cau hoi NC)</li>
+                    <li>Dong gop ly thuyet va thuc tien</li>
+                    <li>Han che cua NC</li>
+                    <li>Kien nghi / huong NC tiep theo</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Viet Abstract (Tom tat)</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <div class="task-desc">150-300 tu. Gom: Boi canh, Muc tieu, PP, Ket qua chinh, Ket luan. Viet SAU KHI hoan thanh toan bo.</div>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Kiem tra dao van & chinh sua</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Chay Turnitin / iThenticate (duoi 20%)</li>
+                    <li>Kiem tra trich dan dung chuan (APA/IEEE)</li>
+                    <li>Doc lai toan bo: chinh ta, ngu phap, logic</li>
+                    <li>Nho 1-2 nguoi doc va gop y (peer review)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="task-row">
+            <div class="task-check"><div class="checkbox" onclick="toggle(this)">&#10003;</div><div class="task-line"></div></div>
+            <div class="task-card">
+                <div class="task-header">
+                    <span class="task-title">Chuan bi thuyet trinh & bao ve</span>
+                    <span class="task-priority pri-must">BAT BUOC</span>
+                </div>
+                <ul class="subtasks">
+                    <li>Lam slide PowerPoint (15-20 slides)</li>
+                    <li>Tap thuyet trinh (15-20 phut)</li>
+                    <li>Chuan bi tra loi cau hoi phan bien</li>
+                    <li>Chuan bi du lieu goc de chung minh neu can</li>
+                </ul>
+                <div class="task-deliverable">
+                    <span class="deliverable-tag">OUTPUT: Luan van hoan chinh</span>
+                    <span class="deliverable-tag">OUTPUT: Slide thuyet trinh</span>
+                    <span class="deliverable-tag">OUTPUT: Bai bao KH (neu co)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TIMELINE -->
+<!-- ============================================================ -->
+<div class="timeline-section">
+    <h2 class="timeline-title">Tien Do Tong The (Gantt Chart)</h2>
+    <div class="gantt">
+        <table class="gantt-table">
+            <thead>
+                <tr>
+                    <th>Giai doan</th>
+                    <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th>
+                    <th>T7</th><th>T8</th><th>T9</th><th>T10</th><th>T11</th><th>T12</th>
+                    <th>T13</th><th>T14</th><th>T15</th><th>T16</th><th>T17</th><th>T18</th>
+                    <th>T19</th><th>T20</th><th>T21</th><th>T22</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="phase-name">0. Chuan bi</td>
+                    <td><div class="gantt-bar gb-0"></div></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">1. Phat hien van de</td>
+                    <td></td>
+                    <td><div class="gantt-bar gb-1"></div></td>
+                    <td><div class="gantt-bar gb-1"></div></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">2. Xay dung gia thuyet</td>
+                    <td></td><td></td>
+                    <td><div class="gantt-bar gb-2"></div></td>
+                    <td><div class="gantt-bar gb-2"></div></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">3. Tong quan tai lieu</td>
+                    <td></td><td></td><td></td>
+                    <td><div class="gantt-bar gb-3"></div></td>
+                    <td><div class="gantt-bar gb-3"></div></td>
+                    <td><div class="gantt-bar gb-3"></div></td>
+                    <td><div class="gantt-bar gb-3"></div></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">4. De cuong NCKH</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td><div class="gantt-bar gb-4"></div></td>
+                    <td><div class="gantt-bar gb-4"></div></td>
+                    <td><div class="gantt-bar gb-4"></div></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">5. Thu thap du lieu</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td><div class="gantt-bar gb-5"></div></td>
+                    <td><div class="gantt-bar gb-5"></div></td>
+                    <td><div class="gantt-bar gb-5"></div></td>
+                    <td><div class="gantt-bar gb-5"></div></td>
+                    <td><div class="gantt-bar gb-5"></div></td>
+                    <td><div class="gantt-bar gb-5"></div></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">6. Phan tich & thao luan</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td><div class="gantt-bar gb-6"></div></td>
+                    <td><div class="gantt-bar gb-6"></div></td>
+                    <td><div class="gantt-bar gb-6"></div></td>
+                    <td><div class="gantt-bar gb-6"></div></td>
+                    <td><div class="gantt-bar gb-6"></div></td>
+                    <td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td class="phase-name">7. Viet bao cao & hoan thanh</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td><div class="gantt-bar gb-7"></div></td>
+                    <td><div class="gantt-bar gb-7"></div></td>
+                    <td><div class="gantt-bar gb-7"></div></td>
+                    <td><div class="gantt-bar gb-7"></div></td>
+                    <td><div class="gantt-bar gb-7"></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- OUTPUT SUMMARY -->
+<!-- ============================================================ -->
+<div class="section">
+    <h2 class="sec-title p0">
+        <span class="num" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5);">&#10003;</span>
+        <span class="text" style="color: #00d2ff;">DANH SACH SAN PHAM DAU RA</span>
+    </h2>
+    <div class="output-grid">
+        <div class="output-card">
+            <div class="output-icon" style="color:#ff6b35;">&#9997;</div>
+            <div class="o-name">Ten De Tai</div>
+            <div class="o-desc">Chinh thuc, ngan gon, co tu khoa</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#2196f3;">&#10067;</div>
+            <div class="o-name">Cau Hoi NC</div>
+            <div class="o-desc">1 chinh + 2-4 phu</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#4caf50;">&#9878;</div>
+            <div class="o-name">Gia Thuyet NC</div>
+            <div class="o-desc">H0 & H1, co the kiem chung</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#ffc107;">&#9733;</div>
+            <div class="o-name">Tong Quan TL</div>
+            <div class="o-desc">30-50 bai, chi ro research gap</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#9c27b0;">&#9881;</div>
+            <div class="o-name">Mo Hinh NC</div>
+            <div class="o-desc">Conceptual framework</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#e91e63;">&#128196;</div>
+            <div class="o-name">De Cuong</div>
+            <div class="o-desc">12 muc, 15-25 trang</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#00bcd4;">&#128202;</div>
+            <div class="o-name">Bo Du Lieu</div>
+            <div class="o-desc">Da lam sach, ma hoa</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#ff5722;">&#128218;</div>
+            <div class="o-name">Luan Van</div>
+            <div class="o-desc">5 chuong, hoan chinh</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#795548;">&#127916;</div>
+            <div class="o-name">Slide TT</div>
+            <div class="o-desc">15-20 slides, 15 phut</div>
+        </div>
+        <div class="output-card">
+            <div class="output-icon" style="color:#607d8b;">&#128240;</div>
+            <div class="o-name">Bai Bao KH</div>
+            <div class="o-desc">Tap chi / Hoi nghi (neu co)</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    PLAN NCKH | Dua tren V1_PPNCKH1 - PGS.TS. Ho Van Khuong | Click checkbox de danh dau hoan thanh
+</div>
+
+<script>
+    function toggle(el) {
+        el.classList.toggle('checked');
+        const card = el.closest('.task-row').querySelector('.task-card');
+        card.classList.toggle('done');
+    }
+</script>
+
+</body>
+</html>

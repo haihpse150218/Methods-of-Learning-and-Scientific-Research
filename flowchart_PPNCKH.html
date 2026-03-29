@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowchart - Phương Pháp Nghiên Cứu Khoa Học</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f3c 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff);
+            background-size: 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7b8fa8;
+            font-size: 1em;
+            margin-bottom: 40px;
+        }
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* ===== SECTION 1: OVERVIEW FLOW ===== */
+        .overview-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .section-title {
+            font-size: 1.5em;
+            color: #00d2ff;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 4px solid #00d2ff;
+        }
+
+        /* Main horizontal flow */
+        .main-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+            margin-bottom: 40px;
+        }
+        .flow-box {
+            background: linear-gradient(145deg, #1e3a5f, #162d4a);
+            border: 2px solid #2a5a8a;
+            border-radius: 16px;
+            padding: 20px 24px;
+            min-width: 200px;
+            max-width: 240px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .flow-box:hover {
+            transform: translateY(-5px);
+            border-color: #00d2ff;
+            box-shadow: 0 8px 30px rgba(0,210,255,0.2);
+        }
+        .flow-box .number {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        .flow-box h3 {
+            color: #fff;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+        .flow-box p {
+            color: #8ba3c0;
+            font-size: 0.78em;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+        .arrow-right {
+            font-size: 2em;
+            color: #3a7bd5;
+            margin: 0 8px;
+            flex-shrink: 0;
+        }
+
+        /* ===== SECTION 2: QUY TRINH 7 BUOC ===== */
+        .process-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .cycle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0;
+            position: relative;
+        }
+        .cycle-step {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .cycle-step:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        .cycle-step .step-num {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .cycle-step .step-label {
+            font-size: 0.7em;
+            color: rgba(255,255,255,0.9);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+        .step-1 { background: linear-gradient(135deg, #ff6b35, #ff8c42); }
+        .step-2 { background: linear-gradient(135deg, #ffc107, #ffb300); }
+        .step-3 { background: linear-gradient(135deg, #4caf50, #66bb6a); }
+        .step-4 { background: linear-gradient(135deg, #e91e63, #f06292); }
+        .step-5 { background: linear-gradient(135deg, #9c27b0, #ab47bc); }
+        .step-6 { background: linear-gradient(135deg, #2196f3, #42a5f5); }
+        .step-7 { background: linear-gradient(135deg, #ff5722, #ff7043); }
+
+        .cycle-arrow {
+            font-size: 1.8em;
+            margin: 0 3px;
+            flex-shrink: 0;
+        }
+        .cycle-arrow.a1 { color: #ff8c42; }
+        .cycle-arrow.a2 { color: #ffb300; }
+        .cycle-arrow.a3 { color: #66bb6a; }
+        .cycle-arrow.a4 { color: #f06292; }
+        .cycle-arrow.a5 { color: #ab47bc; }
+        .cycle-arrow.a6 { color: #42a5f5; }
+
+        /* ===== SECTION 3: PHAN LOAI ===== */
+        .classify-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .classify-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .classify-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        .classify-card:hover {
+            border-color: #00d2ff;
+            box-shadow: 0 5px 20px rgba(0,210,255,0.15);
+        }
+        .classify-card h4 {
+            font-size: 1em;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+        .cc-func h4 { color: #ff6b35; border-color: #ff6b35; }
+        .cc-method h4 { color: #4caf50; border-color: #4caf50; }
+        .cc-phase h4 { color: #ffc107; border-color: #ffc107; }
+        .cc-data h4 { color: #2196f3; border-color: #2196f3; }
+
+        .classify-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .classify-card li {
+            padding: 7px 0 7px 20px;
+            position: relative;
+            color: #b0c4de;
+            font-size: 0.88em;
+        }
+        .classify-card li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .cc-func li::before { background: #ff6b35; }
+        .cc-method li::before { background: #4caf50; }
+        .cc-phase li::before { background: #ffc107; }
+        .cc-data li::before { background: #2196f3; }
+
+        /* ===== SECTION 4: DAC DIEM ===== */
+        .features-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+        }
+        .feature-item {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 12px;
+            padding: 20px 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .feature-item:hover {
+            transform: translateY(-4px);
+            border-color: #00d2ff;
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+        .feature-item span {
+            display: block;
+            color: #b0c4de;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        /* ===== SECTION 5: SUY LUAN ===== */
+        .reasoning-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .reasoning-flow {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .reasoning-card {
+            flex: 1;
+            min-width: 250px;
+            max-width: 320px;
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid;
+            position: relative;
+        }
+        .rc-deductive { border-color: #e91e63; }
+        .rc-inductive { border-color: #4caf50; }
+        .rc-scientific { border-color: #ffc107; }
+
+        .reasoning-card h4 {
+            font-size: 1.1em;
+            margin-bottom: 12px;
+        }
+        .rc-deductive h4 { color: #e91e63; }
+        .rc-inductive h4 { color: #4caf50; }
+        .rc-scientific h4 { color: #ffc107; }
+
+        .reasoning-card p {
+            color: #8ba3c0;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .reasoning-card .direction {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78em;
+            font-weight: 600;
+        }
+        .rc-deductive .direction { background: rgba(233,30,99,0.2); color: #f06292; }
+        .rc-inductive .direction { background: rgba(76,175,80,0.2); color: #81c784; }
+        .rc-scientific .direction { background: rgba(255,193,7,0.2); color: #ffd54f; }
+
+        .merge-arrow {
+            display: flex;
+            align-items: center;
+            font-size: 2em;
+            color: #ffc107;
+        }
+
+        /* ===== SECTION 6: SAN PHAM ===== */
+        .products-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border-radius: 16px;
+            padding: 24px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateX(5px);
+        }
+        .pc-1 { border-color: #ff6b35; }
+        .pc-2 { border-color: #4caf50; }
+        .pc-3 { border-color: #2196f3; }
+        .product-card h4 { font-size: 1.1em; margin-bottom: 8px; }
+        .pc-1 h4 { color: #ff6b35; }
+        .pc-2 h4 { color: #4caf50; }
+        .pc-3 h4 { color: #2196f3; }
+        .product-card .def { color: #8ba3c0; font-size: 0.85em; margin-bottom: 6px; }
+        .product-card .form { color: #5a7a9a; font-size: 0.78em; font-style: italic; }
+
+        /* ===== SECTION 7: HINH THUC TO CHUC ===== */
+        .org-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        .org-flow {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .org-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .org-card:hover { border-color: #00d2ff; transform: translateY(-5px); }
+        .oc-1 { min-height: 120px; min-width: 180px; }
+        .oc-2 { min-height: 160px; min-width: 180px; }
+        .oc-3 { min-height: 200px; min-width: 180px; }
+        .oc-4 { min-height: 240px; min-width: 180px; }
+
+        .org-card h4 {
+            color: #00d2ff;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        .org-card p {
+            color: #7b8fa8;
+            font-size: 0.78em;
+            line-height: 1.4;
+        }
+        .org-level {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        /* ===== SECTION 8: COURSE STRUCTURE ===== */
+        .course-section {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+        }
+        .course-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .course-grid { grid-template-columns: 1fr; }
+        }
+        .course-part {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .course-part h4 {
+            color: #ff8c42;
+            font-size: 1.1em;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff8c42;
+        }
+        .course-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(42,74,106,0.5);
+        }
+        .course-item:last-child { border-bottom: none; }
+        .course-num {
+            background: rgba(0,210,255,0.15);
+            color: #00d2ff;
+            min-width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .course-item span {
+            color: #b0c4de;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: #4a6a8a;
+            font-size: 0.8em;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #1a2a4a;
+        }
+
+        @media (max-width: 768px) {
+            .main-flow { flex-direction: column; }
+            .arrow-right { transform: rotate(90deg); }
+            .cycle-container { flex-direction: column; align-items: center; }
+            .cycle-arrow { transform: rotate(90deg); }
+            .reasoning-flow { flex-direction: column; align-items: center; }
+            .merge-arrow { transform: rotate(90deg); }
+            .org-flow { flex-direction: column; align-items: center; }
+            .oc-1, .oc-2, .oc-3, .oc-4 { min-height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>PHUONG PHAP NGHIEN CUU KHOA HOC</h1>
+<p class="subtitle">PGS.TS. Ho Van Khuong - DH Bach Khoa TP.HCM | Flowchart Tong Hop</p>
+
+<!-- ===== 1. TONG QUAN MON HOC ===== -->
+<div class="overview-section">
+    <h2 class="section-title">1. Tong Quan Mon Hoc</h2>
+    <div class="main-flow">
+        <div class="flow-box">
+            <div class="number">1</div>
+            <h3>Dinh Nghia NCKH</h3>
+            <p>Khai niem, dac diem, phan loai NCKH</p>
+        </div>
+        <div class="arrow-right">&#10132;</div>
+        <div class="flow-box">
+            <div class="number">2</div>
+            <h3>Suy Luan Khoa Hoc</h3>
+            <p>Suy dien, Quy nap, Suy luan KH</p>
+        </div>
+        <div class="arrow-right">&#10132;</div>
+        <div class="flow-box">
+            <div class="number">3</div>
+            <h3>Quy Trinh NCKH</h3>
+            <p>7 buoc thuc hien nghien cuu</p>
+        </div>
+        <div class="arrow-right">&#10132;</div>
+        <div class="flow-box">
+            <div class="number">4</div>
+            <h3>Ky Thuat XD Cong Trinh</h3>
+            <p>Tim tai lieu, viet de cuong, thu thap du lieu, viet bao cao</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 2. DINH NGHIA NCKH ===== -->
+<div class="overview-section">
+    <h2 class="section-title">2. Dinh Nghia Nghien Cuu Khoa Hoc</h2>
+    <div class="main-flow">
+        <div class="flow-box" style="border-color: #e91e63; max-width: 300px;">
+            <h3 style="color: #e91e63;">NCKH la gi?</h3>
+            <p>Qua trinh thu thap thong tin co he thong, co phuong phap khoa hoc ve doi tuong nghien cuu</p>
+        </div>
+        <div class="arrow-right">&#10132;</div>
+        <div class="flow-box" style="border-color: #4caf50;">
+            <h3 style="color: #4caf50;">Phan tich</h3>
+            <p>Ly giai ban chat va quy luat van dong cua hien tuong</p>
+        </div>
+        <div class="arrow-right">&#10132;</div>
+        <div class="flow-box" style="border-color: #ffc107;">
+            <h3 style="color: #ffc107;">Du bao</h3>
+            <p>Du bao su van dong cua doi tuong trong tuong lai</p>
+        </div>
+        <div class="arrow-right">&#10132;</div>
+        <div class="flow-box" style="border-color: #2196f3;">
+            <h3 style="color: #2196f3;">Sang tao</h3>
+            <p>Tao ra PP va phuong tien ky thuat moi cao hon, gia tri hon</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 3. QUY TRINH 7 BUOC ===== -->
+<div class="process-section">
+    <h2 class="section-title">3. Quy Trinh NCKH - 7 Buoc</h2>
+    <div class="cycle-container">
+        <div class="cycle-step step-1">
+            <div class="step-num">1</div>
+            <div class="step-label">Phat hien<br>"van de" NC</div>
+        </div>
+        <div class="cycle-arrow a1">&#10132;</div>
+        <div class="cycle-step step-2">
+            <div class="step-num">2</div>
+            <div class="step-label">Xay dung<br>gia thuyet</div>
+        </div>
+        <div class="cycle-arrow a2">&#10132;</div>
+        <div class="cycle-step step-3">
+            <div class="step-num">3</div>
+            <div class="step-label">Thu thap<br>thong tin</div>
+        </div>
+        <div class="cycle-arrow a3">&#10132;</div>
+        <div class="cycle-step step-4">
+            <div class="step-num">4</div>
+            <div class="step-label">XD luan cu<br>ly thuyet<br>(De cuong)</div>
+        </div>
+        <div class="cycle-arrow a4">&#10132;</div>
+        <div class="cycle-step step-5">
+            <div class="step-num">5</div>
+            <div class="step-label">Thu thap<br>du lieu</div>
+        </div>
+        <div class="cycle-arrow a5">&#10132;</div>
+        <div class="cycle-step step-6">
+            <div class="step-num">6</div>
+            <div class="step-label">Phan tich DL<br>& thao luan</div>
+        </div>
+        <div class="cycle-arrow a6">&#10132;</div>
+        <div class="cycle-step step-7">
+            <div class="step-num">7</div>
+            <div class="step-label">Ket luan<br>& de nghi</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 4. PHAN LOAI NCKH ===== -->
+<div class="classify-section">
+    <h2 class="section-title">4. Phan Loai Nghien Cuu Khoa Hoc</h2>
+    <div class="classify-grid">
+        <div class="classify-card cc-func">
+            <h4>Theo Chuc Nang NCKH</h4>
+            <ul>
+                <li>NC Mo ta</li>
+                <li>NC Giai thich</li>
+                <li>NC Du bao</li>
+                <li>NC Sang tao</li>
+            </ul>
+        </div>
+        <div class="classify-card cc-method">
+            <h4>Theo PP Thu Thap Thong Tin</h4>
+            <ul>
+                <li>NC Thu vien</li>
+                <li>NC Dien da</li>
+                <li>NC La bo (Phong thi nghiem)</li>
+            </ul>
+        </div>
+        <div class="classify-card cc-phase">
+            <h4>Theo Giai Doan NCKH</h4>
+            <ul>
+                <li>NC Co ban</li>
+                <li>NC Ung dung</li>
+                <li>NC Trien khai</li>
+            </ul>
+        </div>
+        <div class="classify-card cc-data">
+            <h4>Theo Hinh Thuc Thu Thap & Phan Tich DL</h4>
+            <ul>
+                <li>NC Dinh tinh</li>
+                <li>NC Dinh luong</li>
+                <li>NC Hon hop</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 5. DAC DIEM NCKH ===== -->
+<div class="features-section">
+    <h2 class="section-title">5. Dac Diem Nghien Cuu Khoa Hoc</h2>
+    <div class="features-grid">
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#ff6b35;">&#9733;</div>
+            <span>Tinh moi</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#4caf50;">&#10004;</div>
+            <span>Tinh tin cay</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#2196f3;">&#9432;</div>
+            <span>Tinh thong tin</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#ffc107;">&#9878;</div>
+            <span>Tinh khach quan</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#9c27b0;">&#8634;</div>
+            <span>Tinh ke thua</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#e91e63;">&#9823;</div>
+            <span>Tinh ca nhan</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon" style="color:#ff5722;">&#9888;</div>
+            <span>Tinh rui ro</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 6. SUY LUAN KHOA HOC ===== -->
+<div class="reasoning-section">
+    <h2 class="section-title">6. Suy Luan Khoa Hoc</h2>
+    <div class="reasoning-flow">
+        <div class="reasoning-card rc-deductive">
+            <h4>Suy Dien (Deduction)</h4>
+            <p>Theo Aristotle: Suy luan di tu cai chung toi cai rieng. Can co tien de chinh + tien de phu = Ket luan.</p>
+            <div class="direction">Chung &#10132; Rieng</div>
+        </div>
+
+        <div class="merge-arrow">+</div>
+
+        <div class="reasoning-card rc-inductive">
+            <h4>Quy Nap (Induction)</h4>
+            <p>Theo Francis Bacon: Kien thuc dat duoc di tu thong tin rieng den ket luan chung. Dung tien de rieng da duoc chap nhan.</p>
+            <div class="direction">Rieng &#10132; Chung</div>
+        </div>
+
+        <div class="merge-arrow">&#10132;</div>
+
+        <div class="reasoning-card rc-scientific">
+            <h4>Suy Luan Khoa Hoc</h4>
+            <p>Ket hop Suy dien + Quy nap. Gom: Xac dinh gia thuyet &#10132; Phan tich kien thuc &#10132; Ket luan gia thuyet.</p>
+            <div class="direction">PP Khoa hoc</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 7. SAN PHAM NCKH ===== -->
+<div class="products-section">
+    <h2 class="section-title">7. San Pham Cua NCKH</h2>
+    <div class="products-grid">
+        <div class="product-card pc-1">
+            <h4>Phat Minh</h4>
+            <div class="def">Phat hien ra quy luat, tinh chat, hien tuong cua gioi tu nhien</div>
+            <div class="form">Khong cap patent, khong bao ho</div>
+        </div>
+        <div class="product-card pc-2">
+            <h4>Phat Hien</h4>
+            <div class="def">Nhan ra quy luat xa hoi, vat the dang ton tai khach quan</div>
+            <div class="form">Khong cap patent, khong bao ho</div>
+        </div>
+        <div class="product-card pc-3">
+            <h4>Sang Che</h4>
+            <div class="def">Giai phap ky thuat mang tinh moi ve nguyen ly, sang tao va ap dung duoc</div>
+            <div class="form">Cap patent, mua ban licence, bao ho quyen so huu</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 8. HINH THUC TO CHUC NC ===== -->
+<div class="org-section">
+    <h2 class="section-title">8. Cac Hinh Thuc To Chuc Nghien Cuu</h2>
+    <div class="org-flow">
+        <div class="org-card oc-1">
+            <div class="org-level">a</div>
+            <h4>De Tai</h4>
+            <p>Mot nhiem vu NC cu the, do ca nhan/nhom thuc hien. Co muc tieu, noi dung, PP ro rang.</p>
+        </div>
+        <div class="org-card oc-2">
+            <div class="org-level">b</div>
+            <h4>Du An KH</h4>
+            <p>De tai mang tinh ung dung, co rang buoc thoi gian & nguon luc. Huong toi hieu qua KT-XH.</p>
+        </div>
+        <div class="org-card oc-3">
+            <div class="org-level">c</div>
+            <h4>Chuong Trinh KH</h4>
+            <p>Tap hop cac de tai/du an co cung muc dich. Co tinh dong bo, ho tro lan nhau.</p>
+        </div>
+        <div class="org-card oc-4">
+            <div class="org-level">d</div>
+            <h4>De An KH</h4>
+            <p>Van kien trinh cap quan ly/co quan tai tro. De xuat thanh lap to chuc hoac tai tro hoat dong.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 9. NOI DUNG MON HOC ===== -->
+<div class="course-section">
+    <h2 class="section-title">9. Cau Truc Noi Dung Mon Hoc</h2>
+    <div class="course-grid">
+        <div class="course-part">
+            <h4>Phan 1: Tong Quan PP NCKH</h4>
+            <div class="course-item">
+                <div class="course-num">1.1</div>
+                <span>Dinh nghia phuong phap NCKH</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">1.2</div>
+                <span>Phan biet sang kien kinh nghiem voi NCKH</span>
+            </div>
+        </div>
+        <div class="course-part">
+            <h4>Phan 2: Quy Trinh & Ky Thuat XD Cong Trinh NCKH</h4>
+            <div class="course-item">
+                <div class="course-num">2.1</div>
+                <span>PP phat hien van de, dat gia thuyet NC</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.2</div>
+                <span>PP thu thap va viet tong quan tai lieu</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.3</div>
+                <span>PP viet de cuong NCKH</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.4</div>
+                <span>PP thu thap du lieu</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.5</div>
+                <span>PP trinh bay va phan tich du lieu</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.6</div>
+                <span>PP viet luan an TN</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.7</div>
+                <span>PP viet va cong bo bai bao KH</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.8</div>
+                <span>PP thuyet trinh ket qua NC</span>
+            </div>
+            <div class="course-item">
+                <div class="course-num">2.9</div>
+                <span>Quy trinh xay dung nhom NC hieu qua</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    Flowchart Phuong Phap NCKH | V1_PPNCKH1 | PGS.TS. Ho Van Khuong - DH Bach Khoa TP.HCM
+</div>
+
+</body>
+</html>

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template - Tinh Moi Trong NCKH</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #121830 50%, #0a1225 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        .header::after {
+            content: '';
+            display: block;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b35, #ffc107, #ff6b35);
+            margin: 16px auto 0;
+            border-radius: 2px;
+        }
+        h1 {
+            font-size: 2.4em;
+            background: linear-gradient(90deg, #ff6b35, #ffc107, #ff8c42);
+            background-size: 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s infinite;
+        }
+        .header p {
+            color: #7b8fa8;
+            margin-top: 8px;
+            font-size: 1em;
+        }
+        @keyframes glow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Section title */
+        .sec-title {
+            font-size: 1.4em;
+            color: #ff8c42;
+            margin-bottom: 20px;
+            padding-left: 16px;
+            border-left: 4px solid #ff6b35;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sec-title .badge {
+            background: rgba(255,107,53,0.15);
+            color: #ff8c42;
+            font-size: 0.55em;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .section { max-width: 1200px; margin: 0 auto 55px; }
+
+        /* ===== HERO: DINH NGHIA ===== */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) { .hero-grid { grid-template-columns: 1fr; } }
+
+        .hero-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 2px solid #2a4a6a;
+            border-radius: 18px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b35, #ffc107);
+        }
+        .hero-card h3 {
+            color: #ff8c42;
+            font-size: 1.15em;
+            margin-bottom: 12px;
+        }
+        .hero-card p {
+            color: #b0c4de;
+            font-size: 0.9em;
+            line-height: 1.7;
+        }
+        .hero-highlight {
+            border-color: #ff6b35;
+            background: linear-gradient(145deg, #1f2a3a, #1a2540);
+        }
+
+        /* ===== 5 CAP DO TINH MOI ===== */
+        .levels-container {
+            position: relative;
+        }
+        .level-row {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            margin-bottom: 16px;
+        }
+        .level-sidebar {
+            width: 70px;
+            min-width: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .level-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .level-line {
+            width: 3px;
+            flex: 1;
+            margin-top: 4px;
+            opacity: 0.5;
+        }
+        .l1 .level-icon { background: linear-gradient(135deg, #4caf50, #66bb6a); }
+        .l1 .level-line { background: linear-gradient(to bottom, #4caf50, #2196f3); }
+        .l2 .level-icon { background: linear-gradient(135deg, #2196f3, #42a5f5); }
+        .l2 .level-line { background: linear-gradient(to bottom, #2196f3, #ffc107); }
+        .l3 .level-icon { background: linear-gradient(135deg, #ffc107, #ffb300); }
+        .l3 .level-line { background: linear-gradient(to bottom, #ffc107, #ff6b35); }
+        .l4 .level-icon { background: linear-gradient(135deg, #ff6b35, #ff8c42); }
+        .l4 .level-line { background: linear-gradient(to bottom, #ff6b35, #e91e63); }
+        .l5 .level-icon { background: linear-gradient(135deg, #e91e63, #f06292); }
+        .l5 .level-line { display: none; }
+
+        .level-content {
+            flex: 1;
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-left: 14px;
+            transition: all 0.3s;
+        }
+        .level-content:hover {
+            border-color: #ff8c42;
+            box-shadow: 0 4px 20px rgba(255,140,66,0.1);
+            transform: translateX(4px);
+        }
+        .level-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .level-title { font-size: 1.05em; font-weight: bold; }
+        .l1 .level-title { color: #66bb6a; }
+        .l2 .level-title { color: #42a5f5; }
+        .l3 .level-title { color: #ffc107; }
+        .l4 .level-title { color: #ff8c42; }
+        .l5 .level-title { color: #f06292; }
+
+        .difficulty {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.68em;
+            font-weight: 600;
+        }
+        .diff-easy { background: rgba(76,175,80,0.2); color: #66bb6a; }
+        .diff-medium { background: rgba(33,150,243,0.2); color: #42a5f5; }
+        .diff-hard { background: rgba(255,193,7,0.2); color: #ffc107; }
+        .diff-expert { background: rgba(255,107,53,0.2); color: #ff8c42; }
+        .diff-master { background: rgba(233,30,99,0.2); color: #f06292; }
+
+        .level-desc {
+            color: #8ba3c0;
+            font-size: 0.85em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .level-example {
+            background: rgba(255,193,7,0.06);
+            border-left: 3px solid #ffc107;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 14px;
+        }
+        .level-example .ex-label {
+            color: #ffc107;
+            font-size: 0.72em;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .level-example p {
+            color: #7b8fa8;
+            font-size: 0.8em;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* ===== TEMPLATE VIET ===== */
+        .template-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 2px solid #2a4a6a;
+            border-radius: 18px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .template-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b35, #ffc107, #4caf50);
+        }
+        .tpl-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(42,74,106,0.4);
+        }
+        .tpl-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .tpl-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .tpl-num {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .tpl-name {
+            color: #ff8c42;
+            font-size: 1.05em;
+            font-weight: 700;
+        }
+
+        .write-box {
+            background: rgba(0,0,0,0.25);
+            border: 1px dashed #3a5a7a;
+            border-radius: 10px;
+            padding: 16px 20px;
+            position: relative;
+        }
+        .write-box .placeholder {
+            color: #5a7a9a;
+            font-size: 0.85em;
+            line-height: 1.8;
+        }
+        .write-box .placeholder strong {
+            color: #ff8c42;
+        }
+        .write-box .guide {
+            color: #4a7aaa;
+            font-size: 0.78em;
+            font-style: italic;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(42,74,106,0.3);
+        }
+
+        /* ===== CHECKLIST ===== */
+        .check-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .check-card {
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 14px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .check-card:hover { border-color: #4caf50; }
+        .check-card h4 {
+            color: #4caf50;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .ci-green { background: #4caf50; }
+        .ci-red { background: #e91e63; }
+        .ci-blue { background: #2196f3; }
+        .ci-orange { background: #ff6b35; }
+
+        .check-list {
+            list-style: none;
+            padding: 0;
+        }
+        .check-list li {
+            padding: 6px 0 6px 28px;
+            position: relative;
+            color: #b0c4de;
+            font-size: 0.83em;
+            line-height: 1.5;
+        }
+        .check-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #3a6a8a;
+            border-radius: 4px;
+        }
+        .check-list li.pass::before {
+            background: #4caf50;
+            border-color: #4caf50;
+        }
+        .check-list li.fail::before {
+            background: #e91e63;
+            border-color: #e91e63;
+        }
+
+        /* ===== DO vs DON'T ===== */
+        .do-dont-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) { .do-dont-grid { grid-template-columns: 1fr; } }
+
+        .do-card, .dont-card {
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .do-card {
+            background: linear-gradient(145deg, #0d2a1a, #122a20);
+            border: 2px solid #2a6a4a;
+        }
+        .dont-card {
+            background: linear-gradient(145deg, #2a0d1a, #2a1220);
+            border: 2px solid #6a2a3a;
+        }
+        .do-card h4 { color: #4caf50; font-size: 1.1em; margin-bottom: 14px; }
+        .dont-card h4 { color: #e91e63; font-size: 1.1em; margin-bottom: 14px; }
+
+        .do-list, .dont-list {
+            list-style: none;
+            padding: 0;
+        }
+        .do-list li, .dont-list li {
+            padding: 7px 0 7px 26px;
+            position: relative;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .do-list li { color: #a0d4b0; }
+        .dont-list li { color: #d4a0b0; }
+        .do-list li::before {
+            content: '\2713';
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .dont-list li::before {
+            content: '\2717';
+            position: absolute;
+            left: 0;
+            color: #e91e63;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* ===== FLOW: CACH THE HIEN TINH MOI ===== */
+        .flow-steps {
+            display: flex;
+            gap: 0;
+            align-items: stretch;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .flow-step {
+            flex: 1;
+            min-width: 180px;
+            max-width: 220px;
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 14px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .flow-step:hover {
+            border-color: #ff8c42;
+            transform: translateY(-4px);
+        }
+        .flow-step .fs-num {
+            background: linear-gradient(135deg, #ff6b35, #ffc107);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 10px;
+        }
+        .flow-step h4 {
+            color: #ff8c42;
+            font-size: 0.9em;
+            margin-bottom: 6px;
+        }
+        .flow-step p {
+            color: #7b8fa8;
+            font-size: 0.78em;
+            line-height: 1.4;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            font-size: 1.8em;
+            color: #ff8c42;
+            padding: 0 6px;
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .flow-steps { flex-direction: column; align-items: center; }
+            .flow-arrow { transform: rotate(90deg); padding: 6px 0; }
+        }
+
+        /* ===== SENTENCE PATTERNS ===== */
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .pattern-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            background: linear-gradient(145deg, #1a2e4a, #152540);
+            border: 1px solid #2a4a6a;
+            border-radius: 12px;
+            padding: 16px 20px;
+            transition: all 0.3s;
+        }
+        .pattern-row:hover { border-color: #2196f3; }
+        .pattern-tag {
+            min-width: 60px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.72em;
+            font-weight: 700;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .pt-vn { background: rgba(233,30,99,0.15); color: #f06292; }
+        .pt-en { background: rgba(33,150,243,0.15); color: #42a5f5; }
+        .pattern-text {
+            color: #b0c4de;
+            font-size: 0.88em;
+            line-height: 1.7;
+        }
+        .pattern-text strong { color: #ffc107; }
+
+        /* ===== COMPARE TABLE ===== */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            background: linear-gradient(135deg, #1a3a5f, #2a4a7a);
+            color: #fff;
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 0.88em;
+        }
+        .compare-table td {
+            padding: 12px 18px;
+            border-bottom: 1px solid #1a2a4a;
+            font-size: 0.84em;
+            color: #b0c4de;
+            line-height: 1.5;
+        }
+        .compare-table tr:nth-child(even) td { background: rgba(26,46,74,0.4); }
+        .compare-table tr:hover td { background: rgba(255,140,66,0.06); }
+        .tag-new { color: #4caf50; font-weight: 600; }
+        .tag-old { color: #e91e63; font-weight: 600; }
+
+        .footer {
+            text-align: center;
+            color: #4a6a8a;
+            font-size: 0.8em;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #1a2a4a;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+    <h1>TINH MOI TRONG NCKH</h1>
+    <p>Novelty / Originality - Dac diem quan trong nhat cua Nghien cuu Khoa hoc</p>
+</div>
+
+<!-- ===== 1. DINH NGHIA ===== -->
+<div class="section">
+    <h2 class="sec-title">1. Tinh Moi La Gi? <span class="badge">DEFINITION</span></h2>
+    <div class="hero-grid">
+        <div class="hero-card hero-highlight">
+            <h3>Dinh Nghia</h3>
+            <p>Tinh moi (Novelty/Originality) la dac diem <strong>hang dau</strong> cua NCKH. Mot cong trinh NCKH phai tao ra <strong>tri thuc moi</strong> - nhung dieu ma truoc do chua ai biet, chua ai lam, hoac chua ai chung minh duoc.</p>
+            <p style="margin-top:10px;">Theo slide bai giang: NCKH la qua trinh thu thap thong tin co he thong nham <strong>phat minh ra nhung cai moi</strong> ve ban chat su vat, ve the gioi TN & XH.</p>
+        </div>
+        <div class="hero-card">
+            <h3>Tai Sao Tinh Moi Quan Trong?</h3>
+            <p><strong>1.</strong> La tieu chi so 1 de danh gia chat luong NCKH</p>
+            <p style="margin-top:6px;"><strong>2.</strong> Quyet dinh bai bao co duoc chap nhan dang hay khong</p>
+            <p style="margin-top:6px;"><strong>3.</strong> La co so de cap patent, bao ho so huu tri tue</p>
+            <p style="margin-top:6px;"><strong>4.</strong> Dong gop vao kho tang tri thuc nhan loai</p>
+            <p style="margin-top:6px;"><strong>5.</strong> Tao gia tri ung dung thuc tien cho xa hoi</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 2. 5 CAP DO TINH MOI ===== -->
+<div class="section">
+    <h2 class="sec-title">2. 5 Cap Do Tinh Moi (Tu Thap Den Cao) <span class="badge">LEVELS</span></h2>
+    <div class="levels-container">
+
+        <div class="level-row l1">
+            <div class="level-sidebar">
+                <div class="level-icon">1</div>
+                <div class="level-line"></div>
+            </div>
+            <div class="level-content">
+                <div class="level-header">
+                    <span class="level-title">Cai Tien (Improvement)</span>
+                    <span class="difficulty diff-easy">DE NHAT</span>
+                </div>
+                <div class="level-desc">Cai tien, nang cap PP/bai toan/he thong hien co. Khac phuc nhuoc diem cu, giu lai uu diem. <strong>Theo slide: "Van de hien huu con nhuoc diem => cai tien (ke thua hoac moi)"</strong></div>
+                <div class="level-example">
+                    <div class="ex-label">VI DU</div>
+                    <p>"De xuat thuat toan X cai tien, giam 30% thoi gian tinh toan so voi thuat toan X goc"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-row l2">
+            <div class="level-sidebar">
+                <div class="level-icon">2</div>
+                <div class="level-line"></div>
+            </div>
+            <div class="level-content">
+                <div class="level-header">
+                    <span class="level-title">Tich Hop (Integration/Combination)</span>
+                    <span class="difficulty diff-medium">TRUNG BINH</span>
+                </div>
+                <div class="level-desc">Ket hop 2+ PP/ly thuyet cu co uu-nhuoc diem doi nghich de tao PP moi tot hon. <strong>Theo slide: "Hai PP hien huu co nhuoc diem va uu diem doi nghich => Tich hop cho ra PP chung"</strong></div>
+                <div class="level-example">
+                    <div class="ex-label">VI DU</div>
+                    <p>"Ket hop PP DLV (nhanh nhung khong chinh xac) va PP toi uu hoa tong the (chinh xac nhung cham) => PP hon hop vua nhanh vua chinh xac" (VD tu slide)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-row l3">
+            <div class="level-sidebar">
+                <div class="level-icon">3</div>
+                <div class="level-line"></div>
+            </div>
+            <div class="level-content">
+                <div class="level-header">
+                    <span class="level-title">Goc Nhin Moi (New Perspective)</span>
+                    <span class="difficulty diff-hard">KHO</span>
+                </div>
+                <div class="level-desc">Du lieu cu + goc nhin moi, hoac bai toan cu + PP giai moi hoan toan. Ap dung ly thuyet tu linh vuc khac vao linh vuc dang NC. <strong>Theo slide: "Du lieu cu => Goc nhin moi; Bai toan cu => PP giai moi"</strong></div>
+                <div class="level-example">
+                    <div class="ex-label">VI DU</div>
+                    <p>"Ap dung mo hinh deep learning (tu Computer Science) de phan tich du lieu y te truyen thong"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-row l4">
+            <div class="level-sidebar">
+                <div class="level-icon">4</div>
+                <div class="level-line"></div>
+            </div>
+            <div class="level-content">
+                <div class="level-header">
+                    <span class="level-title">Van De Moi (New Problem)</span>
+                    <span class="difficulty diff-expert">CHUYEN GIA</span>
+                </div>
+                <div class="level-desc">Phat hien va giai quyet van de/bai toan moi hoan toan ma chua ai dat ra truoc do. <strong>Theo slide: "Van de/bai toan moi hoan toan => Y tuong cu hoac moi de giai quyet"</strong></div>
+                <div class="level-example">
+                    <div class="ex-label">VI DU</div>
+                    <p>"Phat hien hien tuong moi trong truyen thong khong day 6G va de xuat mo hinh ly thuyet giai thich"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-row l5">
+            <div class="level-sidebar">
+                <div class="level-icon">5</div>
+                <div class="level-line"></div>
+            </div>
+            <div class="level-content">
+                <div class="level-header">
+                    <span class="level-title">Phat Minh / Sang Che (Invention)</span>
+                    <span class="difficulty diff-master">CAP CAO NHAT</span>
+                </div>
+                <div class="level-desc">Tao ra ly thuyet moi, nguyen ly moi, hoac giai phap ky thuat hoan toan moi co the ap dung vao thuc tien. Tuong ung voi san pham "Phat minh" va "Sang che" trong NCKH.</div>
+                <div class="level-example">
+                    <div class="ex-label">VI DU</div>
+                    <p>"Tim ra vaccine COVID-19 dua tren cong nghe mRNA - nguyen ly hoan toan moi trong san xuat vaccine"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 3. FLOW: CACH THE HIEN TINH MOI ===== -->
+<div class="section">
+    <h2 class="sec-title">3. Quy Trinh The Hien Tinh Moi Trong Bai NC <span class="badge">WORKFLOW</span></h2>
+    <div class="flow-steps">
+        <div class="flow-step">
+            <div class="fs-num">1</div>
+            <h4>Doc Tai Lieu</h4>
+            <p>Tong quan 20-50 bai bao lien quan. Tim research gap.</p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+            <div class="fs-num">2</div>
+            <h4>Xac Dinh Gap</h4>
+            <p>Tim nhuoc diem, han che, khoang trong cua NC truoc.</p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+            <div class="fs-num">3</div>
+            <h4>De Xuat Moi</h4>
+            <p>Trinh bay y tuong/PP/mo hinh moi cua ban.</p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+            <div class="fs-num">4</div>
+            <h4>Chung Minh</h4>
+            <p>Thuc nghiem/ly thuyet chung minh PP moi tot hon.</p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+            <div class="fs-num">5</div>
+            <h4>So Sanh</h4>
+            <p>So sanh ket qua voi PP cu, lam noi bat dong gop moi.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 4. TEMPLATE VIET ===== -->
+<div class="section">
+    <h2 class="sec-title">4. Template Viet - Nhan Manh Tinh Moi <span class="badge">TEMPLATE</span></h2>
+    <div class="template-card">
+
+        <div class="tpl-section">
+            <div class="tpl-label">
+                <div class="tpl-num">1</div>
+                <span class="tpl-name">Dat Van De (Neu Research Gap)</span>
+            </div>
+            <div class="write-box">
+                <div class="placeholder">
+                    "Hien nay, cac nghien cuu ve <strong>[linh vuc]</strong> da dat duoc nhieu ket qua quan trong, tuy nhien van con ton tai <strong>[nhuoc diem/han che cu the]</strong>. Cu the, <strong>[PP/cach tiep can hien tai]</strong> con gap van de <strong>[van de cu the]</strong>. Do do, viec <strong>[de xuat giai phap moi]</strong> la het suc can thiet."
+                </div>
+                <div class="guide">Huong dan: Chi ro cai gi da lam, cai gi chua lam, tai sao NC cua ban can thiet</div>
+            </div>
+        </div>
+
+        <div class="tpl-section">
+            <div class="tpl-label">
+                <div class="tpl-num">2</div>
+                <span class="tpl-name">Trinh Bay Diem Moi (Contribution)</span>
+            </div>
+            <div class="write-box">
+                <div class="placeholder">
+                    "Dong gop chinh cua nghien cuu nay bao gom:<br><br>
+                    <strong>(1)</strong> De xuat <strong>[PP/mo hinh/thuat toan moi]</strong> dua tren <strong>[co so ly thuyet]</strong>.<br>
+                    <strong>(2)</strong> Chung minh bang <strong>[ly thuyet/thuc nghiem]</strong> rang PP de xuat <strong>[uu diem cu the: nhanh hon X%, chinh xac hon Y%]</strong> so voi cac PP hien co.<br>
+                    <strong>(3)</strong> Ung dung thanh cong vao <strong>[bai toan/tinh huong thuc te]</strong>."
+                </div>
+                <div class="guide">Huong dan: Liet ke 2-4 dong gop moi, moi dong gop phai cu the va do luong duoc</div>
+            </div>
+        </div>
+
+        <div class="tpl-section">
+            <div class="tpl-label">
+                <div class="tpl-num">3</div>
+                <span class="tpl-name">So Sanh Voi NC Truoc (Novelty Comparison)</span>
+            </div>
+            <div class="write-box">
+                <div class="placeholder">
+                    "Khac voi nghien cuu cua <strong>[Tac gia, Nam]</strong> su dung <strong>[PP cu]</strong>, nghien cuu nay de xuat <strong>[PP moi]</strong> voi cac diem khac biet chinh:<br><br>
+                    - <strong>[Diem khac 1]</strong>: ...<br>
+                    - <strong>[Diem khac 2]</strong>: ...<br>
+                    - <strong>[Diem khac 3]</strong>: ...<br><br>
+                    Ket qua cho thay PP de xuat dat <strong>[chi so cu the]</strong>, vuot troi hon <strong>[X%]</strong> so voi <strong>[PP cu]</strong>."
+                </div>
+                <div class="guide">Huong dan: Dung bang so sanh (table) de the hien ro su khac biet va uu viet</div>
+            </div>
+        </div>
+
+        <div class="tpl-section">
+            <div class="tpl-label">
+                <div class="tpl-num">4</div>
+                <span class="tpl-name">Gia Thuyet Nghien Cuu (Lien Ket Voi Tinh Moi)</span>
+            </div>
+            <div class="write-box">
+                <div class="placeholder">
+                    "<strong>H1:</strong> PP <strong>[ten PP moi]</strong> de xuat co hieu suat <strong>[cao hon / tot hon]</strong> so voi PP <strong>[ten PP cu]</strong> trong viec <strong>[nhiem vu cu the]</strong>.<br><br>
+                    <strong>H2:</strong> Viec ket hop <strong>[yeu to A]</strong> va <strong>[yeu to B]</strong> se tao ra ket qua <strong>[tot hon / moi]</strong> so voi viec su dung rieng le."
+                </div>
+                <div class="guide">Huong dan: Gia thuyet phai the hien ro: cai moi cua ban (bien doc lap) => ket qua tot hon (bien phu thuoc)</div>
+            </div>
+        </div>
+
+        <div class="tpl-section">
+            <div class="tpl-label">
+                <div class="tpl-num">5</div>
+                <span class="tpl-name">Ket Luan (Tong Ket Dong Gop Moi)</span>
+            </div>
+            <div class="write-box">
+                <div class="placeholder">
+                    "Nghien cuu nay da dong gop vao linh vuc <strong>[ten linh vuc]</strong> voi cac ket qua moi sau:<br><br>
+                    <strong>Ve ly thuyet:</strong> De xuat <strong>[mo hinh/ly thuyet moi]</strong> giai thich <strong>[hien tuong]</strong>.<br>
+                    <strong>Ve thuc tien:</strong> Cung cap <strong>[giai phap/cong cu]</strong> giup <strong>[doi tuong]</strong> giai quyet <strong>[van de]</strong> hieu qua hon <strong>[X%]</strong>.<br>
+                    <strong>Han che va huong phat trien:</strong> NC con han che o <strong>[...]</strong>. Huong NC tiep theo co the <strong>[mo rong/cai tien them]</strong>."
+                </div>
+                <div class="guide">Huong dan: Phan biet ro dong gop ly thuyet vs dong gop thuc tien</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 5. MAU CAU THUONG DUNG ===== -->
+<div class="section">
+    <h2 class="sec-title">5. Mau Cau Thuong Dung De The Hien Tinh Moi <span class="badge">PHRASES</span></h2>
+    <div class="patterns-grid">
+        <div class="pattern-row">
+            <span class="pattern-tag pt-en">English</span>
+            <div class="pattern-text">"<strong>To the best of our knowledge</strong>, this is the first study that..." / "Unlike previous studies, <strong>our approach</strong>..." / "The <strong>novelty</strong> of this work lies in..." / "The <strong>main contribution</strong> of this paper is..."</div>
+        </div>
+        <div class="pattern-row">
+            <span class="pattern-tag pt-vn">Tieng Viet</span>
+            <div class="pattern-text">"Theo hieu biet cua chung toi, <strong>day la nghien cuu dau tien</strong>..." / "Khac voi cac NC truoc, <strong>nghien cuu nay de xuat</strong>..." / "<strong>Diem moi</strong> cua nghien cuu nam o..." / "<strong>Dong gop chinh</strong> cua bai bao la..."</div>
+        </div>
+        <div class="pattern-row">
+            <span class="pattern-tag pt-en">Gap</span>
+            <div class="pattern-text">"However, <strong>no previous study has addressed</strong>..." / "There is <strong>a lack of research</strong> on..." / "The existing methods <strong>suffer from</strong>..." / "<strong>Despite</strong> recent advances, <strong>challenges remain</strong> in..."</div>
+        </div>
+        <div class="pattern-row">
+            <span class="pattern-tag pt-vn">Gap VN</span>
+            <div class="pattern-text">"Tuy nhien, <strong>chua co NC nao giai quyet</strong>..." / "<strong>Con thieu</strong> cac NC ve..." / "Cac PP hien tai <strong>con han che</strong> o..." / "<strong>Mac du</strong> da co nhieu tien bo, <strong>van con thach thuc</strong> trong..."</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 6. DO vs DON'T ===== -->
+<div class="section">
+    <h2 class="sec-title">6. Nen Va Khong Nen <span class="badge">DO & DON'T</span></h2>
+    <div class="do-dont-grid">
+        <div class="do-card">
+            <h4>NEN LAM</h4>
+            <ul class="do-list">
+                <li>Chi ro research gap cu the tu tong quan tai lieu</li>
+                <li>Liet ke dong gop moi dang numbered list (1, 2, 3...)</li>
+                <li>So sanh dinh luong voi PP cu (bang so lieu, %)</li>
+                <li>Dung bang so sanh (comparison table) de the hien su khac biet</li>
+                <li>Trinh bay tinh moi ngay tu Abstract va Introduction</li>
+                <li>Lien ket tinh moi voi muc tieu va gia thuyet NC</li>
+                <li>Dung cau "To the best of our knowledge, this is the first..."</li>
+                <li>Neu ro dong gop ly thuyet VA dong gop thuc tien</li>
+            </ul>
+        </div>
+        <div class="dont-card">
+            <h4>KHONG NEN LAM</h4>
+            <ul class="dont-list">
+                <li>Chi noi "chua co ai lam" ma khong chung minh bang tong quan TL</li>
+                <li>Noi mo ho: "NC nay co dong gop moi" ma khong cu the hoa</li>
+                <li>Lap lai nhung gi NC truoc da lam roi tuyen bo la "moi"</li>
+                <li>Qua pho truong tinh moi ma khong co bang chung</li>
+                <li>Bo qua viec trich dan va so sanh voi NC truoc</li>
+                <li>Chi so sanh dinh tinh ma khong co so lieu cu the</li>
+                <li>Nham lan "moi voi toi" va "moi voi the gioi" (da co nguoi lam)</li>
+                <li>De tinh moi chi o phan ket luan ma khong nhan manh tu dau</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 7. CHECKLIST ===== -->
+<div class="section">
+    <h2 class="sec-title">7. Checklist Kiem Tra Tinh Moi <span class="badge">SELF-CHECK</span></h2>
+    <div class="check-grid">
+        <div class="check-card">
+            <h4><span class="check-icon ci-green">1</span> Truoc Khi Viet</h4>
+            <ul class="check-list">
+                <li class="pass">Da doc du tong quan tai lieu (20-50 bai)?</li>
+                <li class="pass">Da xac dinh ro research gap?</li>
+                <li class="pass">Y tuong chua ai thuc hien truoc (kiem tra Google Scholar)?</li>
+                <li class="pass">Co the mo ta dong gop moi trong 1-2 cau?</li>
+            </ul>
+        </div>
+        <div class="check-card">
+            <h4><span class="check-icon ci-blue">2</span> Trong Khi Viet</h4>
+            <ul class="check-list">
+                <li class="pass">Abstract co nhan manh tinh moi?</li>
+                <li class="pass">Introduction co research gap ro rang?</li>
+                <li class="pass">Co phan "Contributions" liet ke dong gop moi?</li>
+                <li class="pass">Co bang so sanh voi cac PP truoc?</li>
+            </ul>
+        </div>
+        <div class="check-card">
+            <h4><span class="check-icon ci-orange">3</span> Sau Khi Viet</h4>
+            <ul class="check-list">
+                <li class="pass">Ket qua chung minh PP moi tot hon PP cu?</li>
+                <li class="pass">So sanh co so lieu cu the (%, thoi gian, do chinh xac)?</li>
+                <li class="pass">Ket luan tom tat dong gop moi ro rang?</li>
+                <li class="pass">Reviewer co the nhan ra tinh moi trong 2 phut doc?</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 8. BANG SO SANH MAU ===== -->
+<div class="section">
+    <h2 class="sec-title">8. Mau Bang So Sanh (Comparison Table) <span class="badge">SAMPLE</span></h2>
+    <table class="compare-table">
+        <thead>
+            <tr>
+                <th>Tieu chi</th>
+                <th>PP A (Nguyen, 2020)</th>
+                <th>PP B (Tran, 2022)</th>
+                <th class="tag-new">PP de xuat (2025)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Mo hinh su dung</td>
+                <td class="tag-old">Hoi quy tuyen tinh</td>
+                <td class="tag-old">SVM</td>
+                <td class="tag-new">Deep Learning + Transfer Learning</td>
+            </tr>
+            <tr>
+                <td>Do chinh xac</td>
+                <td>78.5%</td>
+                <td>85.2%</td>
+                <td class="tag-new">94.7% (+9.5%)</td>
+            </tr>
+            <tr>
+                <td>Thoi gian xu ly</td>
+                <td>120s</td>
+                <td>85s</td>
+                <td class="tag-new">12s (-85.9%)</td>
+            </tr>
+            <tr>
+                <td>Co mau</td>
+                <td>500</td>
+                <td>1,200</td>
+                <td class="tag-new">5,000</td>
+            </tr>
+            <tr>
+                <td>Xu ly du lieu nhieu</td>
+                <td class="tag-old">Khong</td>
+                <td class="tag-old">Co (han che)</td>
+                <td class="tag-new">Co (toan dien)</td>
+            </tr>
+            <tr>
+                <td>Kha nang mo rong</td>
+                <td class="tag-old">Thap</td>
+                <td>Trung binh</td>
+                <td class="tag-new">Cao</td>
+            </tr>
+        </tbody>
+    </table>
+    <p style="color:#5a7a9a; font-size:0.78em; margin-top:10px; text-align:center; font-style:italic;">* Day la mau minh hoa. Thay the bang du lieu thuc te cua NC cua ban.</p>
+</div>
+
+<div class="footer">
+    Template Tinh Moi Trong NCKH | Dua tren V1_PPNCKH1 | PGS.TS. Ho Van Khuong - DH Bach Khoa TP.HCM
+</div>
+
+</body>
+</html>
