@@ -304,4 +304,109 @@ d77ba4b — Add research proposal combining HarnessEval + SecureCodeBench
 d03a570 — Add 2 separate proposals (HarnessEval v1 + SecureCodeBench v1)
 2f90168 — Add 3 thesis defense review documents
 c822605 — Add HarnessEval v2 + visualization files
+af22e75 — Add comprehensive Plan-HarnessEval.md
+d9236dd — Add 49 research paper PDFs (132MB)
 ```
+
+---
+
+## 11. RESUME GUIDE — Doc phan nay de tiep tuc
+
+> **Ngay cap nhat:** 06/04/2026
+> **Trang thai:** De cuong v2 da hoan thanh, da push len GitHub. Chua nop cho advisor.
+
+### 11.1. Trang thai hien tai
+
+```
+[XONG] Chon de tai → Agent Framework → Coding Agent Harness & Evaluation
+[XONG] Research 49 papers (tai PDF + tom tat + GAP-ANALYSIS)
+[XONG] Viet de cuong v1 (3 phien ban: ket hop, Gap1, Gap2)
+[XONG] Phan bien hoi dong (3 file thao luan)
+[XONG] Viet de cuong v2 (HarnessEval, da ap dung 7 goi y)
+[XONG] Visualization (2 file HTML)
+[XONG] Plan tong hop (file nay)
+[XONG] Push tat ca len GitHub
+
+[CHUA] Nop de cuong v2 cho advisor
+[CHUA] Tim them papers tu SE venues (ICSE, FSE, ASE)
+[CHUA] Bat dau thuc hien nghien cuu (GD1-GD5)
+```
+
+### 11.2. File quan trong nhat (doc theo thu tu)
+
+| Thu tu | File | Muc dich |
+|--------|------|---------|
+| 1 | **Plan-HarnessEval.md** (file nay) | Tong quan toan bo du an, trang thai, next actions |
+| 2 | **DE-CUONG-HarnessEval-v2.md** | DE CUONG CHINH — phien ban cuoi cung, da qua phan bien |
+| 3 | **THAO-LUAN-HarnessEval.md** | Phan bien chi tiet + 10 cau hoi kho + cach tra loi |
+| 4 | **GAP-ANALYSIS.md** | 6 research gaps, bang so sanh 49 papers x 13 features |
+| 5 | **INDEX.md** | Danh sach 49+5 papers theo 8 nhom |
+| 6 | **visualize-HarnessEval.html** | Mo bang browser — hieu y tuong truc quan |
+| 7 | **visualize-ThaoLuan-HarnessEval.html** | Mo bang browser — hieu phan bien truc quan |
+
+### 11.3. Neu muon tiep tuc NGHIEN CUU (thuc hien de tai)
+
+**Buoc tiep theo la GD1: Taxonomy + Expert Validation**
+
+```
+1. Doc lai DE-CUONG-HarnessEval-v2.md, muc 3.2 (Taxonomy 3 chieu, 7 metrics)
+2. Chuan bi survey form cho 5 experts:
+   - Trinh bay taxonomy 3 chieu
+   - Hoi: co hop ly khong? Thieu/thua gi? Metrics co do luong duoc khong?
+   - Do Fleiss' kappa tren 20 mau danh gia
+3. Lien he advisor + 4 nguoi khac (industry practitioners, PhD students)
+4. Song song: setup SWE-bench Docker environment tren may
+```
+
+**Sau GD1, lam GD1.5: Pilot Study**
+
+```
+1. Fork SWE-Agent: git clone https://github.com/princeton-nlp/SWE-agent
+2. Refactor thanh modular (doi tool config, context strategy, backend)
+3. Chon 20 tasks tu SWE-bench Verified (random)
+4. Chay 5 conditions x 20 tasks x 2 runs = 200 evaluations
+5. Tinh metrics, uoc tinh cost → quyet dinh so conditions cho full experiment
+```
+
+### 11.4. Neu muon chinh sua DE CUONG
+
+```
+1. Doc THAO-LUAN-HarnessEval.md — xem 7 goi y va 10 cau hoi
+2. Doc DE-CUONG-HarnessEval-v2.md — xem phu luc A (bang V1 vs V2)
+3. Tim "Thay doi so voi v1" trong v2 de biet chinh xac da sua gi
+4. Neu can sua tiep → tao v3, KHONG ghi de v2
+```
+
+### 11.5. Neu muon lam de tai Gap 2 (SecureCodeBench)
+
+```
+1. Doc DE-CUONG-SecureCodeBench.md (v1)
+2. Doc THAO-LUAN-SecureCodeBench.md (6.7/10 — can chinh sua nhieu)
+3. Van de lon nhat: THIEU section Ethics & Responsible Disclosure
+4. SRR = RR x (1-ASR) bi danh gia qua don gian → can weighted version
+5. Tao v2 ap dung phan bien, tuong tu cach da lam voi HarnessEval
+```
+
+### 11.6. Thong tin ky thuat de resume nhanh
+
+**Repo:** https://github.com/haihpse150218/Methods-of-Learning-and-Scientific-Research
+**Branch:** master
+**Working dir:** D:\MSA-FPT\Methods of Learnning and scientific research
+**Papers:** 49 PDFs trong NCKK-Docs/de-tai/papers/ (132MB)
+**Summaries:** 49 .md trong NCKK-Docs/de-tai/summary/
+
+**Cac repo lien quan (cua ban):**
+- https://github.com/haihpse150218/claw-code-free — harness project
+- https://github.com/haihpse150218/antigravity-awesome-skills — skills
+
+**Tools da dung:**
+- Claude Code (Opus 4.6) — viet de cuong, research, phan bien
+- arXiv — tai 49 papers
+- SWE-bench Verified — benchmark chinh (can setup Docker)
+- SWE-Agent — se fork lam modular harness
+
+**Budget du kien:** $2,500-3,100 (API costs cho Claude Sonnet + GPT-4o + DeepSeek)
+
+### 11.7. Mot cau de nho y tuong chinh
+
+> **"SWE-bench do MON AN (output). HarnessEval do NHA HANG (harness). Cung 1 dau bep (LLM), nha hang khac nhau → mon khac nhau. Chung ta do nha hang, khong do dau bep."**
