@@ -112,35 +112,160 @@ tr:hover{background:#eef1f6}
 </table>
 </div>
 
-<!-- ===== S2: 3 CHIEU DANH GIA ===== -->
+<!-- ===== S2: TAT CA 5 CHIEU + 11 METRICS ===== -->
 <div class="section">
-<h2>2. Taxonomy 3 Chieu — 7 Metrics</h2>
+<h2>2. Do gi? 5 Chieu danh gia Harness (Day du)</h2>
+<p style="color:#777;margin-bottom:5px">Moi chieu tra loi 1 cau hoi cu the ve chat luong harness</p>
+<p style="font-size:.85em;margin-bottom:20px"><span class="tag tag-good">V2: 3 chieu chinh</span> <span class="tag tag-warn">2 chieu future work</span> — hien thi day du de hieu toan canh</p>
 
-<div class="card-grid">
-  <div class="card" style="border-left:4px solid #e65100">
-    <div class="card-title" style="color:#e65100">D1. Tool Dispatch Efficiency</div>
-    <p style="color:#777;font-style:italic;margin-bottom:10px">"Harness goi dung tool khong? Co thua khong?"</p>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M1.1</strong> Correct Selection Rate — % tool calls chon dung (tu TAP HOP acceptable, khong phai 1 ground-truth)</div>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M1.2</strong> Redundant Call Rate — % tool calls khong duoc dung trong 3 buoc sau</div>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M1.3</strong> Tool Utilization Breadth — so tool types dung / tong tools co</div>
+<!-- D1 -->
+<div class="card" style="border-left:5px solid #e65100;margin-bottom:20px">
+  <div class="card-title" style="color:#e65100;font-size:1.15em">D1: Tool Dispatch Efficiency <span class="tag tag-good">V2 CHINH</span></div>
+  <p style="color:#555;font-style:italic;margin-bottom:12px;font-size:1.05em">"Harness goi dung tool khong? Co bi thua khong?"</p>
+
+  <div style="background:#fff3e0;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#e65100;margin-bottom:6px">M1.1: Correct Tool Selection Rate</div>
+    <div style="color:#555"><strong>Do gi:</strong> % tool calls chon dung tool cho muc dich</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Agent can doc file → goi <code style="background:#f0f2f5;padding:2px 6px;border-radius:4px">Read</code> (dung) hay goi <code style="background:#f0f2f5;padding:2px 6px;border-radius:4px">Bash cat</code> (sai tool)?</div>
+    <div style="color:#555;margin-top:4px"><strong>Cach do:</strong> 2 annotators gan nhan "acceptable/not" tren 500 tool calls mau. Dung TAP HOP acceptable tools (nhieu cach dung).</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Khong — can nguoi. Validate bang Fleiss' kappa >= 0.6</div>
   </div>
-  <div class="card" style="border-left:4px solid #1565c0">
-    <div class="card-title" style="color:#1565c0">D2. Context Utilization</div>
-    <p style="color:#777;font-style:italic;margin-bottom:10px">"Nen context mat thong tin khong?"</p>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M2.1</strong> Info Retention Score — BERTScore giua full-context va compacted response</div>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M2.2</strong> Effective Token Ratio — % tokens lien quan (LLM classifier + human validate)</div>
+
+  <div style="background:#fff3e0;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#e65100;margin-bottom:6px">M1.2: Redundant Call Rate</div>
+    <div style="color:#555"><strong>Do gi:</strong> % tool calls ma ket qua KHONG duoc su dung trong 3 buoc tiep theo</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Agent goi <code style="background:#f0f2f5;padding:2px 6px;border-radius:4px">Grep "error"</code> 5 lan cho cung 1 tu → 4 lan la thua</div>
+    <div style="color:#555;margin-top:4px"><strong>Cach do:</strong> Tu dong — log analysis: tool output co xuat hien trong context 3 turns sau khong?</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Co. Validate tren 100 mau voi human check</div>
   </div>
-  <div class="card" style="border-left:4px solid #6a1b9a">
-    <div class="card-title" style="color:#6a1b9a">D3. Backend Portability</div>
-    <p style="color:#777;font-style:italic;margin-bottom:10px">"Doi LLM khac thi harness con tot khong?"</p>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M3.1</strong> Cross-Backend Std Dev — std(RR) qua Claude, GPT, DeepSeek</div>
-    <div style="background:#f0f2f5;padding:8px 12px;border-radius:6px;margin:5px 0;font-size:.9em"><strong>M3.2</strong> Min/Max Ratio — min(RR) / max(RR)</div>
+
+  <div style="background:#fff3e0;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#e65100;margin-bottom:6px">M1.3: Tool Utilization Breadth</div>
+    <div style="color:#555"><strong>Do gi:</strong> So loai tool duoc su dung / tong so tools co san</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Harness co 12 tools nhung agent chi dung 4 → breadth = 33% (thap = khong tan dung)</div>
+    <div style="color:#555;margin-top:4px"><strong>Cach do:</strong> Tu dong — dem unique tool types trong log</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Co</div>
   </div>
 </div>
 
-<div class="note-info" style="background:#f0f7ff;border-left:4px solid #0066cc;padding:15px 20px;border-radius:0 8px 8px 0;margin:15px 0">
-  <strong>Da bo (future work):</strong> D4 Safety Enforcement, D5 Session Continuity<br>
-  <strong>Ly do:</strong> Giam scope cho kha thi 6 thang. Safety → de tai rieng (SecureCodeBench)
+<!-- D2 -->
+<div class="card" style="border-left:5px solid #1565c0;margin-bottom:20px">
+  <div class="card-title" style="color:#1565c0;font-size:1.15em">D2: Context Utilization <span class="tag tag-good">V2 CHINH</span></div>
+  <p style="color:#555;font-style:italic;margin-bottom:12px;font-size:1.05em">"Harness nen context tot khong? Co mat thong tin quan trong?"</p>
+
+  <div style="background:#e3f2fd;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#1565c0;margin-bottom:6px">M2.1: Info Retention Score</div>
+    <div style="color:#555"><strong>Do gi:</strong> % thong tin quan trong con lai sau khi nen context</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Context 100K tokens, sau compaction con 30K. Nhung mat thong tin ve file quan trong → Info Retention thap</div>
+    <div style="color:#555;margin-top:4px"><strong>Cach do:</strong> Chay cung task 2 lan (full context vs compacted). Tinh BERTScore giua 2 outputs</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Co. Validate voi human preference tren 30 cap</div>
+  </div>
+
+  <div style="background:#e3f2fd;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#1565c0;margin-bottom:6px">M2.2: Effective Token Ratio</div>
+    <div style="color:#555"><strong>Do gi:</strong> % tokens trong context thuc su lien quan den task hien tai</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Context 50K tokens nhung chi 15K lien quan → ratio = 30% (70% la "rac")</div>
+    <div style="color:#555;margin-top:4px"><strong>Cach do:</strong> LLM classifier (Claude Haiku) phan loai tung segment: relevant/irrelevant. Validate accuracy tren 200 segments voi human labels</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Ban tu dong. Chap nhan neu classifier accuracy >90%</div>
+  </div>
+</div>
+
+<!-- D3 (future work) -->
+<div class="card" style="border-left:5px solid #c62828;margin-bottom:20px;opacity:.75">
+  <div class="card-title" style="color:#c62828;font-size:1.15em">D3: Safety Enforcement <span class="tag tag-warn">FUTURE WORK</span></div>
+  <p style="color:#555;font-style:italic;margin-bottom:12px;font-size:1.05em">"Harness chan duoc lenh nguy hiem khong?"</p>
+
+  <div style="background:#ffebee;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#c62828;margin-bottom:6px">M3.1: Destructive Op Block Rate</div>
+    <div style="color:#555"><strong>Do gi:</strong> % lenh nguy hiem (rm -rf, git push --force) bi chan</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Agent bi trick goi <code style="background:#f0f2f5;padding:2px 6px;border-radius:4px">rm -rf /</code> → harness chan duoc? Inject 50 destructive commands de test</div>
+  </div>
+
+  <div style="background:#ffebee;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#c62828;margin-bottom:6px">M3.2: Injection Resist Rate</div>
+    <div style="color:#555"><strong>Do gi:</strong> % prompt injection bi phat hien va chan</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> File <code style="background:#f0f2f5;padding:2px 6px;border-radius:4px">.cursorrules</code> chua lenh doc hai → harness phat hien? (Lien quan vu Claude Code leak)</div>
+  </div>
+
+  <div style="background:#fff8f0;border-left:3px solid #e65100;padding:10px 15px;border-radius:0 6px 6px 0;margin-top:10px;font-size:.9em">
+    <strong>Tai sao bo khoi v2?</strong> Giam scope cho 6 thang. Safety se la de tai rieng: <strong>SecureCodeBench</strong> (Gap 2).
+  </div>
+</div>
+
+<!-- D4 (future work) -->
+<div class="card" style="border-left:5px solid #2e7d32;margin-bottom:20px;opacity:.75">
+  <div class="card-title" style="color:#2e7d32;font-size:1.15em">D4: Session Continuity <span class="tag tag-warn">FUTURE WORK</span></div>
+  <p style="color:#555;font-style:italic;margin-bottom:12px;font-size:1.05em">"Harness co suy giam theo thoi gian khong?"</p>
+
+  <div style="background:#e8f5e9;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#2e7d32;margin-bottom:6px">M4.1: Performance Decay</div>
+    <div style="color:#555"><strong>Do gi:</strong> % giam hieu suat sau 100+ turns</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> Turn 10: agent lam dung yeu cau. Turn 150: agent "quen" yeu cau ban dau. Day goi la "instruction fade-out" — harness tot se chen reminders de chong [A1]</div>
+  </div>
+
+  <div style="background:#e8f5e9;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#2e7d32;margin-bottom:6px">M4.2: Instruction Adherence</div>
+    <div style="color:#555"><strong>Do gi:</strong> % responses van tuan thu system prompt goc</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong> System prompt noi "chi sua bug, khong refactor" nhung turn 100 agent bat dau refactor → adherence giam</div>
+  </div>
+
+  <div style="background:#fff8f0;border-left:3px solid #e65100;padding:10px 15px;border-radius:0 6px 6px 0;margin-top:10px;font-size:.9em">
+    <strong>Tai sao bo khoi v2?</strong> Can long-running experiments (200+ turns) ton nhieu thoi gian va chi phi. De cho future work.
+  </div>
+</div>
+
+<!-- D5 -->
+<div class="card" style="border-left:5px solid #6a1b9a;margin-bottom:20px">
+  <div class="card-title" style="color:#6a1b9a;font-size:1.15em">D5: Backend Portability <span class="tag tag-good">V2 CHINH</span></div>
+  <p style="color:#555;font-style:italic;margin-bottom:12px;font-size:1.05em">"Doi model khac thi harness con tot khong?"</p>
+
+  <div style="background:#f3e5f5;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#6a1b9a;margin-bottom:6px">M5.1: Cross-Backend Std Dev</div>
+    <div style="color:#555"><strong>Do gi:</strong> Do lech chuan cua resolve rate khi doi LLM backend</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong></div>
+    <div style="background:#fff;padding:10px;border-radius:6px;margin-top:6px;font-family:monospace;font-size:.9em">
+      Harness A + Claude: 70%, GPT: 65%, DeepSeek: 60% → <span style="color:#2e7d32;font-weight:bold">std = 5.0% (tot, portable)</span><br>
+      Harness B + Claude: 80%, GPT: 30%, DeepSeek: 20% → <span style="color:#c62828;font-weight:bold">std = 32.1% (te, chi tot cho Claude)</span>
+    </div>
+    <div style="color:#555;margin-top:6px"><strong>Cach do:</strong> std(RR_claude, RR_gpt, RR_deepseek). Std thap = portable</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Co</div>
+  </div>
+
+  <div style="background:#f3e5f5;padding:14px 18px;border-radius:8px;margin:8px 0">
+    <div style="font-weight:bold;color:#6a1b9a;margin-bottom:6px">M5.2: Min/Max Ratio</div>
+    <div style="color:#555"><strong>Do gi:</strong> Ty le performance backend yeu nhat / backend manh nhat</div>
+    <div style="color:#555;margin-top:4px"><strong>Vi du:</strong></div>
+    <div style="background:#fff;padding:10px;border-radius:6px;margin-top:6px;font-family:monospace;font-size:.9em">
+      Harness A: min=60%, max=70% → <span style="color:#2e7d32;font-weight:bold">ratio = 0.86 (tot)</span><br>
+      Harness B: min=20%, max=80% → <span style="color:#c62828;font-weight:bold">ratio = 0.25 (te)</span>
+    </div>
+    <div style="color:#555;margin-top:6px"><strong>Cach do:</strong> min(RR) / max(RR). Gan 1.0 = portable. Gan 0 = phu thuoc 1 model</div>
+    <div style="color:#777;margin-top:4px;font-size:.85em"><strong>Tu dong?</strong> Co</div>
+  </div>
+</div>
+
+<!-- Summary table -->
+<h3 style="margin-top:25px">Bang tong hop 11 metrics (5 chieu day du)</h3>
+<table style="text-align:left;font-size:.88em">
+<thead><tr><th>Chieu</th><th>#</th><th>Metric</th><th>Do gi</th><th>Tu dong?</th><th>V2?</th></tr></thead>
+<tbody>
+<tr style="background:#fff3e0"><td rowspan="3" style="font-weight:bold;color:#e65100;vertical-align:top">D1. Tool Dispatch</td><td>M1.1</td><td>Correct Selection Rate</td><td>Tool goi co dung khong</td><td>Khong (2 annotators)</td><td><span class="tag tag-good">CHINH</span></td></tr>
+<tr style="background:#fff3e0"><td>M1.2</td><td>Redundant Call Rate</td><td>Tool goi co thua khong</td><td>Co (log analysis)</td><td><span class="tag tag-good">CHINH</span></td></tr>
+<tr style="background:#fff3e0"><td>M1.3</td><td>Tool Utilization Breadth</td><td>Dung bao nhieu loai tool</td><td>Co (dem types)</td><td><span class="tag tag-good">CHINH</span></td></tr>
+<tr style="background:#e3f2fd"><td rowspan="2" style="font-weight:bold;color:#1565c0;vertical-align:top">D2. Context</td><td>M2.1</td><td>Info Retention Score</td><td>Nen mat info khong</td><td>Co (BERTScore)</td><td><span class="tag tag-good">CHINH</span></td></tr>
+<tr style="background:#e3f2fd"><td>M2.2</td><td>Effective Token Ratio</td><td>% token huu ich</td><td>Ban tu dong (LLM+human)</td><td><span class="tag tag-good">CHINH</span></td></tr>
+<tr style="background:#ffebee"><td rowspan="2" style="font-weight:bold;color:#c62828;vertical-align:top">D3. Safety</td><td>M3.1</td><td>Destructive Block Rate</td><td>Chan lenh nguy hiem</td><td>Co</td><td><span class="tag tag-warn">FUTURE</span></td></tr>
+<tr style="background:#ffebee"><td>M3.2</td><td>Injection Resist Rate</td><td>Phat hien prompt injection</td><td>Co</td><td><span class="tag tag-warn">FUTURE</span></td></tr>
+<tr style="background:#e8f5e9"><td rowspan="2" style="font-weight:bold;color:#2e7d32;vertical-align:top">D4. Session</td><td>M4.1</td><td>Performance Decay</td><td>Suy giam theo turns</td><td>Co</td><td><span class="tag tag-warn">FUTURE</span></td></tr>
+<tr style="background:#e8f5e9"><td>M4.2</td><td>Instruction Adherence</td><td>Nho system prompt</td><td>Ban tu dong</td><td><span class="tag tag-warn">FUTURE</span></td></tr>
+<tr style="background:#f3e5f5"><td rowspan="2" style="font-weight:bold;color:#6a1b9a;vertical-align:top">D5. Portability</td><td>M5.1</td><td>Cross-Backend Std Dev</td><td>Doi model chenh bao nhieu</td><td>Co</td><td><span class="tag tag-good">CHINH</span></td></tr>
+<tr style="background:#f3e5f5"><td>M5.2</td><td>Min/Max Ratio</td><td>Model yeu / model manh</td><td>Co</td><td><span class="tag tag-good">CHINH</span></td></tr>
+</tbody>
+</table>
+
+<div class="note" style="margin-top:15px">
+  <strong>V2 focus:</strong> 7 metrics chinh (D1 + D2 + D5) — 5/7 tu dong, 1 can annotator, 1 ban tu dong. Phu hop 1 nguoi thuc hien.<br>
+  <strong>Future work:</strong> 4 metrics (D3 + D4) → de tai SecureCodeBench hoac luan van tien si.
 </div>
 </div>
 
