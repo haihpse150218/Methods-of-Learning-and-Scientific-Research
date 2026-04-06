@@ -19,7 +19,7 @@
 \usepackage{setspace}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
-\usepackage{natbib}
+\usepackage[numbers,square]{natbib}
 
 % ===== FORMATTING =====
 \onehalfspacing
@@ -181,21 +181,77 @@ ToolLLM~\cite{F2} evaluates 16,000+ APIs with DFSDT reasoning. AnyTool~\cite{F3}
 
 \textbf{Observation:} Each paper evaluates \textbf{a single component in isolation}. No study evaluates \textbf{all components simultaneously} within a harness and compares their relative contributions.
 
-\subsubsection{Research Gap Summary}
+\subsubsection{Summary on Characteristics Investigated}
+
+Table~\ref{tab:characteristics} presents a systematic comparison of the characteristics investigated by related works, following the format of Ho-Van~(2013). Each column represents a key aspect of harness evaluation. The table reveals that while individual aspects have been partially addressed in isolation, \textbf{no prior work addresses all characteristics simultaneously}. In particular, columns C3 (Backend Portability), C4 (Component Ablation), and C5 (Harness vs.\ LLM Decomposition) are \textbf{entirely empty}---no paper has investigated these aspects.
 
 \begin{table}[H]
 \centering
-\caption{Research Gap Analysis: What Exists vs.\ What Is Missing}
-\label{tab:gap}
+\caption{Summary on Characteristics Investigated by Related Works}
+\label{tab:characteristics}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l l c c c c c c c c}
+\toprule
+\textbf{Ref} & \textbf{Paper} & \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4} & \textbf{C5} & \textbf{C6} & \textbf{C7} & \textbf{C8} \\
+& & \rotatebox{70}{\scriptsize Tool Dispatch} & \rotatebox{70}{\scriptsize Context Eval} & \rotatebox{70}{\scriptsize Backend Port.} & \rotatebox{70}{\scriptsize Ablation} & \rotatebox{70}{\scriptsize H vs L Decomp.} & \rotatebox{70}{\scriptsize Multi-Metric} & \rotatebox{70}{\scriptsize Coding-Specific} & \rotatebox{70}{\scriptsize Open-Source} \\
+\midrule
+\cite{A1} & Bui 2026 (OpenDev) & $\triangle$ & $\triangle$ & & & & & $\checkmark$ & $\checkmark$ \\
+\cite{A2} & Lou 2026 (AutoHarness) & $\triangle$ & & & $\triangle$ & & & & \\
+\cite{A3} & Cao 2026 (LongContext) & $\checkmark$ & $\triangle$ & & & & & $\checkmark$ & \\
+\cite{B10} & Robeyns 2025 (SICA) & $\triangle$ & & & & & & $\checkmark$ & $\checkmark$ \\
+\cite{C1} & Deng 2025 (SWE-Bench Pro) & & & & & & & $\checkmark$ & $\triangle$ \\
+\cite{C5} & Xu 2025 (SWE-Compass) & & & & & & $\triangle$ & $\checkmark$ & $\checkmark$ \\
+\cite{E1} & Chhikara 2025 (Mem0) & & $\checkmark^*$ & & & & & & $\checkmark$ \\
+\cite{E2} & Xu 2025 (A-MEM) & & $\checkmark^*$ & & & & & & $\checkmark$ \\
+\cite{E3} & Yu 2026 (AgeMem) & & $\checkmark^*$ & & $\triangle$ & & & & \\
+\cite{F1} & Patil 2023 (Gorilla) & $\checkmark^{\dagger}$ & & & & & & & $\checkmark$ \\
+\cite{F2} & Qin 2023 (ToolLLM) & $\checkmark^{\dagger}$ & & & & & & & $\checkmark$ \\
+\cite{F3} & Du 2024 (AnyTool) & $\checkmark^{\dagger}$ & & & & & & & \\
+\cite{G3} & Ma 2024 (AgentBoard) & $\triangle$ & $\triangle$ & & & & $\checkmark$ & & $\checkmark$ \\
+\cite{I2} & Wang 2025 (VisualAnalytics) & & $\triangle$ & & & & $\checkmark$ & $\checkmark$ & \\
+\cite{S5} & 2025 (EvalSurvey) & & & & & & $\triangle$ & & \\
+\midrule
+& \textbf{Ours (HarnessEval)} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\bottomrule
+\multicolumn{9}{l}{\scriptsize $\checkmark$ = Addressed \quad $\triangle$ = Partially addressed \quad (blank) = Not addressed} \\
+\multicolumn{9}{l}{\scriptsize $^*$ Context evaluated on chatbot benchmarks (LoCoMo), not coding tasks} \\
+\multicolumn{9}{l}{\scriptsize $^{\dagger}$ Tool accuracy evaluated in isolation (API benchmarks), not within a coding harness} \\
+\end{tabular}
+\end{table}
+
+\textbf{Key observations from Table~\ref{tab:characteristics}:}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Three columns entirely empty (C3, C4, C5):} No prior work evaluates backend portability, conducts component ablation on coding harnesses, or decomposes harness vs.\ LLM contributions. These represent the strongest evidence for our research gap.
+
+    \item \textbf{Tool evaluation exists but outside harness context (C1):} Gorilla~\cite{F1}, ToolLLM~\cite{F2}, and AnyTool~\cite{F3} evaluate tool accuracy on standalone API benchmarks ($\checkmark^{\dagger}$), not within an integrated coding harness where tool dispatch interacts with context management and orchestration.
+
+    \item \textbf{Context evaluation exists but wrong domain (C2):} Mem0~\cite{E1}, A-MEM~\cite{E2}, and AgeMem~\cite{E3} evaluate memory/context on chatbot benchmarks ($\checkmark^*$) such as LoCoMo and DialSim---not on coding tasks where context includes AST structures, dependency graphs, and test results.
+
+    \item \textbf{Multi-metric frameworks exist but evaluate output, not harness (C6):} AgentBoard~\cite{G3} provides multi-dimensional evaluation via progress rates, but measures \textit{agent output quality}, not \textit{harness infrastructure quality}.
+
+    \item \textbf{HarnessEval is the first to address all 8 characteristics simultaneously,} filling the gap between isolated component evaluations and output-only benchmarks.
+\end{enumerate}
+
+\subsubsection{Research Gap Summary}
+
+Based on the characteristics analysis above, Table~\ref{tab:gap_summary} summarizes the research gap.
+
+\begin{table}[H]
+\centering
+\caption{Research Gap Summary}
+\label{tab:gap_summary}
 \begin{tabularx}{\textwidth}{lXX}
 \toprule
 \textbf{Aspect} & \textbf{Existing Work} & \textbf{Gap (This Study)} \\
 \midrule
 Agent output evaluation & SWE-Bench, SWE-Compass, AgentBoard & --- \\
-Individual tool accuracy & ToolLLM, AnyTool, Gorilla & Tool dispatch \textbf{within} coding harness \\
-Individual memory evaluation & Mem0, A-MEM (chatbot only) & Memory \textbf{within} coding harness \\
-Harness description & OpenDev, AutoHarness & \textbf{Measuring} harness quality \\
+Tool accuracy (isolated) & ToolLLM, AnyTool, Gorilla & Tool dispatch \textbf{within} coding harness \\
+Context/memory (chatbot) & Mem0, A-MEM (LoCoMo benchmark) & Context evaluation \textbf{on coding tasks} \\
+Harness description & OpenDev, AutoHarness & \textbf{Measuring} harness quality with metrics \\
 Cross-backend comparison & --- & \textbf{Entirely unexplored} \\
+Component ablation (coding) & --- & \textbf{Entirely unexplored} \\
 Harness vs.\ LLM decomposition & --- & \textbf{Entirely unexplored} \\
 \bottomrule
 \end{tabularx}
