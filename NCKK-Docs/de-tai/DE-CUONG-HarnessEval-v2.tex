@@ -163,88 +163,85 @@ This study aims to \textbf{construct the first integrated evaluation framework} 
 
 \subsection{Literature Review}
 
-\subsubsection{Coding Agent Harness Architecture}
+This section reviews the five works most closely related to our study. Each addresses a subset of harness evaluation concerns but leaves critical gaps, which are summarized in Table~\ref{tab:characteristics}.
 
-Wang~et~al.~\cite{S1} proposed the Profile-Memory-Planning-Action framework for LLM agents, cited over 3,000 times. Bui~et~al.~\cite{A1} instantiated this framework for coding agents with OpenDev---a terminal-native harness featuring dual-agent architecture (Planner-Executor), 5-stage Adaptive Context Compaction reducing token usage by 54\%, and event-driven system reminders. Lou~et~al.~\cite{A2} demonstrated that harnesses can be automatically synthesized, enabling smaller models to outperform larger ones. Cao~et~al.~\cite{A3} showed that coding agents process long contexts effectively by externalizing reasoning through file-system tools, outperforming SOTA by 17.3\%. Robeyns~et~al.~\cite{B10} proposed SICA---a self-improving coding agent that increased SWE-Bench from 17\% to 53\% over 15~iterations---but did not measure individual component contributions.
+\subsubsection{Bui et al. (OpenDev)~\cite{A1}: Harness Design Without Evaluation}
 
-\textbf{Observation:} These works describe harness designs in detail but \textbf{do not benchmark} individual components.
+Bui~et~al.~\cite{A1} provided the most detailed harness description to date: a terminal-native coding agent with dual-agent architecture (Planner-Executor), 5-stage Adaptive Context Compaction (ACC) reducing token usage by 54\%, lazy tool discovery, and event-driven system reminders to combat instruction fade-out. The paper introduced the term ``harness'' as an analogy to an operating system for agents and described a four-layer architecture with safety sandboxing.
 
-\subsubsection{Coding Agent Benchmarks}
+\textbf{What is present ($\triangle$~in C1, C2):} The paper describes tool dispatch logic (which tools to expose, when to load them) and context management strategies (ACC stages, reminder injection). However, these descriptions are \textit{qualitative design choices}, not quantitative evaluations---no metric measures how effective the tool dispatch is, nor how much information ACC retains after compaction.
 
-SWE-Bench Pro~\cite{C1} provides 1,865 contamination-resistant tasks from commercial codebases. SWE-EVO~\cite{C2} evaluates long-horizon software evolution (best model achieves only 21\%). SWE-Compass~\cite{C5} covers 10~programming languages and 8~task types. Prathifkumar~et~al.~\cite{C3} found evidence that LLMs may memorize patches rather than reason---Claude performs 3--6$\times$ better on file localization in SWE-Bench vs.\ novel benchmarks. AgentBoard~\cite{G3} introduced the progress rate metric with Pearson correlation $> 0.95$ with human judgment. A survey on agent evaluation~\cite{S5} found that 8 out of 10 popular benchmarks have serious validity issues---do-nothing agents pass 38\% of tasks.
+\textbf{What is missing (\_ in C3, C4, C5, C6):} OpenDev was tested with a single LLM backend, so \textit{cross-backend portability is unknown}~(C3). No component was systematically removed to measure its individual contribution~(C4). The paper reports overall resolve rate but does not decompose how much is attributable to the harness vs.\ the underlying LLM~(C5). There is no multi-metric evaluation framework---only resolve rate~(C6).
 
-\textbf{Observation:} All benchmarks evaluate \textbf{output quality}. None evaluates \textbf{harness quality}.
+\subsubsection{Lou et al. (AutoHarness)~\cite{A2}: Ablation on Games, Not Coding}
 
-\subsubsection{Tool Learning and Context Management}
+Lou~et~al.~\cite{A2} demonstrated that LLMs can automatically synthesize code harnesses through iterative refinement with environment feedback. Their key finding---that a smaller model with an auto-generated harness outperforms a larger model without one---provides strong evidence that harness quality matters independently of model size.
 
-ToolLLM~\cite{F2} evaluates 16,000+ APIs with DFSDT reasoning. AnyTool~\cite{F3} proposes hierarchical self-reflective API retrieval. EasyTool~\cite{F5} reduces token cost by 70\%+ through documentation simplification. Mem0~\cite{E1} achieves 91\% latency reduction for persistent memory. A-MEM~\cite{E2} uses a Zettelkasten-inspired approach. Wang~et~al.~\cite{I2} discovered that agents repeat the same bugs across iterations due to lacking persistent memory.
+\textbf{What is present ($\triangle$~in C4):} AutoHarness performs a form of ablation: comparing agent performance \textit{with} vs.\ \textit{without} a harness. This is the closest existing work to our ablation methodology. However, the evaluation is conducted on game environments (TextArena, 145~games), not on software engineering tasks, and the ``ablation'' is binary (harness present/absent) rather than systematic (varying individual components).
 
-\textbf{Observation:} Each paper evaluates \textbf{a single component in isolation}. No study evaluates \textbf{all components simultaneously} within a harness and compares their relative contributions.
+\textbf{What is missing (\_ in C1, C2, C3, C5, C6):} Tool dispatch and context management are not evaluated separately~(C1, C2). Only one LLM backend is used per experiment~(C3). There is no variance decomposition between harness and model~(C5). No multi-metric framework is proposed~(C6).
+
+\subsubsection{Qin et al. (ToolLLM)~\cite{F2}: Tool Evaluation in Isolation}
+
+Qin~et~al.~\cite{F2} introduced ToolBench, a benchmark of 16,464 real-world REST APIs, and ToolLLaMA, a model fine-tuned to match ChatGPT-level tool-use performance. They proposed ToolEval with automatic metrics for tool selection and task completion.
+
+\textbf{What is present ($\checkmark^\dagger$~in C1):} ToolLLM provides the most comprehensive tool evaluation to date, with metrics for API selection accuracy and multi-step tool planning via DFSDT (Depth-First Search-based Decision Tree). However, tools are evaluated \textit{in isolation}---each API call is independent, with no interaction with context management, file systems, or coding-specific workflows. The benchmark tests whether an LLM can \textit{call the right API}, not whether a \textit{harness dispatches tools efficiently} within a multi-turn coding session.
+
+\textbf{What is missing (\_ in C2, C3, C4, C5, C6):} Context management is not assessed~(C2). The benchmark uses a fixed model, so portability is untested~(C3). No ablation is performed on harness components~(C4). Model vs.\ infrastructure contributions are not separated~(C5). The evaluation is single-metric (pass rate)~(C6).
+
+\subsubsection{Chhikara et al. (Mem0)~\cite{E1}: Context Evaluation on Chatbots}
+
+Chhikara~et~al.~\cite{E1} introduced Mem0, a scalable memory architecture that dynamically extracts, consolidates, and retrieves information across conversations. It achieves 91\% lower p95~latency and over 90\% token cost savings compared to full-context approaches, with a graph-based variant (Mem0$^g$) that captures entity relationships.
+
+\textbf{What is present ($\checkmark^*$~in C2):} Mem0 provides rigorous context/memory evaluation with metrics for retrieval accuracy, latency, and token efficiency. However, evaluation is conducted exclusively on the LoCoMo benchmark---a conversational QA dataset---not on coding tasks. In coding, ``context'' involves AST structures, file dependency graphs, test result histories, and multi-file relationships, which are structurally different from conversational memory.
+
+\textbf{What is missing (\_ in C1, C3, C4, C5, C6):} Tool dispatch is not evaluated~(C1). Only one backend is used~(C3). No component ablation~(C4). No harness vs.\ LLM decomposition~(C5). Single-domain evaluation (chatbot), no multi-metric coding framework~(C6).
+
+\subsubsection{Ma et al. (AgentBoard)~\cite{G3}: Multi-Metric for Output, Not Harness}
+
+Ma~et~al.~\cite{G3} introduced AgentBoard, a benchmark with 9~diverse environments and 1,013~tasks. Its key contribution is the \textit{progress rate} metric---a fine-grained measure of partial task completion that correlates with human judgment at Pearson~$> 0.95$. AgentBoard evaluates agents across multiple dimensions (web browsing, tool use, game playing, etc.).
+
+\textbf{What is present ($\checkmark^\ddagger$~in C6):} AgentBoard is the most mature multi-metric evaluation framework. However, all metrics measure \textit{agent output quality} (did the agent make progress toward the goal?), not \textit{harness infrastructure quality} (did the harness dispatch tools efficiently? did it manage context well?). The framework evaluates what the agent \textit{achieved}, not what the harness \textit{provided}.
+
+\textbf{What is missing (\_ in C3, C4, C5):} Agents are tested on a fixed scaffold, so cross-backend portability is not measured~(C3). No scaffold component is varied~(C4). There is no decomposition of scaffold vs.\ model contributions~(C5).
 
 \subsubsection{Summary on Characteristics Investigated}
 
-Table~\ref{tab:characteristics} presents a focused comparison of the five most closely related works against the six core characteristics of harness evaluation, following the format of Ho-Van~(2013). Each row represents a paper that partially addresses at least one harness-related concern; each column represents a characteristic directly tied to our research objectives. The table reveals that while individual characteristics have been partially investigated, \textbf{no prior work addresses more than two}, and \textbf{three characteristics remain entirely unexplored}.
+Table~\ref{tab:characteristics} consolidates the analysis above. Each ``\textbf{\_}'' marks a characteristic that the corresponding paper does not address, representing a specific research gap. Every gap marked in the table has been discussed in Sections~2.1.1--2.1.5 above.
 
 \begin{table}[H]
 \centering
-\caption{Summary on Characteristics Investigated by Closest Related Works}
+\caption{Summary on Characteristics Investigated by Related Works. Each ``\_'' denotes an unaddressed research gap discussed in the text.}
 \label{tab:characteristics}
 \begin{tabular}{l c c c c c c}
 \toprule
 \textbf{Reference} & \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4} & \textbf{C5} & \textbf{C6} \\
-& \rotatebox{70}{\small Tool Dispatch} & \rotatebox{70}{\small Context Eval} & \rotatebox{70}{\small Cross-Backend} & \rotatebox{70}{\small Ablation} & \rotatebox{70}{\small H/LLM Decomp.} & \rotatebox{70}{\small Multi-Metric} \\
+& \rotatebox{70}{\small Tool Dispatch} & \rotatebox{70}{\small Context Eval} & \rotatebox{70}{\small Cross-Backend} & \rotatebox{70}{\small Comp. Ablation} & \rotatebox{70}{\small H/LLM Decomp.} & \rotatebox{70}{\small Multi-Metric} \\
 \midrule
-Bui~et~al.~\cite{A1} (OpenDev)       & $\triangle$ & $\triangle$ &             &             &             &             \\[3pt]
-Lou~et~al.~\cite{A2} (AutoHarness)   & $\triangle$ &             &             & $\triangle$ &             &             \\[3pt]
-Qin~et~al.~\cite{F2} (ToolLLM)       & $\checkmark^{\dagger}$ &  &             &             &             &             \\[3pt]
-Chhikara~et~al.~\cite{E1} (Mem0)     &             & $\checkmark^{*}$ &          &             &             &             \\[3pt]
-Ma~et~al.~\cite{G3} (AgentBoard)     & $\triangle$ & $\triangle$ &             &             &             & $\checkmark^{\ddagger}$ \\[3pt]
+Bui~\cite{A1} (OpenDev)       & $\triangle$ & $\triangle$ & \_          & \_          & \_          & \_          \\[4pt]
+Lou~\cite{A2} (AutoHarness)   & \_          & \_          & \_          & $\triangle$ & \_          & \_          \\[4pt]
+Qin~\cite{F2} (ToolLLM)       & $\checkmark^{\dagger}$ & \_ & \_          & \_          & \_          & \_          \\[4pt]
+Chhikara~\cite{E1} (Mem0)     & \_          & $\checkmark^{*}$ & \_     & \_          & \_          & \_          \\[4pt]
+Ma~\cite{G3} (AgentBoard)     & $\triangle$ & $\triangle$ & \_          & \_          & \_          & $\checkmark^{\ddagger}$ \\[4pt]
 \midrule
-\textbf{Ours (HarnessEval)}           & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\textbf{Ours (HarnessEval)}   & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
 \bottomrule
-\multicolumn{7}{l}{\small $\checkmark$ = Addressed as primary contribution \quad $\triangle$ = Partially addressed} \\
-\multicolumn{7}{l}{\small $^{\dagger}$~Tool accuracy evaluated in isolation (API benchmarks), not within a coding harness} \\
-\multicolumn{7}{l}{\small $^{*}$~Context evaluated on chatbot benchmarks (LoCoMo), not on coding tasks} \\
-\multicolumn{7}{l}{\small $^{\ddagger}$~Multi-metric for agent \textit{output} (progress rate), not for \textit{harness infrastructure}} \\
+\multicolumn{7}{l}{\small $\checkmark$ = Addressed \quad $\triangle$ = Partially \quad \_ = Not addressed (research gap)} \\[2pt]
+\multicolumn{7}{l}{\small $^{\dagger}$~Evaluated in isolation on API benchmarks, not within a coding harness} \\
+\multicolumn{7}{l}{\small $^{*}$~Evaluated on chatbot benchmarks (LoCoMo), not on coding tasks} \\
+\multicolumn{7}{l}{\small $^{\ddagger}$~Multi-metric for agent \textit{output} quality, not for \textit{harness infrastructure} quality} \\
 \end{tabular}
 \end{table}
 
-\textbf{Key observations from Table~\ref{tab:characteristics}:}
+\textbf{Reading the table.} The table reveals two patterns that define our research gap:
 
 \begin{enumerate}[leftmargin=2em]
-    \item \textbf{Three columns are entirely empty (C3, C4, C5).} No prior work evaluates cross-backend portability, conducts component ablation on coding harnesses, or decomposes harness vs.\ LLM contributions. These represent the core research gap.
+    \item \textbf{Columns C3, C4, C5 are entirely ``\_'' across all five papers.} No prior work has (C3)~compared the same harness across multiple LLM backends, (C4)~systematically ablated harness components in coding tasks, or (C5)~decomposed variance between harness and LLM contributions. These three unexplored characteristics form the \textbf{primary contribution} of HarnessEval.
 
-    \item \textbf{Tool evaluation exists but outside harness context (C1).} ToolLLM~\cite{F2} evaluates tool selection accuracy on 16,000+ standalone APIs~($\checkmark^{\dagger}$), not within an integrated coding harness where tool dispatch interacts with context management. OpenDev~\cite{A1} describes its tool system but does not benchmark dispatch efficiency with formal metrics~($\triangle$).
-
-    \item \textbf{Context evaluation exists but in the wrong domain (C2).} Mem0~\cite{E1} achieves 91\% latency reduction for persistent memory~($\checkmark^{*}$), but evaluates on the LoCoMo chatbot benchmark---not on coding tasks where context includes AST structures, dependency graphs, and test histories.
-
-    \item \textbf{Multi-metric frameworks evaluate output, not harness (C6).} AgentBoard~\cite{G3} provides multi-dimensional evaluation via progress rates~($\checkmark^{\ddagger}$), but measures \textit{agent output quality}, not \textit{harness infrastructure quality}.
-
-    \item \textbf{HarnessEval is the first to address all six characteristics,} bridging isolated component evaluations with a unified, ablation-driven, multi-backend framework for coding agent harness assessment.
+    \item \textbf{Columns C1 and C2 have partial coverage ($\triangle$ or qualified $\checkmark$) but never within a coding harness.} ToolLLM evaluates tool accuracy on standalone APIs ($\checkmark^\dagger$), not tool dispatch within a multi-turn coding agent session. Mem0 evaluates context on chatbot conversations ($\checkmark^*$), not on coding tasks involving AST structures and test histories. OpenDev and AgentBoard partially address these ($\triangle$) but without formal metrics. HarnessEval \textbf{bridges this gap} by evaluating tool dispatch and context utilization \textit{within} an integrated coding harness using formal, validated metrics (M1.1--M2.2).
 \end{enumerate}
 
-\subsubsection{Research Gap Summary}
-
-Based on the characteristics analysis above, Table~\ref{tab:gap_summary} summarizes the research gap.
-
-\begin{table}[H]
-\centering
-\caption{Research Gap Summary}
-\label{tab:gap_summary}
-\begin{tabularx}{\textwidth}{lXX}
-\toprule
-\textbf{Aspect} & \textbf{Existing Work} & \textbf{Gap (This Study)} \\
-\midrule
-Agent output evaluation & SWE-Bench, SWE-Compass, AgentBoard & --- \\
-Tool accuracy (isolated) & ToolLLM, AnyTool, Gorilla & Tool dispatch \textbf{within} coding harness \\
-Context/memory (chatbot) & Mem0, A-MEM (LoCoMo benchmark) & Context evaluation \textbf{on coding tasks} \\
-Harness description & OpenDev, AutoHarness & \textbf{Measuring} harness quality with metrics \\
-Cross-backend comparison & --- & \textbf{Entirely unexplored} \\
-Component ablation (coding) & --- & \textbf{Entirely unexplored} \\
-Harness vs.\ LLM decomposition & --- & \textbf{Entirely unexplored} \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\textbf{In summary,} existing works either (a)~describe harness designs without evaluating them~\cite{A1}, (b)~evaluate components in isolation outside the harness context~\cite{F2,E1}, (c)~perform ablation on non-coding domains~\cite{A2}, or (d)~provide multi-metric frameworks that measure output rather than infrastructure~\cite{G3}. HarnessEval is the first to unify all six characteristics into a single evaluation framework for coding agent harnesses.
 
 \subsection{Theoretical Background}
 
