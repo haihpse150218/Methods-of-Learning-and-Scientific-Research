@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval - Visualize Y tuong Gap 1</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.7; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+h1 { text-align: center; font-size: 2.2em; margin: 30px 0; color: #0066cc; }
+h2 { font-size: 1.6em; margin: 40px 0 20px; color: #cc3333; border-bottom: 2px solid #cc3333; padding-bottom: 10px; }
+h3 { font-size: 1.2em; margin: 20px 0 10px; color: #996600; }
+
+.section { background: #ffffff; border-radius: 16px; padding: 30px; margin: 30px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+/* === SECTION 1: Problem === */
+.problem-visual {
+  display: flex; gap: 40px; justify-content: center; align-items: flex-start; flex-wrap: wrap; margin: 30px 0;
+}
+.problem-box {
+  background: #f8f9fc; border-radius: 12px; padding: 25px; width: 350px; text-align: center;
+  border: 2px solid #ccc; position: relative;
+}
+.problem-box.current { border-color: #cc3333; background: #fff5f5; }
+.problem-box.proposed { border-color: #0066cc; background: #f0f7ff; }
+.problem-box .title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
+.problem-box.current .title { color: #cc3333; }
+.problem-box.proposed .title { color: #0066cc; }
+
+.score-bar {
+  background: #e8ecf0; border-radius: 8px; height: 30px; margin: 8px 0; position: relative; overflow: hidden;
+}
+.score-fill {
+  height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 10px;
+  font-size: 0.85em; font-weight: bold; color: #fff;
+}
+.label-row { display: flex; justify-content: space-between; font-size: 0.85em; color: #666; margin-top: 4px; }
+
+/* === SECTION 2: Analogy === */
+.analogy {
+  display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin: 20px 0;
+}
+.analogy-card {
+  background: #f8f9fc; border-radius: 12px; padding: 25px; width: 280px; text-align: center;
+  border: 1px solid #ddd;
+}
+.analogy-card .emoji { font-size: 3em; margin-bottom: 10px; }
+.analogy-card .role { font-size: 1.1em; font-weight: bold; color: #996600; margin-bottom: 8px; }
+
+/* === SECTION 3: Architecture === */
+.arch-diagram {
+  display: flex; flex-direction: column; gap: 0; align-items: center; margin: 30px 0;
+}
+.arch-layer {
+  width: 90%; max-width: 700px; padding: 18px; text-align: center; font-weight: bold;
+  border: 2px solid; position: relative; font-size: 0.95em;
+}
+.arch-layer:not(:last-child)::after {
+  content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+  border-left: 8px solid transparent; border-right: 8px solid transparent;
+  border-top: 12px solid #aaa; z-index: 1;
+}
+.layer5 { background: #e8f5e9; border-color: #388e3c; color: #2e7d32; border-radius: 12px 12px 0 0; }
+.layer4 { background: #ffebee; border-color: #d32f2f; color: #c62828; }
+.layer3 { background: #e3f2fd; border-color: #1976d2; color: #1565c0; }
+.layer2 { background: #fff3e0; border-color: #f57c00; color: #e65100; }
+.layer1 { background: #f3e5f5; border-color: #7b1fa2; color: #6a1b9a; border-radius: 0 0 12px 12px; }
+
+.arch-label {
+  position: absolute; right: -180px; top: 50%; transform: translateY(-50%);
+  font-size: 0.8em; color: #888; width: 160px; text-align: left; font-weight: normal;
+}
+
+/* === SECTION 4: What we measure === */
+.dimension-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin: 20px 0;
+}
+.dim-card {
+  background: #fafbfd; border-radius: 12px; padding: 20px; border-left: 4px solid;
+  border-right: 1px solid #eee; border-top: 1px solid #eee; border-bottom: 1px solid #eee;
+}
+.dim-card .dim-title { font-size: 1.05em; font-weight: bold; margin-bottom: 10px; }
+.dim-card .question { font-style: italic; color: #777; margin-bottom: 10px; }
+.dim-card .metric { background: #f0f2f5; padding: 8px 12px; border-radius: 6px; margin: 5px 0; font-size: 0.9em; }
+.dim-card .metric code { color: #0066cc; font-weight: bold; }
+
+.d1 { border-left-color: #e65100; }
+.d1 .dim-title { color: #e65100; }
+.d2 { border-left-color: #1565c0; }
+.d2 .dim-title { color: #1565c0; }
+.d3 { border-left-color: #c62828; }
+.d3 .dim-title { color: #c62828; }
+.d4 { border-left-color: #2e7d32; }
+.d4 .dim-title { color: #2e7d32; }
+.d5 { border-left-color: #6a1b9a; }
+.d5 .dim-title { color: #6a1b9a; }
+
+/* === SECTION 5: Ablation === */
+.ablation-table {
+  width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em;
+}
+.ablation-table th, .ablation-table td {
+  padding: 10px 14px; border: 1px solid #ddd; text-align: center;
+}
+.ablation-table th { background: #f0f2f5; color: #333; font-weight: 700; }
+.ablation-table tr:nth-child(even) { background: #f8f9fc; }
+.ablation-table tr:hover { background: #eef1f6; }
+.on { color: #2e7d32; font-weight: bold; }
+.off { color: #c62828; font-weight: bold; }
+.result { font-weight: bold; }
+.high { color: #2e7d32; }
+.med { color: #e65100; }
+.low { color: #c62828; }
+
+/* === SECTION 6: Comparison === */
+.radar-container {
+  display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin: 20px 0;
+}
+.radar-card {
+  background: #fafbfd; border-radius: 12px; padding: 20px; width: 280px; text-align: center;
+  border: 1px solid #ddd;
+}
+.radar-card .agent-name { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; }
+.bar-metric {
+  display: flex; align-items: center; margin: 8px 0; gap: 10px;
+}
+.bar-metric .label { width: 100px; text-align: right; font-size: 0.85em; color: #777; }
+.bar-metric .bar-bg { flex: 1; height: 16px; background: #e8ecf0; border-radius: 4px; overflow: hidden; }
+.bar-metric .bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+/* === SECTION 7: Output === */
+.output-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;
+}
+.output-item {
+  background: #fafbfd; border-radius: 10px; padding: 18px; text-align: center;
+  border: 1px solid #ddd;
+}
+.output-item .icon { font-size: 2em; margin-bottom: 8px; }
+.output-item .name { font-weight: bold; color: #0066cc; margin-bottom: 5px; }
+
+/* === Flow arrow === */
+.flow-arrow { text-align: center; font-size: 2em; color: #aaa; margin: 15px 0; }
+
+.highlight { color: #996600; font-weight: bold; }
+.red { color: #c62828; }
+.green { color: #2e7d32; }
+.blue { color: #0066cc; }
+
+.note {
+  background: #f0f9f0; border-left: 4px solid #2e7d32; padding: 15px 20px; border-radius: 0 8px 8px 0;
+  margin: 15px 0; font-size: 0.95em;
+}
+
+.vs-badge {
+  display: inline-block; background: #cc3333; color: white; padding: 3px 12px;
+  border-radius: 20px; font-weight: bold; font-size: 0.9em;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>HarnessEval: Visualize Y tuong Gap 1</h1>
+<p style="text-align:center; color:#777; margin-bottom:30px;">Hieu ro tai sao can danh gia HARNESS, khong chi danh gia AGENT</p>
+
+<!-- ==================== SECTION 1: VAN DE ==================== -->
+<div class="section">
+<h2>1. Van de: Chung ta dang danh gia SAI thu</h2>
+
+<div class="problem-visual">
+  <div class="problem-box current">
+    <div class="title">HIEN TAI: Chi do Output</div>
+    <p style="margin-bottom:15px;">SWE-bench hoi: "Agent co sua duoc bug khong?"</p>
+    <div>
+      <div class="label-row"><span>Claude Code</span><span>70%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:70%;background:#4caf50;">Pass</div></div>
+    </div>
+    <div>
+      <div class="label-row"><span>Cursor</span><span>55%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:55%;background:#ff9800;">Pass</div></div>
+    </div>
+    <div>
+      <div class="label-row"><span>SWE-Agent</span><span>40%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:40%;background:#f44336;">Pass</div></div>
+    </div>
+    <p style="margin-top:15px; color:#cc3333; font-size:0.9em;">
+      Chi biet KET QUA cuoi cung.<br>
+      Khong biet TAI SAO tot/xau.
+    </p>
+  </div>
+
+  <div style="display:flex;align-items:center;font-size:2em;color:#996600;">VS</div>
+
+  <div class="problem-box proposed">
+    <div class="title">DE XUAT: Do Harness (ha tang)</div>
+    <p style="margin-bottom:15px;">HarnessEval hoi: "Ha tang hoat dong tot den dau?"</p>
+    <div>
+      <div class="label-row"><span>Tool Dispatch</span><span>85%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:85%;background:#ff9800;">Chinh xac</div></div>
+    </div>
+    <div>
+      <div class="label-row"><span>Context Utilization</span><span>72%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:72%;background:#2196f3;">Giu info</div></div>
+    </div>
+    <div>
+      <div class="label-row"><span>Safety</span><span>60%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:60%;background:#f44336;">Chan tan cong</div></div>
+    </div>
+    <div>
+      <div class="label-row"><span>Backend Portability</span><span>90%</span></div>
+      <div class="score-bar"><div class="score-fill" style="width:90%;background:#9c27b0;">On dinh</div></div>
+    </div>
+    <p style="margin-top:15px; color:#0066cc; font-size:0.9em;">
+      Biet CHINH XAC component nao tot/yeu.<br>
+      Biet CACH cai thien.
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SECTION 2: ANALOGY ==================== -->
+<div class="section">
+<h2>2. Vi du de hieu: Coding Agent giong nhu mot Nha hang</h2>
+
+<div class="analogy">
+  <div class="analogy-card">
+    <div class="emoji">👨‍🍳</div>
+    <div class="role">LLM = Dau bep</div>
+    <p>Claude, GPT, DeepSeek...<br>Quyet dinh "nau mon gi"<br>(chon tool, viet code)</p>
+  </div>
+  <div class="analogy-card">
+    <div class="emoji">🏪</div>
+    <div class="role">HARNESS = Nha hang</div>
+    <p>Bep (tools), thuc don (context),<br>ve sinh (safety), phuc vu (session)<br>Co so vat chat giup dau bep lam viec</p>
+  </div>
+  <div class="analogy-card">
+    <div class="emoji">🍽️</div>
+    <div class="role">OUTPUT = Mon an</div>
+    <p>Code duoc sua, bug duoc fix<br>SWE-bench chi cham MON AN<br>Khong cham NHA HANG</p>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Van de:</strong> Cung 1 dau bep (Claude), dat vao nha hang tot (harness tot) → mon ngon. Dat vao nha hang te (harness te) → mon do.
+  <br><br>
+  <strong>Hien tai:</strong> Chung ta chi cham mon an (SWE-bench) → "dau bep nay gioi!"
+  <br>
+  <strong>Thuc te:</strong> Co the dau bep binh thuong nhung nha hang tot, hoac dau bep gioi nhung nha hang te.
+  <br><br>
+  <strong>HarnessEval:</strong> Cham CHINH NHA HANG — bep co tot khong? Thuc don ro rang khong? Ve sinh dat chuan khong?
+</div>
+</div>
+
+<!-- ==================== SECTION 3: HARNESS LA GI ==================== -->
+<div class="section">
+<h2>3. Harness gom nhung gi? (Kien truc 5 lop)</h2>
+
+<div class="arch-diagram">
+  <div class="arch-layer layer5">
+    Layer 5: ORCHESTRATION (Dieu phoi)
+    <br><small>Agent loop: ReAct, Plan-Execute | Quyet dinh khi nao dung, khi nao tiep</small>
+  </div>
+  <div class="arch-layer layer4">
+    Layer 4: SAFETY & PERMISSION (Bao mat)
+    <br><small>Chan lenh nguy hiem (rm -rf) | Chong prompt injection | Sandbox</small>
+  </div>
+  <div class="arch-layer layer3">
+    Layer 3: CONTEXT & MEMORY (Ngu canh)
+    <br><small>Quan ly context window | Nen thong tin | Nho qua nhieu phien</small>
+  </div>
+  <div class="arch-layer layer2">
+    Layer 2: TOOL SYSTEM (Cong cu)
+    <br><small>Read, Write, Edit, Bash, Grep, Glob, WebSearch... | Goi tool nao? Khi nao?</small>
+  </div>
+  <div class="arch-layer layer1">
+    Layer 1: MODEL BACKEND (Mo hinh)
+    <br><small>Claude Sonnet | GPT-4o | DeepSeek-V3 | Qwen... (doi duoc!)</small>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Diem mau chot:</strong> Layer 2-5 la HARNESS (chung ta danh gia cai nay).<br>
+  Layer 1 la LLM (da co SWE-bench danh gia roi).<br><br>
+  <strong>Vi du thuc te:</strong> Claude Code co ~40 tools, 5 lop safety, Adaptive Context Compaction. SWE-Agent chi co ~5 tools, 1 lop safety don gian. → Cung dung Claude Sonnet nhung ket qua rat khac!
+</div>
+</div>
+
+<!-- ==================== SECTION 4: 5 CHIEU DANH GIA ==================== -->
+<div class="section">
+<h2>4. Do gi? 5 Chieu danh gia Harness</h2>
+<p style="color:#777; margin-bottom:20px;">Moi chieu tra loi 1 cau hoi cu the ve chat luong harness</p>
+
+<div class="dimension-grid">
+  <div class="dim-card d1">
+    <div class="dim-title">D1: Tool Dispatch Efficiency</div>
+    <div class="question">"Harness goi dung tool khong? Co bi thua khong?"</div>
+    <div class="metric">M1.1: <code>Correct Selection Rate</code> = % tool calls chon dung tool</div>
+    <div class="metric">M1.2: <code>Redundant Call Rate</code> = % tool calls khong can thiet</div>
+    <p style="margin-top:10px; font-size:0.9em;">
+      <strong>Vi du:</strong> Agent can doc file → goi <code>Read</code> (dung) hay goi <code>Bash cat</code> (sai tool)?
+      <br>Agent goi <code>Grep</code> 5 lan cho cung 1 tu → 4 lan la thua.
+    </p>
+  </div>
+
+  <div class="dim-card d2">
+    <div class="dim-title">D2: Context Utilization</div>
+    <div class="question">"Harness nen context tot khong? Co mat thong tin quan trong?"</div>
+    <div class="metric">M2.1: <code>Info Retention</code> = % thong tin con lai sau khi nen</div>
+    <div class="metric">M2.2: <code>Token Waste Ratio</code> = % tokens khong lien quan</div>
+    <p style="margin-top:10px; font-size:0.9em;">
+      <strong>Vi du:</strong> Context 100K tokens nhung chi 20K lien quan → 80% waste.
+      <br>Sau khi nen con 30K tokens nhung mat thong tin ve file quan trong → Info Retention thap.
+    </p>
+  </div>
+
+  <div class="dim-card d3">
+    <div class="dim-title">D3: Safety Enforcement</div>
+    <div class="question">"Harness chan duoc lenh nguy hiem khong?"</div>
+    <div class="metric">M3.1: <code>Destructive Block Rate</code> = % lenh nguy hiem bi chan</div>
+    <div class="metric">M3.2: <code>Injection Resist Rate</code> = % prompt injection bi phat hien</div>
+    <p style="margin-top:10px; font-size:0.9em;">
+      <strong>Vi du:</strong> Agent bi trick goi <code>rm -rf /</code> → harness chan duoc?
+      <br>File .cursorrules chua lenh doc hai → harness phat hien?
+    </p>
+  </div>
+
+  <div class="dim-card d4">
+    <div class="dim-title">D4: Session Continuity</div>
+    <div class="question">"Harness co suy giam theo thoi gian khong?"</div>
+    <div class="metric">M4.1: <code>Performance Decay</code> = % giam hieu suat sau 100+ turns</div>
+    <div class="metric">M4.2: <code>Instruction Adherence</code> = % van nho system prompt</div>
+    <p style="margin-top:10px; font-size:0.9em;">
+      <strong>Vi du:</strong> Turn 10: agent lam dung yeu cau. Turn 150: agent "quen" yeu cau ban dau.
+      <br>Day goi la "instruction fade-out" — harness tot se chen reminders de chong.
+    </p>
+  </div>
+
+  <div class="dim-card d5">
+    <div class="dim-title">D5: Backend Portability</div>
+    <div class="question">"Doi model khac thi harness con tot khong?"</div>
+    <div class="metric">M5.1: <code>Cross-Backend Variance</code> = do lech chuan giua cac model</div>
+    <div class="metric">M5.2: <code>Min/Max Ratio</code> = model yeu nhat / model manh nhat</div>
+    <p style="margin-top:10px; font-size:0.9em;">
+      <strong>Vi du:</strong> Harness A: Claude=70%, GPT=65%, DeepSeek=60% → variance thap = tot
+      <br>Harness B: Claude=80%, GPT=30%, DeepSeek=20% → variance cao = harness chi tot cho Claude
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SECTION 5: ABLATION ==================== -->
+<div class="section">
+<h2>5. Lam gi? Ablation Study — Tat/Bat tung component</h2>
+<p style="color:#777; margin-bottom:20px;">Giong nhu thi nghiem y hoc: tat tung thanh phan de xem no dong gop bao nhieu</p>
+
+<table class="ablation-table">
+<thead>
+<tr>
+  <th>Condition</th>
+  <th>Tool System</th>
+  <th>Context Mgmt</th>
+  <th>Safety Layer</th>
+  <th>Memory</th>
+  <th>Resolve Rate</th>
+  <th>Nhan xet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Full Harness</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="on">ACC ON</td>
+  <td class="on">Rules ON</td>
+  <td class="on">Mem0 ON</td>
+  <td class="result high">65%</td>
+  <td>Baseline tot nhat</td>
+</tr>
+<tr>
+  <td><strong>Tat Safety</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="on">ACC ON</td>
+  <td class="off">OFF</td>
+  <td class="on">Mem0 ON</td>
+  <td class="result high">68%</td>
+  <td>Tang 3%! Safety lam CHAM agent</td>
+</tr>
+<tr>
+  <td><strong>Tat Memory</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="on">ACC ON</td>
+  <td class="on">Rules ON</td>
+  <td class="off">OFF</td>
+  <td class="result med">58%</td>
+  <td>Giam 7% — memory giup</td>
+</tr>
+<tr>
+  <td><strong>Giam Tools (5)</strong></td>
+  <td class="off">5 tools</td>
+  <td class="on">ACC ON</td>
+  <td class="on">Rules ON</td>
+  <td class="on">Mem0 ON</td>
+  <td class="result med">48%</td>
+  <td>Giam 17%! Tools rat quan trong</td>
+</tr>
+<tr>
+  <td><strong>Tat Context Mgmt</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="off">Full (no compress)</td>
+  <td class="on">Rules ON</td>
+  <td class="on">Mem0 ON</td>
+  <td class="result med">52%</td>
+  <td>Giam 13% — context bị tran</td>
+</tr>
+<tr>
+  <td><strong>Chi co Tools</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="off">OFF</td>
+  <td class="off">OFF</td>
+  <td class="off">OFF</td>
+  <td class="result low">35%</td>
+  <td>Giam 30% — can ca 4 components</td>
+</tr>
+<tr>
+  <td><strong>Doi Backend (GPT)</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="on">ACC ON</td>
+  <td class="on">Rules ON</td>
+  <td class="on">Mem0 ON</td>
+  <td class="result med">58%</td>
+  <td>Giam 7% — harness van on</td>
+</tr>
+<tr>
+  <td><strong>Doi Backend (DeepSeek)</strong></td>
+  <td class="on">12 tools ON</td>
+  <td class="on">ACC ON</td>
+  <td class="on">Rules ON</td>
+  <td class="on">Mem0 ON</td>
+  <td class="result med">52%</td>
+  <td>Giam 13% — harness tot giu duoc</td>
+</tr>
+</tbody>
+</table>
+
+<div class="note">
+  <strong>Du lieu tren la GIA DINH (minh hoa).</strong> Trong thuc te, ban se chay thuc nghiem de co con so that.
+  <br><br>
+  <strong>Ket luan mau:</strong><br>
+  - Tool system dong gop nhieu nhat (~17%)<br>
+  - Context management dong gop ~13%<br>
+  - Memory dong gop ~7%<br>
+  - Safety giam ~3% performance (trade-off)<br>
+  - Harness tot giu Portability: Claude 65% → GPT 58% → DeepSeek 52% (variance thap)
+</div>
+</div>
+
+<!-- ==================== SECTION 6: SO SANH HARNESS ==================== -->
+<div class="section">
+<h2>6. Ket qua cuoi: So sanh 3 Harness tren 5 chieu</h2>
+
+<div class="radar-container">
+  <div class="radar-card" style="border:2px solid #4caf50;">
+    <div class="agent-name" style="color:#4caf50;">SWE-Agent</div>
+    <div class="bar-metric">
+      <div class="label">Tool</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#ff9800;"></div></div>
+      <span style="font-size:0.8em;">75%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Context</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#2196f3;"></div></div>
+      <span style="font-size:0.8em;">60%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Safety</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:40%;background:#f44336;"></div></div>
+      <span style="font-size:0.8em;">40%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Session</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#4caf50;"></div></div>
+      <span style="font-size:0.8em;">55%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Portability</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#9c27b0;"></div></div>
+      <span style="font-size:0.8em;">85%</span>
+    </div>
+    <p style="margin-top:10px; font-size:0.85em; color:#777;">Don gian, portable, nhung safety yeu</p>
+  </div>
+
+  <div class="radar-card" style="border:2px solid #ff9800;">
+    <div class="agent-name" style="color:#ff9800;">OpenHands</div>
+    <div class="bar-metric">
+      <div class="label">Tool</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#ff9800;"></div></div>
+      <span style="font-size:0.8em;">70%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Context</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#2196f3;"></div></div>
+      <span style="font-size:0.8em;">70%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Safety</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#f44336;"></div></div>
+      <span style="font-size:0.8em;">65%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Session</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#4caf50;"></div></div>
+      <span style="font-size:0.8em;">60%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Portability</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#9c27b0;"></div></div>
+      <span style="font-size:0.8em;">70%</span>
+    </div>
+    <p style="margin-top:10px; font-size:0.85em; color:#777;">Can bang, safety kha, nhung khong xuat sac</p>
+  </div>
+
+  <div class="radar-card" style="border:2px solid #0066cc;">
+    <div class="agent-name" style="color:#0066cc;">Claude Code</div>
+    <div class="bar-metric">
+      <div class="label">Tool</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#ff9800;"></div></div>
+      <span style="font-size:0.8em;">95%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Context</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:88%;background:#2196f3;"></div></div>
+      <span style="font-size:0.8em;">88%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Safety</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#f44336;"></div></div>
+      <span style="font-size:0.8em;">80%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Session</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#4caf50;"></div></div>
+      <span style="font-size:0.8em;">75%</span>
+    </div>
+    <div class="bar-metric">
+      <div class="label">Portability</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#9c27b0;"></div></div>
+      <span style="font-size:0.8em;">30%</span>
+    </div>
+    <p style="margin-top:10px; font-size:0.85em; color:#777;">Xuat sac moi mat, NHUNG chi chay voi Claude!</p>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Insight quan trong:</strong> Claude Code manh nhat 4/5 chieu nhung <span class="red">Portability rat thap</span> (chi chay voi Claude model).
+  <br>SWE-Agent yeu nhat ve Safety nhung <span class="green">Portability cao nhat</span> (chay voi bat ky LLM nao).
+  <br><br>
+  <strong>Day la thong tin ma SWE-bench KHONG cho ban biet.</strong> SWE-bench chi noi "Claude Code = 70%, SWE-Agent = 40%"
+  nhung khong giai thich TAI SAO va COMPONENT NAO lam nen su khac biet.
+</div>
+</div>
+
+<!-- ==================== SECTION 7: TOM TAT ==================== -->
+<div class="section">
+<h2>7. Tom tat: HarnessEval lam gi?</h2>
+
+<div style="text-align:center; margin:30px 0;">
+  <div style="display:inline-block; background:#f8f9fc; border-radius:12px; padding:20px 40px; border:2px solid #0066cc;">
+    <span style="font-size:1.3em; color:#0066cc; font-weight:bold;">INPUT</span><br>
+    <span>Bat ky coding agent harness nao</span><br>
+    <span style="font-size:0.85em; color:#777;">(SWE-Agent, OpenHands, Claude Code, claw-code, ...)</span>
+  </div>
+</div>
+
+<div class="flow-arrow">&#8595;</div>
+
+<div style="text-align:center;">
+  <div style="display:inline-block; background:#f0f7ff; border-radius:12px; padding:25px; border:2px solid #cc9900; max-width:600px;">
+    <span style="font-size:1.3em; color:#996600; font-weight:bold;">HarnessEval Framework</span><br><br>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <span style="background:#ff9800; color:black; padding:5px 12px; border-radius:6px; font-size:0.9em;">D1: Tools</span>
+      <span style="background:#2196f3; color:white; padding:5px 12px; border-radius:6px; font-size:0.9em;">D2: Context</span>
+      <span style="background:#f44336; color:white; padding:5px 12px; border-radius:6px; font-size:0.9em;">D3: Safety</span>
+      <span style="background:#4caf50; color:white; padding:5px 12px; border-radius:6px; font-size:0.9em;">D4: Session</span>
+      <span style="background:#9c27b0; color:white; padding:5px 12px; border-radius:6px; font-size:0.9em;">D5: Portability</span>
+    </div>
+    <br>
+    <span style="font-size:0.9em; color:#777;">Ablation Study + 11 Metrics + Cross-backend Comparison</span>
+  </div>
+</div>
+
+<div class="flow-arrow">&#8595;</div>
+
+<div class="output-grid">
+  <div class="output-item">
+    <div class="icon">📊</div>
+    <div class="name">Radar Chart</div>
+    <p>So sanh truc quan 5 chieu giua cac harness</p>
+  </div>
+  <div class="output-item">
+    <div class="icon">🔬</div>
+    <div class="name">Component Contribution</div>
+    <p>"Tools dong gop 35%, Context dong gop 20%..."</p>
+  </div>
+  <div class="output-item">
+    <div class="icon">📋</div>
+    <div class="name">Design Guidelines</div>
+    <p>"Toi thieu can 5 core tools, ACC giam 54% token"</p>
+  </div>
+  <div class="output-item">
+    <div class="icon">🛠️</div>
+    <div class="name">Open-source Toolkit</div>
+    <p>Python package — bat ky ai cung co the tu danh gia harness</p>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SECTION 8: TAI SAO QUAN TRONG ==================== -->
+<div class="section">
+<h2>8. Tai sao nghien cuu nay quan trong?</h2>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin:20px 0;">
+  <div style="background:#1a3a1a; border-radius:10px; padding:20px; border:1px solid #4caf50;">
+    <h3 style="color:#4caf50;">Cho Developer</h3>
+    <p>Biet chon harness nao phu hop cho du an — khong chi chon model. "Du an can safety → chon OpenHands. Can portability → chon SWE-Agent."</p>
+  </div>
+  <div style="background:#fff8f0; border-radius:10px; padding:20px; border:1px solid #ff9800;">
+    <h3 style="color:#ff9800;">Cho Researcher</h3>
+    <p>Co framework chuan de so sanh harness moi. Thay vi chi bao "harness cua toi dat 70% tren SWE-bench," gio phai bao ro 5 chieu.</p>
+  </div>
+  <div style="background:#f0f0ff; border-radius:10px; padding:20px; border:1px solid #2196f3;">
+    <h3 style="color:#2196f3;">Cho Cong nghiep</h3>
+    <p>Anthropic, OpenAI, Google se biet CHINH XAC component nao can cai thien trong harness cua ho, thay vi chi "thu dung model lon hon."</p>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SECTION 8.5: NGUOI KHAC DA LAM GI ==================== -->
+<div class="section">
+<h2>8.5. Nhung gi NGUOI KHAC da lam (va CHUA lam)</h2>
+<p style="color:#777; margin-bottom:20px;">Ho da lam tung MANH rieng le — khong ai ghep lai</p>
+
+<table class="ablation-table" style="text-align:left;">
+<thead>
+<tr>
+  <th style="width:150px;">Paper</th>
+  <th style="width:280px;">Ho da lam</th>
+  <th>Ho CHUA lam</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>SWE-bench</strong> [C1]</td>
+  <td>Do resolve rate (output)</td>
+  <td class="red">Khong biet TAI SAO agent fail — tool sai? context mat?</td>
+</tr>
+<tr>
+  <td><strong>AgentBoard</strong> [G3]</td>
+  <td>Do progress rate (tung buoc)</td>
+  <td class="red">Van do OUTPUT tung buoc, khong do HARNESS</td>
+</tr>
+<tr>
+  <td><strong>ToolLLM</strong> [F2]</td>
+  <td>Do tool selection accuracy</td>
+  <td class="red">Chi do tool RIENG LE, khong do tool TRONG HARNESS</td>
+</tr>
+<tr>
+  <td><strong>Mem0</strong> [E1]</td>
+  <td>Do memory efficiency</td>
+  <td class="red">Chi do memory cho CHATBOT, khong phai CODING</td>
+</tr>
+<tr>
+  <td><strong>AIShellJack</strong> [D3]</td>
+  <td>Do security cua coding editor</td>
+  <td class="red">Chi do SECURITY, khong do chinh xac</td>
+</tr>
+<tr>
+  <td><strong>OpenDev</strong> [A1]</td>
+  <td>Mo ta harness design chi tiet</td>
+  <td class="red">KHONG BENCHMARK — chi mo ta, khong do luong</td>
+</tr>
+<tr>
+  <td><strong>AutoHarness</strong> [A2]</td>
+  <td>Chung minh harness quan trong</td>
+  <td class="red">Chi trong GAME, khong phai coding</td>
+</tr>
+<tr>
+  <td><strong>SICA</strong> [B10]</td>
+  <td>Tu cai thien harness</td>
+  <td class="red">KHONG DO tung component dong gop bao nhieu</td>
+</tr>
+</tbody>
+</table>
+
+<!-- Van de: moi nguoi 1 goc -->
+<div style="margin-top:25px; padding:25px; background:#f5f6fa; border-radius:12px; border:1px solid #cc3333;">
+<h3 style="color:#cc3333; margin-bottom:15px;">Van de: Moi nguoi lam 1 goc, KHONG AI ghep lai</h3>
+<div style="font-family:monospace; font-size:0.95em; line-height:2; color:#444;">
+  <span style="color:#ff9800;">ToolLLM</span> ──────── do tool accuracy <span style="color:#777;">(rieng)</span><br>
+  <span style="color:#2196f3;">Mem0</span> ────────── do memory <span style="color:#777;">(rieng, cho chatbot)</span><br>
+  <span style="color:#f44336;">AIShellJack</span> ──── do security <span style="color:#777;">(rieng)</span><br>
+  <span style="color:#4caf50;">SWE-bench</span> ────── do output <span style="color:#777;">(khong biet component nao gay ra)</span><br>
+  <span style="color:#9c27b0;">OpenDev</span> ──────── mo ta harness <span style="color:#777;">(khong do luong)</span><br>
+  <br>
+  <span style="color:#996600;">→ 5 papers, 5 goc nhin, KHONG AI ket noi chung lai</span><br>
+  <span style="color:#996600;">→ Khong ai biet: "trong 1 harness, component NAO quan trong NHAT?"</span>
+</div>
+</div>
+
+<!-- 4 Khac biet chi tiet -->
+<div style="margin-top:30px;">
+<h3 style="color:#0066cc; margin-bottom:20px;">Chung ta lam gi KHAC BIET? (4 diem)</h3>
+
+<!-- Khac biet 1 -->
+<div style="background:#f8f9fc; border-radius:10px; padding:20px; margin-bottom:15px; border-left:4px solid #00d4ff;">
+<h3 style="color:#0066cc; margin-bottom:10px;">Khac biet 1: DO HARNESS, khong phai do OUTPUT</h3>
+<div style="display:flex; gap:20px; flex-wrap:wrap;">
+  <div style="flex:1; min-width:280px; background:#fff5f5; border-radius:8px; padding:15px;">
+    <div style="color:#f44336; font-weight:bold; margin-bottom:8px;">SWE-bench hoi:</div>
+    <p>"Agent co fix duoc bug khong?" → <strong>Yes/No</strong> (1 con so)</p>
+    <div style="margin-top:10px; font-family:monospace; font-size:0.9em; color:#777;">
+      Claude Code: <span style="color:#4caf50;">70%</span> | SWE-Agent: <span style="color:#f44336;">40%</span><br>
+      → "Claude Code gioi hon"<br>
+      → <span style="color:#f44336;">NHUNG KHONG BIET TAI SAO</span>
+    </div>
+  </div>
+  <div style="flex:1; min-width:280px; background:#f0f9f0; border-radius:8px; padding:15px;">
+    <div style="color:#4caf50; font-weight:bold; margin-bottom:8px;">HarnessEval hoi:</div>
+    <p>"TAI SAO agent fix/khong fix duoc?" → <strong>5 con so</strong> (5 chieu)</p>
+    <div style="margin-top:10px; font-family:monospace; font-size:0.85em;">
+      Claude Code: <span style="color:#ff9800;">Tool=95%</span>, <span style="color:#2196f3;">Ctx=88%</span>, <span style="color:#f44336;">Safe=80%</span>, <span style="color:#4caf50;">Sess=75%</span>, <span style="color:#9c27b0;">Port=30%</span><br>
+      SWE-Agent:&nbsp;&nbsp; <span style="color:#ff9800;">Tool=75%</span>, <span style="color:#2196f3;">Ctx=60%</span>, <span style="color:#f44336;">Safe=40%</span>, <span style="color:#4caf50;">Sess=55%</span>, <span style="color:#9c27b0;">Port=85%</span><br>
+      <span style="color:#4caf50;">→ Claude manh vi TOOL + CONTEXT</span><br>
+      <span style="color:#f44336;">→ Claude yeu vi PORTABILITY (chi chay Claude model)</span><br>
+      <span style="color:#996600;">→ Them safety cho SWE-Agent → tang dang ke</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Khac biet 2 -->
+<div style="background:#f8f9fc; border-radius:10px; padding:20px; margin-bottom:15px; border-left:4px solid #ff9800;">
+<h3 style="color:#ff9800; margin-bottom:10px;">Khac biet 2: ABLATION — do dong gop tung component</h3>
+<p style="margin-bottom:10px;">Day la <strong>dong gop lon nhat</strong>. Chua ai lam trong coding.</p>
+<div style="background:#f0f2f5; border-radius:8px; padding:15px; font-family:monospace; font-size:0.9em;">
+  <div style="color:#996600; margin-bottom:8px;">Cau hoi chua ai tra loi duoc:</div>
+  <span style="color:#777;">"Trong 1 harness, tool system dong gop bao nhieu %?</span><br>
+  <span style="color:#777;"> Context management dong gop bao nhieu %?</span><br>
+  <span style="color:#777;"> Neu bo safety layer, performance tang hay giam?"</span><br><br>
+  <div style="color:#996600; margin-bottom:8px;">Cach lam: TAT tung component, do su thay doi</div>
+  Full harness: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:#4caf50; font-weight:bold;">65%</span> resolve rate<br>
+  Tat tool (5 tools): &nbsp; <span style="color:#ff9800; font-weight:bold;">48%</span> → Tool dong gop <span style="color:#ff9800;">~17%</span><br>
+  Tat context mgmt: &nbsp;&nbsp; <span style="color:#2196f3; font-weight:bold;">52%</span> → Context dong gop <span style="color:#2196f3;">~13%</span><br>
+  Tat safety: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:#f44336; font-weight:bold;">68%</span> → Safety <span style="color:#f44336;">GIAM 3%</span> performance (trade-off!)<br><br>
+  <span style="color:#4caf50;">→ KET LUAN: "Dau tu tool system truoc, context thu hai,</span><br>
+  <span style="color:#4caf50;">&nbsp;&nbsp;safety chap nhan giam nhe performance"</span>
+</div>
+<p style="margin-top:10px; font-size:0.9em; color:#777;">ToolLLM do tool accuracy nhung khong biet tool quan trong bao nhieu <strong>SO VOI</strong> context, safety. HarnessEval do TAT CA cung luc va so sanh.</p>
+</div>
+
+<!-- Khac biet 3 -->
+<div style="background:#f8f9fc; border-radius:10px; padding:20px; margin-bottom:15px; border-left:4px solid #9c27b0;">
+<h3 style="color:#9c27b0; margin-bottom:10px;">Khac biet 3: CROSS-BACKEND — cung harness, doi LLM</h3>
+<p style="margin-bottom:10px;"><strong>CHUA CO PAPER NAO</strong> lam cross-backend comparison cho harness.</p>
+<div style="background:#f0f2f5; border-radius:8px; padding:15px; font-family:monospace; font-size:0.9em;">
+  <div style="color:#996600; margin-bottom:8px;">Cach lam: Giu CUNG harness, doi model</div>
+  SWE-Agent + <span style="color:#0066cc;">Claude</span>: &nbsp;&nbsp; <span style="color:#4caf50; font-weight:bold;">65%</span><br>
+  SWE-Agent + <span style="color:#ff9800;">GPT-4o</span>: &nbsp;&nbsp; <span style="color:#ff9800; font-weight:bold;">58%</span><br>
+  SWE-Agent + <span style="color:#9c27b0;">DeepSeek</span>: <span style="color:#f44336; font-weight:bold;">52%</span><br>
+  → Variance = <span style="color:#4caf50;">6.5%</span> → <span style="color:#4caf50;">Portable</span> (harness on dinh)<br><br>
+  Claude Code + <span style="color:#0066cc;">Claude</span>: &nbsp; <span style="color:#4caf50; font-weight:bold;">70%</span><br>
+  Claude Code + <span style="color:#ff9800;">GPT-4o</span>: &nbsp; <span style="color:#f44336; font-weight:bold;">???</span> (khong chay duoc!)<br>
+  → Portability = <span style="color:#f44336; font-weight:bold;">0</span> (chi chay voi 1 model)
+</div>
+</div>
+
+<!-- Khac biet 4 -->
+<div style="background:#f8f9fc; border-radius:10px; padding:20px; margin-bottom:15px; border-left:4px solid #ffd93d;">
+<h3 style="color:#996600; margin-bottom:10px;">Khac biet 4: FRAMEWORK THONG NHAT (thay nhieu papers rieng le)</h3>
+<div style="display:flex; gap:20px; flex-wrap:wrap;">
+  <div style="flex:1; min-width:280px; background:#fff5f5; border-radius:8px; padding:15px;">
+    <div style="color:#f44336; font-weight:bold; margin-bottom:8px;">TRUOC HarnessEval:</div>
+    <div style="font-size:0.9em; color:#444;">
+      Muon biet tool tot khong? → Doc paper <span style="color:#ff9800;">ToolLLM</span><br>
+      Muon biet memory tot khong? → Doc paper <span style="color:#2196f3;">Mem0</span><br>
+      Muon biet safe khong? → Doc paper <span style="color:#f44336;">AIShellJack</span><br>
+      Muon biet output tot khong? → Chay <span style="color:#4caf50;">SWE-bench</span><br>
+      <span style="color:#777;">→ 4 papers, 4 cong cu, 4 metric KHAC NHAU</span><br>
+      <span style="color:#f44336;">→ Khong so sanh duoc voi nhau</span>
+    </div>
+  </div>
+  <div style="flex:1; min-width:280px; background:#f0f9f0; border-radius:8px; padding:15px;">
+    <div style="color:#4caf50; font-weight:bold; margin-bottom:8px;">SAU HarnessEval:</div>
+    <div style="font-size:0.9em; color:#444;">
+      Chay <span style="color:#996600; font-weight:bold;">1 framework</span><br>
+      → Duoc <span style="color:#996600;">5 scores</span> (5 chieu)<br>
+      → Duoc <span style="color:#996600;">ablation</span> (tung component)<br>
+      → Duoc <span style="color:#996600;">cross-backend</span> (portability)<br>
+      <span style="color:#4caf50;">→ So sanh TRUC TIEP giua cac harness</span><br>
+      <span style="color:#4caf50;">→ 1 toolkit thay 4 papers rieng le</span>
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ==================== SECTION 9: KHAC BIET ==================== -->
+<div class="section">
+<h2>9. Diem KHAC BIET cua HarnessEval so voi cac nghien cuu khac</h2>
+<p style="color:#777; margin-bottom:20px;">Tai sao nghien cuu nay KHONG trung lap voi cac papers da co?</p>
+
+<table class="ablation-table" style="text-align:left;">
+<thead>
+<tr>
+  <th style="width:40px;">#</th>
+  <th style="width:220px;">Diem khac biet</th>
+  <th style="width:250px;">Ai da lam?</th>
+  <th>Chung ta lam gi MOI?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>1</strong></td>
+  <td><strong style="color:#0066cc;">Do HARNESS thay vi do OUTPUT</strong></td>
+  <td><span class="red">Khong ai</span><br><small>SWE-bench, SWE-Compass, PRDBench deu chi do output (resolve rate)</small></td>
+  <td><span class="green">Taxonomy 5 chieu danh gia CHINH HARNESS</span><br><small>Tool dispatch, Context utilization, Safety, Session, Portability — do ha tang, khong phai do ket qua cuoi</small></td>
+</tr>
+<tr>
+  <td><strong>2</strong></td>
+  <td><strong style="color:#ff9800;">ABLATION tung component</strong></td>
+  <td><span class="red">Khong ai (trong coding)</span><br><small>AutoHarness chi lam trong game. OpenDev chi mo ta, khong do. SICA tu cai thien nhung khong do tung phan</small></td>
+  <td><span class="green">Dinh luong dong gop cua TUNG component</span><br><small>"Tool dong gop ~17%, Context ~13%, Safety giam ~3% performance" — con so cu the, co the hanh dong</small></td>
+</tr>
+<tr>
+  <td><strong>3</strong></td>
+  <td><strong style="color:#9c27b0;">Cross-backend comparison</strong></td>
+  <td><span class="red">Khong ai</span><br><small>Moi harness chi test voi 1 LLM backend. Khong ai hoi "doi model thi harness con tot khong?"</small></td>
+  <td><span class="green">CUNG harness + DOI LLM → do Portability</span><br><small>SWE-Agent + Claude vs GPT vs DeepSeek → variance bao nhieu? Harness co phu thuoc model khong?</small></td>
+</tr>
+<tr>
+  <td><strong>4</strong></td>
+  <td><strong style="color:#996600;">Framework THONG NHAT</strong></td>
+  <td><span class="med">Moi nguoi lam 1 MANH</span><br><small>ToolLLM do tool rieng. Mem0 do memory rieng. AIShellJack do security rieng. 4 papers, 4 metric, khong ket noi</small></td>
+  <td><span class="green">1 framework thay NHIEU papers rieng le</span><br><small>Chay 1 toolkit → duoc 5 scores + ablation + cross-backend. So sanh truc tiep giua cac harness</small></td>
+</tr>
+<tr>
+  <td><strong>5</strong></td>
+  <td><strong style="color:#4caf50;">Actionable GUIDELINES</strong></td>
+  <td><span class="med">OpenDev chi MO TA thiet ke</span><br><small>"Chung toi dung ACC 5 giai doan" — nhung khong chung minh ACC dong gop bao nhieu %</small></td>
+  <td><span class="green">"Dau tu TOOL truoc, CONTEXT thu hai"</span><br><small>Guidelines dua tren DU LIEU thuc nghiem, khong phai y kien chu quan. Developer biet nen uu tien gi</small></td>
+</tr>
+</tbody>
+</table>
+
+<div style="margin-top:25px; padding:20px; background:#f5f6fa; border-radius:10px; border:1px solid #ddd;">
+<h3 style="color:#996600; margin-bottom:15px;">So sanh truc quan: TRUOC va SAU HarnessEval</h3>
+<div style="display:flex; gap:30px; flex-wrap:wrap; justify-content:center;">
+
+  <div style="flex:1; min-width:300px; background:#fff5f5; border-radius:10px; padding:20px; border:2px solid #f44336;">
+    <div style="text-align:center; font-weight:bold; color:#f44336; font-size:1.1em; margin-bottom:15px;">TRUOC HarnessEval</div>
+    <p>"Claude Code dat <strong>70%</strong> tren SWE-bench"</p>
+    <p style="color:#777; margin-top:10px;">→ Biet KET QUA nhung khong biet TAI SAO</p>
+    <p style="color:#777;">→ Khong biet component nao gay ra</p>
+    <p style="color:#777;">→ Khong biet cach cai thien</p>
+    <p style="color:#777;">→ Khong biet doi model co on khong</p>
+  </div>
+
+  <div style="flex:1; min-width:300px; background:#f0f9f0; border-radius:10px; padding:20px; border:2px solid #4caf50;">
+    <div style="text-align:center; font-weight:bold; color:#4caf50; font-size:1.1em; margin-bottom:15px;">SAU HarnessEval</div>
+    <p>"Claude Code dat 70% <strong>VI</strong>:</p>
+    <p style="color:#ff9800;">- Tool system xuat sac (<strong>95%</strong> correct dispatch)</p>
+    <p style="color:#2196f3;">- Context management tot (<strong>88%</strong> info retention)</p>
+    <p style="color:#4caf50;">- Safety kha (<strong>80%</strong> block rate)</p>
+    <p style="color:#f44336;">- <strong>NHUNG</strong> portability rat thap (<strong>30%</strong>) — chi chay voi Claude"</p>
+    <p style="color:#666; margin-top:10px;">→ Biet TAI SAO, biet CACH CAI THIEN, biet GIOI HAN</p>
+  </div>
+
+</div>
+</div>
+
+</div>
+
+<div style="text-align:center; margin:40px 0; padding:30px; background:#f8f9fc; border-radius:12px; border:2px solid #cc9900;">
+  <p style="font-size:1.3em; color:#996600; font-weight:bold;">
+    "Khong phai model nao cung can lon hon.<br>
+    Doi khi, chi can harness tot hon."
+  </p>
+  <p style="color:#777; margin-top:10px;">— Y tuong cot loi cua HarnessEval</p>
+</div>
+
+</div>
+</body>
+</html>
