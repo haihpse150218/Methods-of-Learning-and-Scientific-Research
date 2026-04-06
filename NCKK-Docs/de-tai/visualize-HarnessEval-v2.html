@@ -146,6 +146,127 @@ tr:hover{background:#eef1f6}
 </div>
 </div>
 
+<!-- ===== S0.7: TAI SAO CHON 6 KEYWORDS ===== -->
+<div class="section">
+<h2>0.7. Tai sao chon 6 Characteristics nay cho Table?</h2>
+<p style="color:#777;margin-bottom:20px">6 keywords khong chon ngau nhien — chung duoc suy nguoc tu 3 cau hoi nghien cuu</p>
+
+<!-- 3 RO → 6 Keywords mapping -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin:20px 0">
+
+  <!-- RO3 -->
+  <div style="flex:1;min-width:300px;background:#fff3e0;border-radius:12px;padding:20px;border:2px solid #e65100">
+    <div style="font-weight:bold;color:#e65100;font-size:1.05em;margin-bottom:12px">RO3: "Component nao dong gop nhieu nhat?"</div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+      <span style="color:#555">Can DO tung component rieng &rarr;</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+      <span style="background:#e65100;color:#fff;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:.9em">C1: Tool Dispatch</span>
+      <span style="background:#1565c0;color:#fff;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:.9em">C2: Context Eval</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+      <span style="color:#555">Can TAT/DOI tung cai &rarr;</span>
+    </div>
+    <div style="display:flex;gap:8px;margin:8px 0">
+      <span style="background:#c62828;color:#fff;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:.9em">C4: Comp. Ablation</span>
+    </div>
+  </div>
+
+  <!-- RO4 -->
+  <div style="flex:1;min-width:300px;background:#f0f7ff;border-radius:12px;padding:20px;border:2px solid #1565c0">
+    <div style="font-weight:bold;color:#1565c0;font-size:1.05em;margin-bottom:12px">RO4: "Harness dong gop bao nhieu % so voi LLM?"</div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+      <span style="color:#555">Can TACH roi harness vs LLM &rarr;</span>
+    </div>
+    <div style="display:flex;gap:8px;margin:8px 0">
+      <span style="background:#2e7d32;color:#fff;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:.9em">C5: H/LLM Decomp.</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+      <span style="color:#555">Can DOI nhieu LLM backends &rarr;</span>
+    </div>
+    <div style="display:flex;gap:8px;margin:8px 0">
+      <span style="background:#6a1b9a;color:#fff;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:.9em">C3: Cross-Backend</span>
+    </div>
+  </div>
+
+  <!-- RO1 -->
+  <div style="flex:1;min-width:300px;background:#f0f9f0;border-radius:12px;padding:20px;border:2px solid #2e7d32">
+    <div style="font-weight:bold;color:#2e7d32;font-size:1.05em;margin-bottom:12px">RO1: "Framework danh gia thong nhat"</div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+      <span style="color:#555">Can NHIEU metric dong thoi &rarr;</span>
+    </div>
+    <div style="display:flex;gap:8px;margin:8px 0">
+      <span style="background:#996600;color:#fff;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:.9em">C6: Multi-Metric</span>
+    </div>
+  </div>
+</div>
+
+<!-- Chi tiet tung keyword -->
+<h3 style="margin-top:25px">Chi tiet: Moi keyword tra loi 1 cau hoi</h3>
+
+<table style="text-align:left;font-size:.9em">
+<thead><tr><th style="width:40px">#</th><th style="width:140px">Keyword</th><th style="width:250px">Cau hoi can tra loi</th><th>Tai sao chon? (bang chung tu papers)</th></tr></thead>
+<tbody>
+<tr>
+  <td style="font-weight:bold;color:#e65100">C1</td>
+  <td style="font-weight:bold;color:#e65100">Tool Dispatch</td>
+  <td>"Harness goi dung tool khong?"</td>
+  <td>ToolLLM [F2] do tool accuracy nhung <strong>rieng le</strong> (API benchmarks). Chua ai do tool dispatch <strong>trong</strong> harness coding — noi tool tuong tac voi context va orchestration.</td>
+</tr>
+<tr>
+  <td style="font-weight:bold;color:#1565c0">C2</td>
+  <td style="font-weight:bold;color:#1565c0">Context Eval</td>
+  <td>"Nen context mat thong tin khong?"</td>
+  <td>Mem0 [E1] do context tren <strong>chatbot</strong> (LoCoMo). Chua ai do tren <strong>coding tasks</strong> — noi context gom AST, dependencies, test histories.</td>
+</tr>
+<tr>
+  <td style="font-weight:bold;color:#6a1b9a">C3</td>
+  <td style="font-weight:bold;color:#6a1b9a">Cross-Backend</td>
+  <td>"Doi model khac thi harness con tot khong?"</td>
+  <td><strong>HOAN TOAN chua ai lam.</strong> Moi paper test 1 model. Khong ai hoi: "cung harness, doi Claude &rarr; GPT &rarr; DeepSeek thi sao?"</td>
+</tr>
+<tr>
+  <td style="font-weight:bold;color:#c62828">C4</td>
+  <td style="font-weight:bold;color:#c62828">Comp. Ablation</td>
+  <td>"Tat/doi tung component &rarr; anh huong bao nhieu?"</td>
+  <td>AutoHarness [A2] lam ablation nhung trong <strong>game</strong>. Chua ai tat/doi tung component cua <strong>coding</strong> harness de do dong gop.</td>
+</tr>
+<tr>
+  <td style="font-weight:bold;color:#2e7d32">C5</td>
+  <td style="font-weight:bold;color:#2e7d32">H/LLM Decomp.</td>
+  <td>"Bao nhieu % do harness, bao nhieu % do LLM?"</td>
+  <td><strong>HOAN TOAN chua ai lam.</strong> Day la dong gop ly thuyet chinh — ANOVA 3 chieu phan tach variance.</td>
+</tr>
+<tr>
+  <td style="font-weight:bold;color:#996600">C6</td>
+  <td style="font-weight:bold;color:#996600">Multi-Metric</td>
+  <td>"Danh gia nhieu chieu cung luc?"</td>
+  <td>AgentBoard [G3] co multi-metric nhung do <strong>output</strong>. Chua ai co multi-metric do <strong>harness infrastructure</strong>.</td>
+</tr>
+</tbody>
+</table>
+
+<!-- Gom thanh 3 nhom -->
+<h3 style="margin-top:25px">3 nhom &harr; ten de tai</h3>
+<div style="background:#fafbfd;border-radius:10px;padding:20px;border:1px solid #ddd;font-size:.95em">
+  <div style="margin-bottom:12px">
+    <strong style="color:#e65100">NHOM 1 — DO CAI GI</strong> (What to measure):<br>
+    <span style="margin-left:20px">C1 Tool Dispatch + C2 Context Eval &rarr; <strong>"Evaluating Coding Agent <em>Scaffolds</em>"</em></strong></span>
+  </div>
+  <div style="margin-bottom:12px">
+    <strong style="color:#1565c0">NHOM 2 — DO NHU THE NAO</strong> (How to measure):<br>
+    <span style="margin-left:20px">C4 Ablation + C3 Cross-Backend &rarr; <strong>"Through <em>Ablation-Driven</em> ... Analysis"</strong></span>
+  </div>
+  <div>
+    <strong style="color:#2e7d32">NHOM 3 — KET QUA GI</strong> (What result):<br>
+    <span style="margin-left:20px">C5 Decomposition + C6 Multi-Metric &rarr; <strong>"<em>Multi-Dimensional</em> Analysis"</strong></span>
+  </div>
+  <div style="margin-top:15px;padding-top:12px;border-top:1px solid #ddd;text-align:center">
+    <strong style="font-size:1.05em">"HarnessEval: Evaluating Coding Agent <span style="color:#e65100">Scaffolds</span> Through <span style="color:#1565c0">Ablation-Driven</span> <span style="color:#2e7d32">Multi-Dimensional</span> Analysis"</strong>
+  </div>
+</div>
+</div>
+
 <!-- ===== S1: V1 vs V2 ===== -->
 <div class="section">
 <h2>1. V1 vs V2: Nhung gi da thay doi</h2>
