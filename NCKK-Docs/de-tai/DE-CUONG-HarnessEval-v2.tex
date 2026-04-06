@@ -183,55 +183,44 @@ ToolLLM~\cite{F2} evaluates 16,000+ APIs with DFSDT reasoning. AnyTool~\cite{F3}
 
 \subsubsection{Summary on Characteristics Investigated}
 
-Table~\ref{tab:characteristics} presents a systematic comparison of the characteristics investigated by related works, following the format of Ho-Van~(2013). Each column represents a key aspect of harness evaluation. The table reveals that while individual aspects have been partially addressed in isolation, \textbf{no prior work addresses all characteristics simultaneously}. In particular, columns C3 (Backend Portability), C4 (Component Ablation), and C5 (Harness vs.\ LLM Decomposition) are \textbf{entirely empty}---no paper has investigated these aspects.
+Table~\ref{tab:characteristics} presents a focused comparison of the five most closely related works against the six core characteristics of harness evaluation, following the format of Ho-Van~(2013). Each row represents a paper that partially addresses at least one harness-related concern; each column represents a characteristic directly tied to our research objectives. The table reveals that while individual characteristics have been partially investigated, \textbf{no prior work addresses more than two}, and \textbf{three characteristics remain entirely unexplored}.
 
 \begin{table}[H]
 \centering
-\caption{Summary on Characteristics Investigated by Related Works}
+\caption{Summary on Characteristics Investigated by Closest Related Works}
 \label{tab:characteristics}
-\small
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{l l c c c c c c c c}
+\begin{tabular}{l c c c c c c}
 \toprule
-\textbf{Ref} & \textbf{Paper} & \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4} & \textbf{C5} & \textbf{C6} & \textbf{C7} & \textbf{C8} \\
-& & \rotatebox{70}{\scriptsize Tool Dispatch} & \rotatebox{70}{\scriptsize Context Eval} & \rotatebox{70}{\scriptsize Backend Port.} & \rotatebox{70}{\scriptsize Ablation} & \rotatebox{70}{\scriptsize H vs L Decomp.} & \rotatebox{70}{\scriptsize Multi-Metric} & \rotatebox{70}{\scriptsize Coding-Specific} & \rotatebox{70}{\scriptsize Open-Source} \\
+\textbf{Reference} & \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4} & \textbf{C5} & \textbf{C6} \\
+& \rotatebox{70}{\small Tool Dispatch} & \rotatebox{70}{\small Context Eval} & \rotatebox{70}{\small Cross-Backend} & \rotatebox{70}{\small Ablation} & \rotatebox{70}{\small H/LLM Decomp.} & \rotatebox{70}{\small Multi-Metric} \\
 \midrule
-\cite{A1} & Bui 2026 (OpenDev) & $\triangle$ & $\triangle$ & & & & & $\checkmark$ & $\checkmark$ \\
-\cite{A2} & Lou 2026 (AutoHarness) & $\triangle$ & & & $\triangle$ & & & & \\
-\cite{A3} & Cao 2026 (LongContext) & $\checkmark$ & $\triangle$ & & & & & $\checkmark$ & \\
-\cite{B10} & Robeyns 2025 (SICA) & $\triangle$ & & & & & & $\checkmark$ & $\checkmark$ \\
-\cite{C1} & Deng 2025 (SWE-Bench Pro) & & & & & & & $\checkmark$ & $\triangle$ \\
-\cite{C5} & Xu 2025 (SWE-Compass) & & & & & & $\triangle$ & $\checkmark$ & $\checkmark$ \\
-\cite{E1} & Chhikara 2025 (Mem0) & & $\checkmark^*$ & & & & & & $\checkmark$ \\
-\cite{E2} & Xu 2025 (A-MEM) & & $\checkmark^*$ & & & & & & $\checkmark$ \\
-\cite{E3} & Yu 2026 (AgeMem) & & $\checkmark^*$ & & $\triangle$ & & & & \\
-\cite{F1} & Patil 2023 (Gorilla) & $\checkmark^{\dagger}$ & & & & & & & $\checkmark$ \\
-\cite{F2} & Qin 2023 (ToolLLM) & $\checkmark^{\dagger}$ & & & & & & & $\checkmark$ \\
-\cite{F3} & Du 2024 (AnyTool) & $\checkmark^{\dagger}$ & & & & & & & \\
-\cite{G3} & Ma 2024 (AgentBoard) & $\triangle$ & $\triangle$ & & & & $\checkmark$ & & $\checkmark$ \\
-\cite{I2} & Wang 2025 (VisualAnalytics) & & $\triangle$ & & & & $\checkmark$ & $\checkmark$ & \\
-\cite{S5} & 2025 (EvalSurvey) & & & & & & $\triangle$ & & \\
+Bui~et~al.~\cite{A1} (OpenDev)       & $\triangle$ & $\triangle$ &             &             &             &             \\[3pt]
+Lou~et~al.~\cite{A2} (AutoHarness)   & $\triangle$ &             &             & $\triangle$ &             &             \\[3pt]
+Qin~et~al.~\cite{F2} (ToolLLM)       & $\checkmark^{\dagger}$ &  &             &             &             &             \\[3pt]
+Chhikara~et~al.~\cite{E1} (Mem0)     &             & $\checkmark^{*}$ &          &             &             &             \\[3pt]
+Ma~et~al.~\cite{G3} (AgentBoard)     & $\triangle$ & $\triangle$ &             &             &             & $\checkmark^{\ddagger}$ \\[3pt]
 \midrule
-& \textbf{Ours (HarnessEval)} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\textbf{Ours (HarnessEval)}           & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
 \bottomrule
-\multicolumn{9}{l}{\scriptsize $\checkmark$ = Addressed \quad $\triangle$ = Partially addressed \quad (blank) = Not addressed} \\
-\multicolumn{9}{l}{\scriptsize $^*$ Context evaluated on chatbot benchmarks (LoCoMo), not coding tasks} \\
-\multicolumn{9}{l}{\scriptsize $^{\dagger}$ Tool accuracy evaluated in isolation (API benchmarks), not within a coding harness} \\
+\multicolumn{7}{l}{\small $\checkmark$ = Addressed as primary contribution \quad $\triangle$ = Partially addressed} \\
+\multicolumn{7}{l}{\small $^{\dagger}$~Tool accuracy evaluated in isolation (API benchmarks), not within a coding harness} \\
+\multicolumn{7}{l}{\small $^{*}$~Context evaluated on chatbot benchmarks (LoCoMo), not on coding tasks} \\
+\multicolumn{7}{l}{\small $^{\ddagger}$~Multi-metric for agent \textit{output} (progress rate), not for \textit{harness infrastructure}} \\
 \end{tabular}
 \end{table}
 
 \textbf{Key observations from Table~\ref{tab:characteristics}:}
 
 \begin{enumerate}[leftmargin=2em]
-    \item \textbf{Three columns entirely empty (C3, C4, C5):} No prior work evaluates backend portability, conducts component ablation on coding harnesses, or decomposes harness vs.\ LLM contributions. These represent the strongest evidence for our research gap.
+    \item \textbf{Three columns are entirely empty (C3, C4, C5).} No prior work evaluates cross-backend portability, conducts component ablation on coding harnesses, or decomposes harness vs.\ LLM contributions. These represent the core research gap.
 
-    \item \textbf{Tool evaluation exists but outside harness context (C1):} Gorilla~\cite{F1}, ToolLLM~\cite{F2}, and AnyTool~\cite{F3} evaluate tool accuracy on standalone API benchmarks ($\checkmark^{\dagger}$), not within an integrated coding harness where tool dispatch interacts with context management and orchestration.
+    \item \textbf{Tool evaluation exists but outside harness context (C1).} ToolLLM~\cite{F2} evaluates tool selection accuracy on 16,000+ standalone APIs~($\checkmark^{\dagger}$), not within an integrated coding harness where tool dispatch interacts with context management. OpenDev~\cite{A1} describes its tool system but does not benchmark dispatch efficiency with formal metrics~($\triangle$).
 
-    \item \textbf{Context evaluation exists but wrong domain (C2):} Mem0~\cite{E1}, A-MEM~\cite{E2}, and AgeMem~\cite{E3} evaluate memory/context on chatbot benchmarks ($\checkmark^*$) such as LoCoMo and DialSim---not on coding tasks where context includes AST structures, dependency graphs, and test results.
+    \item \textbf{Context evaluation exists but in the wrong domain (C2).} Mem0~\cite{E1} achieves 91\% latency reduction for persistent memory~($\checkmark^{*}$), but evaluates on the LoCoMo chatbot benchmark---not on coding tasks where context includes AST structures, dependency graphs, and test histories.
 
-    \item \textbf{Multi-metric frameworks exist but evaluate output, not harness (C6):} AgentBoard~\cite{G3} provides multi-dimensional evaluation via progress rates, but measures \textit{agent output quality}, not \textit{harness infrastructure quality}.
+    \item \textbf{Multi-metric frameworks evaluate output, not harness (C6).} AgentBoard~\cite{G3} provides multi-dimensional evaluation via progress rates~($\checkmark^{\ddagger}$), but measures \textit{agent output quality}, not \textit{harness infrastructure quality}.
 
-    \item \textbf{HarnessEval is the first to address all 8 characteristics simultaneously,} filling the gap between isolated component evaluations and output-only benchmarks.
+    \item \textbf{HarnessEval is the first to address all six characteristics,} bridging isolated component evaluations with a unified, ablation-driven, multi-backend framework for coding agent harness assessment.
 \end{enumerate}
 
 \subsubsection{Research Gap Summary}
