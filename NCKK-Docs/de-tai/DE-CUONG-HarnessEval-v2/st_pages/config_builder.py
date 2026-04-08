@@ -112,7 +112,8 @@ def _scan_data_counts() -> dict[str, int]:
 
 
 def _get_run_manager() -> RunManager:
-    if "run_manager" not in st.session_state:
+    # Re-create if old instance lacks new methods (e.g., after code update)
+    if "run_manager" not in st.session_state or not hasattr(st.session_state.run_manager, "_run_thread_ollama"):
         st.session_state.run_manager = RunManager()
     return st.session_state.run_manager
 
