@@ -1,0 +1,84 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_full_gpt",
+  "total_cost": 0.1851,
+  "context_tokens_used": 75230,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/utils/"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/core/cache/backends/"
+      },
+      "output": "line 50: def clean_0(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "test_runner",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/fields/__init__.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/forms/fields.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 5,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_summary_gpt",
+  "total_cost": 0.1581,
+  "context_tokens_used": 14581,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/contrib/admin/views/main.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/http/"
+      },
+      "output": "line 29: def handle_0(self, *args):\nline 474: def delete_1(self, *args):\nline 468: def update_2(self, *args):\nline 245: def handle_3(self, *args):\nline 288: def save_4(self, *args):\nline 30: def update_5(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:27"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/forms/fields.py"
+      },
+      "output": "..............................\n116 passed in 19.48s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:44"
+    }
+  ]
+}

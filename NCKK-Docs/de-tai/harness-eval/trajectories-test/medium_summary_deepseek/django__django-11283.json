@@ -1,0 +1,71 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "medium_summary_deepseek",
+  "total_cost": 0.0337,
+  "context_tokens_used": 15751,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/http/"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:05"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/contrib/auth/models.py"
+      },
+      "output": "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+      "acceptable_tools": [
+        "read",
+        "write",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:38"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:33"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n183 passed in 16.06s",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    }
+  ]
+}

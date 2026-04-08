@@ -1,0 +1,129 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "sliding_window",
+    "backend": "claude"
+  },
+  "condition_id": "medium_sliding_window_claude",
+  "total_cost": 0.3547,
+  "context_tokens_used": 46551,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/contrib/auth/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/forms/fields.py"
+      },
+      "output": "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+      "acceptable_tools": [
+        "read",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 4,
+      "action": "read",
+      "args": {
+        "path": "django/template/loader.py"
+      },
+      "output": "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+      "acceptable_tools": [
+        "read",
+        "write",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:52"
+    },
+    {
+      "turn": 5,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/sql/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:01:20"
+    },
+    {
+      "turn": 6,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/sql/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:01:30"
+    },
+    {
+      "turn": 7,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/cache/tests.py"
+      },
+      "output": "99 passed, 3 failed in 16.44s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_diff",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:01:31"
+    },
+    {
+      "turn": 8,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/utils/dateparse.py"
+      },
+      "output": "..............................\n183 passed in 17.50s",
+      "acceptable_tools": [
+        "bash",
+        "python",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:02:00"
+    }
+  ]
+}

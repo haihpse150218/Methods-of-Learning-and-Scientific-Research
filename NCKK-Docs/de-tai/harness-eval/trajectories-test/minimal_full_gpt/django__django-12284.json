@@ -1,0 +1,113 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_full_gpt",
+  "total_cost": 0.2707,
+  "context_tokens_used": 45481,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/template/loader.py"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/forms/"
+      },
+      "output": "line 449: def update_0(self, *args):\nline 352: def create_1(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:22"
+    },
+    {
+      "turn": 3,
+      "action": "read",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py"
+      },
+      "output": "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:39"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/views/generic/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:28"
+    },
+    {
+      "turn": 5,
+      "action": "edit",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:10"
+    },
+    {
+      "turn": 6,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/contrib/admin/views/main.py"
+      },
+      "output": "93 passed, 1 failed in 14.94s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/template/loader.py"
+      },
+      "output": "..............................\n139 passed in 29.92s",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:02:06"
+    }
+  ]
+}

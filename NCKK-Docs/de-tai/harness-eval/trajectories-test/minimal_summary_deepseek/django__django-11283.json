@@ -1,0 +1,86 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_summary_deepseek",
+  "total_cost": 0.0385,
+  "context_tokens_used": 16462,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/contrib/auth/models.py"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:05"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "class ",
+        "path": "django/db/models/fields/"
+      },
+      "output": "line 348: def validate_0(self, *args):\nline 144: def clean_1(self, *args):\nline 309: def validate_2(self, *args):\nline 239: def update_3(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/core/cache/backends/filebased.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:44"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/utils/dateparse.py"
+      },
+      "output": "..............................\n176 passed in 12.52s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:01:20"
+    }
+  ]
+}

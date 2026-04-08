@@ -1,0 +1,58 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "sliding_window",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_sliding_window_gpt",
+  "total_cost": 0.1812,
+  "context_tokens_used": 33282,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/http/"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:14"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": ".................\n17 passed in 23.72s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:57"
+    }
+  ]
+}

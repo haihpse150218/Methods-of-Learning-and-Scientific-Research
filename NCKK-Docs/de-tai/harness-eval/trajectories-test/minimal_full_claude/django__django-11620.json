@@ -1,0 +1,56 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "claude"
+  },
+  "condition_id": "minimal_full_claude",
+  "total_cost": 0.25,
+  "context_tokens_used": 66107,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/http/response.py"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/forms/fields.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/template/loader.py"
+      },
+      "output": "..............................\n99 passed in 3.26s",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    }
+  ]
+}

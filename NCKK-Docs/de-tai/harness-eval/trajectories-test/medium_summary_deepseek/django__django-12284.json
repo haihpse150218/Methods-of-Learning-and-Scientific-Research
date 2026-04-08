@@ -1,0 +1,111 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "medium_summary_deepseek",
+  "total_cost": 0.0641,
+  "context_tokens_used": 19008,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/forms/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:08"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/contrib/auth/"
+      },
+      "output": "line 153: def update_0(self, *args):\nline 370: def delete_1(self, *args):\nline 103: def clean_2(self, *args):\nline 301: def validate_3(self, *args):\nline 6: def save_4(self, *args):\nline 4: def process_5(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    },
+    {
+      "turn": 3,
+      "action": "read",
+      "args": {
+        "path": "django/urls/resolvers.py"
+      },
+      "output": "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+      "acceptable_tools": [
+        "read",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/urls/resolvers.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    },
+    {
+      "turn": 5,
+      "action": "edit",
+      "args": {
+        "path": "django/template/loader.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:45"
+    },
+    {
+      "turn": 6,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "28 passed, 5 failed in 8.59s",
+      "acceptable_tools": [
+        "test_runner",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:48"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "39 passed, 1 failed in 17.42s",
+      "acceptable_tools": [
+        "bash",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    }
+  ]
+}

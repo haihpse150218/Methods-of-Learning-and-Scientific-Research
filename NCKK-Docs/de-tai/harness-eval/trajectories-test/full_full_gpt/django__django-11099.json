@@ -1,0 +1,59 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "full_full_gpt",
+  "total_cost": 0.1815,
+  "context_tokens_used": 73163,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/template/"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "edit",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/forms/fields.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "find",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 3,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/forms_tests/tests/test_fields.py"
+      },
+      "output": ".............................\n29 passed in 18.00s",
+      "acceptable_tools": [
+        "test_runner",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    }
+  ]
+}

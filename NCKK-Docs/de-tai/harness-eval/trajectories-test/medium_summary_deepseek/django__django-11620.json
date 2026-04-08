@@ -1,0 +1,56 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "medium_summary_deepseek",
+  "total_cost": 0.029,
+  "context_tokens_used": 10876,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "git_diff",
+      "args": {},
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "git_diff",
+        "write",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:05"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 3,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/cache/tests.py"
+      },
+      "output": "..............................\n198 passed in 29.47s",
+      "acceptable_tools": [
+        "test_runner",
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:57"
+    }
+  ]
+}

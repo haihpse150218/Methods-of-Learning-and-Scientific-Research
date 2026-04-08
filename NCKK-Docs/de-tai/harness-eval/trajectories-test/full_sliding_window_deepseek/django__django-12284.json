@@ -1,0 +1,88 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_sliding_window_deepseek",
+  "total_cost": 0.0574,
+  "context_tokens_used": 36489,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/contrib/auth/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/forms/fields.py"
+      },
+      "output": "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+      "acceptable_tools": [
+        "read",
+        "git_show",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:22"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/db/models/sql/query.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_diff",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:57"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:01:08"
+    },
+    {
+      "turn": 5,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "..............................\n116 passed in 17.00s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_show"
+      ],
+      "timestamp": "2026-05-01T10:01:35"
+    }
+  ]
+}

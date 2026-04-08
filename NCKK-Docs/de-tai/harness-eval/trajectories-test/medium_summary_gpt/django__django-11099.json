@@ -1,0 +1,87 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_summary_gpt",
+  "total_cost": 0.167,
+  "context_tokens_used": 13465,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/http/"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "test_runner",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:06"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "git_diff",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    },
+    {
+      "turn": 5,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/cache/tests.py"
+      },
+      "output": "..............................\n166 passed in 23.14s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:35"
+    }
+  ]
+}

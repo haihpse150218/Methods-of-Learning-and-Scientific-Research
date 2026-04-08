@@ -1,0 +1,54 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_summary_deepseek",
+  "total_cost": 0.041,
+  "context_tokens_used": 18876,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/views/generic/base.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "96 passed, 2 failed in 18.42s",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    }
+  ]
+}

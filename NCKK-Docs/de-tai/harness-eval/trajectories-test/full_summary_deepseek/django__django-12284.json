@@ -1,0 +1,98 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_summary_deepseek",
+  "total_cost": 0.0418,
+  "context_tokens_used": 16410,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/db/models/sql/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/core/cache/backends/"
+      },
+      "output": "line 354: def clean_0(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "edit",
+        "git_show"
+      ],
+      "timestamp": "2026-05-01T10:00:22"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/forms/models.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "87 passed, 1 failed in 12.56s",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "find"
+      ],
+      "timestamp": "2026-05-01T10:00:35"
+    },
+    {
+      "turn": 6,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "..............................\n48 passed in 2.11s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    }
+  ]
+}

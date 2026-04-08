@@ -1,0 +1,72 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "claude"
+  },
+  "condition_id": "medium_summary_claude",
+  "total_cost": 0.2519,
+  "context_tokens_used": 18370,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/forms/"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "bash",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:11"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/forms/models.py"
+      },
+      "output": "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/http/request.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:39"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/contrib/admin/views/main.py"
+      },
+      "output": "...........................\n27 passed in 4.15s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    }
+  ]
+}

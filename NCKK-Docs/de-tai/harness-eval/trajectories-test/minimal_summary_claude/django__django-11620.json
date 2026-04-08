@@ -1,0 +1,73 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "claude"
+  },
+  "condition_id": "minimal_summary_claude",
+  "total_cost": 0.246,
+  "context_tokens_used": 12623,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/core/cache/backends/base.py"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "write",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/db/models/sql/"
+      },
+      "output": "line 139: def update_0(self, *args):\nline 127: def update_1(self, *args):\nline 294: def create_2(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/template/loader.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "53 passed, 2 failed in 8.45s",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    }
+  ]
+}

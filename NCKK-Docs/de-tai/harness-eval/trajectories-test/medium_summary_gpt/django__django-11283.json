@@ -1,0 +1,71 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_summary_gpt",
+  "total_cost": 0.2265,
+  "context_tokens_used": 15765,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/utils/"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "edit",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:08"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "python",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/views/generic/base.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "read",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    },
+    {
+      "turn": 4,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "test_runner",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:20"
+    }
+  ]
+}

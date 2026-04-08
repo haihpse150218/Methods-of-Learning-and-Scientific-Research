@@ -1,0 +1,56 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_summary_deepseek",
+  "total_cost": 0.0376,
+  "context_tokens_used": 19095,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/http/response.py"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:09"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n184 passed in 16.85s",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    }
+  ]
+}

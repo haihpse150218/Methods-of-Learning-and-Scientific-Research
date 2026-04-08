@@ -1,0 +1,67 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "sliding_window",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_sliding_window_gpt",
+  "total_cost": 0.1651,
+  "context_tokens_used": 34921,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/views/generic/base.py"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:14"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/template/"
+      },
+      "output": "line 426: def process_0(self, *args):\nline 42: def clean_1(self, *args):\nline 222: def create_2(self, *args):\nline 290: def validate_3(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "test_runner",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 4,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    }
+  ]
+}

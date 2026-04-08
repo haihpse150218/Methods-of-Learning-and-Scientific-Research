@@ -1,0 +1,84 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_full_gpt",
+  "total_cost": 0.1413,
+  "context_tokens_used": 71855,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/core/cache/backends/"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:05"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/db/models/query.py"
+      },
+      "output": "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+      "acceptable_tools": [
+        "read",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "test_runner",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:01:16"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n89 passed in 29.26s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:20"
+    }
+  ]
+}

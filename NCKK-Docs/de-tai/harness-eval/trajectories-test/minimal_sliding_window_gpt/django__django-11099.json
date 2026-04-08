@@ -1,0 +1,58 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "sliding_window",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_sliding_window_gpt",
+  "total_cost": 0.1868,
+  "context_tokens_used": 46885,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/db/models/"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:09"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "88 passed, 2 failed in 1.43s",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:33"
+    }
+  ]
+}

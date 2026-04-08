@@ -1,0 +1,84 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_sliding_window_deepseek",
+  "total_cost": 0.0354,
+  "context_tokens_used": 50699,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/urls/resolvers.py"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/template/"
+      },
+      "output": "line 175: def clean_0(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/urls/resolvers.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/http/request.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n154 passed in 7.41s",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:25"
+    }
+  ]
+}

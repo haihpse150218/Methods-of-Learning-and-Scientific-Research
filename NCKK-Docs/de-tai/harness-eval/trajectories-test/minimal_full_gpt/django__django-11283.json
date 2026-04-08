@@ -1,0 +1,57 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_full_gpt",
+  "total_cost": 0.1739,
+  "context_tokens_used": 66884,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/contrib/admin/views/main.py"
+      },
+      "output": "26 passed, 5 failed in 7.38s",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    }
+  ]
+}

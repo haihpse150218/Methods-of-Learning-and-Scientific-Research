@@ -1,0 +1,84 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "medium_full_deepseek",
+  "total_cost": 0.0349,
+  "context_tokens_used": 61816,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "class ",
+        "path": "django/contrib/auth/"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "python",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/contrib/admin/views/main.py"
+      },
+      "output": "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+      "acceptable_tools": [
+        "read",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:57"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/contrib/admin/views/main.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/urls/resolvers.py"
+      },
+      "output": "..............................\n153 passed in 12.25s",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:15"
+    }
+  ]
+}

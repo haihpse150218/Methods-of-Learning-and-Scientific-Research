@@ -1,0 +1,69 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_summary_deepseek",
+  "total_cost": 0.0368,
+  "context_tokens_used": 13587,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "find",
+      "args": {
+        "path": "django/",
+        "name": "*.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "find",
+        "git_log",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/contrib/admin/views/main.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 4,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    }
+  ]
+}

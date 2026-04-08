@@ -1,0 +1,69 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_full_deepseek",
+  "total_cost": 0.0333,
+  "context_tokens_used": 45310,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/contrib/admin/views/"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:19"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/forms/fields.py"
+      },
+      "output": "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+      "acceptable_tools": [
+        "read",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:34"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "...................\n19 passed in 26.51s",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:56"
+    }
+  ]
+}

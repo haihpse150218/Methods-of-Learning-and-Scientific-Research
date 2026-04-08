@@ -1,0 +1,72 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_summary_deepseek",
+  "total_cost": 0.0487,
+  "context_tokens_used": 15773,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "find",
+      "args": {
+        "path": "django/",
+        "name": "*.py"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "find",
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/contrib/auth/"
+      },
+      "output": "line 473: def clean_0(self, *args):\nline 121: def process_1(self, *args):\nline 216: def process_2(self, *args):\nline 252: def delete_3(self, *args):\nline 235: def delete_4(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    },
+    {
+      "turn": 4,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "51 passed, 1 failed in 4.84s",
+      "acceptable_tools": [
+        "test_runner",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:08"
+    }
+  ]
+}

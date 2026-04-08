@@ -1,0 +1,102 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_summary_gpt",
+  "total_cost": 0.2517,
+  "context_tokens_used": 17289,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/http/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:26"
+    },
+    {
+      "turn": 3,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/forms/"
+      },
+      "output": "line 383: def delete_0(self, *args):\nline 130: def save_1(self, *args):\nline 195: def validate_2(self, *args):\nline 187: def delete_3(self, *args):\nline 153: def save_4(self, *args):\nline 443: def process_5(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "read",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:21"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/views/generic/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "36 passed, 3 failed in 10.51s",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:25"
+    },
+    {
+      "turn": 6,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "46 passed, 2 failed in 6.85s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    }
+  ]
+}

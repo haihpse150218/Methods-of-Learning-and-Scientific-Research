@@ -1,0 +1,88 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_summary_deepseek",
+  "total_cost": 0.0333,
+  "context_tokens_used": 16290,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/utils/dateparse.py"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/db/models/query.py"
+      },
+      "output": "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+      "acceptable_tools": [
+        "read",
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:51"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/fields/__init__.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:01:08"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/db/models/sql/query.py"
+      },
+      "output": "..............................\n185 passed in 2.71s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:40"
+    }
+  ]
+}

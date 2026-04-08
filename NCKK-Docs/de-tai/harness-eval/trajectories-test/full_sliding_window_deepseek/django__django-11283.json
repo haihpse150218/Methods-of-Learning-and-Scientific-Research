@@ -1,0 +1,55 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_sliding_window_deepseek",
+  "total_cost": 0.0376,
+  "context_tokens_used": 28789,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/urls/resolvers.py"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:09"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/forms/fields.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "test_runner",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 3,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_full_deepseek",
+  "total_cost": 0.0408,
+  "context_tokens_used": 64104,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/forms/"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:07"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/sql/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "..............................\n35 passed in 15.55s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    }
+  ]
+}

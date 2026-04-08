@@ -1,0 +1,84 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_sliding_window_deepseek",
+  "total_cost": 0.0376,
+  "context_tokens_used": 28596,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "git_log",
+      "args": {
+        "n": 7
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "git_log",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:09"
+    },
+    {
+      "turn": 2,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "edit",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_diff",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/forms/fields.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 5,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "78 passed, 5 failed in 8.82s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_show",
+        "find"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    }
+  ]
+}

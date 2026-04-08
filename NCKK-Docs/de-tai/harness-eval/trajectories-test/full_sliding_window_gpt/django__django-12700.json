@@ -1,0 +1,72 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "sliding_window",
+    "backend": "gpt"
+  },
+  "condition_id": "full_sliding_window_gpt",
+  "total_cost": 0.1542,
+  "context_tokens_used": 43785,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/core/cache/backends/"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:06"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/contrib/admin/views/main.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "git_log",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_diff",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 4,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "..............................\n112 passed in 20.29s",
+      "acceptable_tools": [
+        "test_runner",
+        "read",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:01:12"
+    }
+  ]
+}

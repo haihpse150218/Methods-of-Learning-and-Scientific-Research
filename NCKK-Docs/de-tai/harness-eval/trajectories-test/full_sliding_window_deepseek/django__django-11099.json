@@ -1,0 +1,70 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_sliding_window_deepseek",
+  "total_cost": 0.0281,
+  "context_tokens_used": 39918,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "glob",
+      "args": {
+        "pattern": "**/django/**/*.py"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "glob",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "git_show",
+      "args": {
+        "ref": "HEAD"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "git_show",
+        "find",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/sql/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "find"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n165 passed in 28.16s",
+      "acceptable_tools": [
+        "bash",
+        "git_show"
+      ],
+      "timestamp": "2026-05-01T10:01:04"
+    }
+  ]
+}

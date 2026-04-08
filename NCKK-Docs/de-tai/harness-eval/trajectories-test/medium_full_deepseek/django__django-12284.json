@@ -1,0 +1,86 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "medium_full_deepseek",
+  "total_cost": 0.0646,
+  "context_tokens_used": 47432,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/template/loader.py"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:09"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/db/models/"
+      },
+      "output": "line 253: def save_0(self, *args):\nline 287: def process_1(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:45"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "python",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:08"
+    },
+    {
+      "turn": 5,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "26 passed, 2 failed in 19.53s",
+      "acceptable_tools": [
+        "test_runner",
+        "write",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:30"
+    }
+  ]
+}

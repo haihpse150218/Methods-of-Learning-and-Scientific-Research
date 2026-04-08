@@ -1,0 +1,72 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "full_full_gpt",
+  "total_cost": 0.1751,
+  "context_tokens_used": 48777,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "class ",
+        "path": "django/http/"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "find"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/utils/"
+      },
+      "output": "line 386: def save_0(self, *args):\nline 151: def update_1(self, *args):\nline 286: def handle_2(self, *args):\nline 57: def delete_3(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "git_diff",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:38"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/urls/resolvers.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:33"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": ".................\n17 passed in 19.23s",
+      "acceptable_tools": [
+        "bash",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:28"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_sliding_window_deepseek",
+  "total_cost": 0.0579,
+  "context_tokens_used": 36993,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/db/models/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:11"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/urls/"
+      },
+      "output": "line 429: def validate_0(self, *args):\nline 218: def process_1(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:14"
+    },
+    {
+      "turn": 3,
+      "action": "grep",
+      "args": {
+        "pattern": "def ",
+        "path": "django/contrib/auth/"
+      },
+      "output": "line 462: def validate_0(self, *args):\nline 140: def clean_1(self, *args):\nline 18: def handle_2(self, *args):\nline 462: def handle_3(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:57"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:40"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:10"
+    },
+    {
+      "turn": 6,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "36 passed, 4 failed in 19.39s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:52"
+    },
+    {
+      "turn": 8,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "33 passed, 1 failed in 19.01s",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:20"
+    }
+  ]
+}

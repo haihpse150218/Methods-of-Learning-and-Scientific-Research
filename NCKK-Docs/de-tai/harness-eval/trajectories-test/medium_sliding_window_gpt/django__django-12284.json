@@ -1,0 +1,124 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "sliding_window",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_sliding_window_gpt",
+  "total_cost": 0.2625,
+  "context_tokens_used": 50868,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/core/cache/backends/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:17"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/http/"
+      },
+      "output": "line 239: def clean_0(self, *args):\nline 297: def create_1(self, *args):\nline 345: def update_2(self, *args):\nline 404: def save_3(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 3,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/urls/"
+      },
+      "output": "line 187: def save_0(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:39"
+    },
+    {
+      "turn": 4,
+      "action": "read",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py"
+      },
+      "output": "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:56"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "write",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:35"
+    },
+    {
+      "turn": 6,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/core/cache/backends/filebased.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:01:48"
+    },
+    {
+      "turn": 7,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/forms_tests/tests/test_fields.py"
+      },
+      "output": "29 passed, 3 failed in 1.28s",
+      "acceptable_tools": [
+        "test_runner",
+        "read",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    },
+    {
+      "turn": 8,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:02:16"
+    }
+  ]
+}

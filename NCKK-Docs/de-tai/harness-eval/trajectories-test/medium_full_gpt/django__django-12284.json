@@ -1,0 +1,114 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_full_gpt",
+  "total_cost": 0.2716,
+  "context_tokens_used": 76650,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/views/generic/base.py"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:06"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/template/"
+      },
+      "output": "line 184: def save_0(self, *args):\nline 375: def update_1(self, *args):\nline 349: def save_2(self, *args):\nline 172: def update_3(self, *args):\nline 127: def handle_4(self, *args):\nline 306: def process_5(self, *args):\nline 301: def clean_6(self, *args):\nline 331: def delete_7(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 3,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/urls/"
+      },
+      "output": "line 474: def handle_0(self, *args):\nline 366: def validate_1(self, *args):\nline 480: def validate_2(self, *args):\nline 198: def create_3(self, *args):\nline 489: def create_4(self, *args):\nline 311: def save_5(self, *args):\nline 451: def handle_6(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "git_diff",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:21"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/forms/fields.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:01:08"
+    },
+    {
+      "turn": 5,
+      "action": "write",
+      "args": {
+        "path": "django/db/models/fields/__init__.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:01:05"
+    },
+    {
+      "turn": 6,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/core/cache/backends/filebased.py"
+      },
+      "output": "25 passed, 2 failed in 6.83s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 7,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/cache/tests.py"
+      },
+      "output": "..............................\n83 passed in 1.80s",
+      "acceptable_tools": [
+        "test_runner",
+        "read",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:01:17"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "full_full_gpt",
+  "total_cost": 0.1797,
+  "context_tokens_used": 71407,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "glob",
+      "args": {
+        "pattern": "**/django/**/*.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "glob",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:06"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/forms/models.py"
+      },
+      "output": "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/urls/resolvers.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:01:04"
+    },
+    {
+      "turn": 5,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "glob",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:35"
+    }
+  ]
+}

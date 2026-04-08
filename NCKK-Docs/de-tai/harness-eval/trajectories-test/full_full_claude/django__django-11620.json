@@ -1,0 +1,86 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "claude"
+  },
+  "condition_id": "full_full_claude",
+  "total_cost": 0.2498,
+  "context_tokens_used": 48269,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/views/generic/"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:11"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/contrib/auth/"
+      },
+      "output": "line 389: def update_0(self, *args):\nline 267: def save_1(self, *args):\nline 105: def handle_2(self, *args):\nline 306: def update_3(self, *args):\nline 118: def save_4(self, *args):\nline 358: def process_5(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "git_diff",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/http/response.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:33"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/forms/models.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "test_runner",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:28"
+    },
+    {
+      "turn": 5,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "..............................\n102 passed in 5.16s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:45"
+    }
+  ]
+}

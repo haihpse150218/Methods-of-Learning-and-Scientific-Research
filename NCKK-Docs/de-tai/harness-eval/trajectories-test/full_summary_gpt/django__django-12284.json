@@ -1,0 +1,82 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3-max",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "full_summary_gpt",
+  "total_cost": 0.2306,
+  "context_tokens_used": 14432,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "git_log",
+      "args": {
+        "n": 6
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "git_log",
+        "test_runner",
+        "git_show"
+      ],
+      "timestamp": "2026-05-01T10:00:17"
+    },
+    {
+      "turn": 2,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "test_runner",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:14"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/http/response.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "bash",
+        "git_show"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "glob",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 5,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:40"
+    }
+  ]
+}

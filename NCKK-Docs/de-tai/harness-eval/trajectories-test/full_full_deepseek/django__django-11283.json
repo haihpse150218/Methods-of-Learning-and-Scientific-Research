@@ -1,0 +1,71 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_full_deepseek",
+  "total_cost": 0.0372,
+  "context_tokens_used": 56286,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "git_log",
+      "args": {
+        "n": 4
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "git_log",
+        "grep",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:11"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/utils/dateparse.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/contrib/admin/views/main.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_diff",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    },
+    {
+      "turn": 4,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/forms_tests/tests/test_fields.py"
+      },
+      "output": "..............................\n107 passed in 28.42s",
+      "acceptable_tools": [
+        "test_runner",
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    }
+  ]
+}

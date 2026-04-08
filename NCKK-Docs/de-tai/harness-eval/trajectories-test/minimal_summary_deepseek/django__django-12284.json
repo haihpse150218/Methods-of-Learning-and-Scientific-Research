@@ -1,0 +1,131 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_summary_deepseek",
+  "total_cost": 0.0491,
+  "context_tokens_used": 12852,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "raise ",
+        "path": "django/http/"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:17"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/db/models/"
+      },
+      "output": "line 368: def validate_0(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 3,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/utils/"
+      },
+      "output": "line 80: def handle_0(self, *args):\nline 319: def validate_1(self, *args):\nline 411: def create_2(self, *args):\nline 408: def create_3(self, *args):\nline 42: def update_4(self, *args):\nline 351: def update_5(self, *args):\nline 141: def handle_6(self, *args):\nline 366: def update_7(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:39"
+    },
+    {
+      "turn": 4,
+      "action": "grep",
+      "args": {
+        "pattern": "self.",
+        "path": "django/forms/"
+      },
+      "output": "line 108: def save_0(self, *args):\nline 176: def update_1(self, *args):\nline 478: def delete_2(self, *args):\nline 198: def clean_3(self, *args):\nline 288: def save_4(self, *args):\nline 13: def validate_5(self, *args):\nline 45: def update_6(self, *args):\nline 235: def handle_7(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:20"
+    },
+    {
+      "turn": 5,
+      "action": "write",
+      "args": {
+        "path": "django/http/response.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:50"
+    },
+    {
+      "turn": 6,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:24"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "31 passed, 4 failed in 6.07s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:01:17"
+    },
+    {
+      "turn": 8,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "86 passed, 3 failed in 8.75s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:02:40"
+    }
+  ]
+}

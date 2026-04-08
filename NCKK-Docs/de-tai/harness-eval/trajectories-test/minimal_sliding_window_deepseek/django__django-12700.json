@@ -1,0 +1,87 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "sliding_window",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_sliding_window_deepseek",
+  "total_cost": 0.0396,
+  "context_tokens_used": 39080,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/views/generic/base.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:17"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/template/loader.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "write",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/db/models/query.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:21"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/contrib/admin/views/main.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:52"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "27 passed, 5 failed in 2.63s",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:45"
+    }
+  ]
+}

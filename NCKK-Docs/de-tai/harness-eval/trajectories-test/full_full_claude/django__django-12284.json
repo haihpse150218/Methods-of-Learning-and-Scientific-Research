@@ -1,0 +1,83 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "claude"
+  },
+  "condition_id": "full_full_claude",
+  "total_cost": 0.3099,
+  "context_tokens_used": 56499,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "glob",
+      "args": {
+        "pattern": "**/django/**/*.py"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "glob",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/utils/dateparse.py"
+      },
+      "output": "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+      "acceptable_tools": [
+        "read",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:34"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/contrib/auth/models.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "python",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:45"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "find",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:08"
+    },
+    {
+      "turn": 5,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/model_fields/tests.py"
+      },
+      "output": "..............................\n149 passed in 25.70s",
+      "acceptable_tools": [
+        "test_runner",
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    }
+  ]
+}

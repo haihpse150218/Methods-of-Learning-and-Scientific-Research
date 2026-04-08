@@ -1,0 +1,56 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "claude"
+  },
+  "condition_id": "full_full_claude",
+  "total_cost": 0.1722,
+  "context_tokens_used": 55709,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "class ",
+        "path": "django/template/"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/contrib/admin/views/main.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 3,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:42"
+    }
+  ]
+}

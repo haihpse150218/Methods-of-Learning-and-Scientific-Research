@@ -9,12 +9,12 @@
 *.synctex.gz
 
 # SWE-Agent clone (large repo, clone locally)
-NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/SWE-agent/
+NCKK-Docs/de-tai/harness-eval/SWE-agent/
 
 # Pilot/experiment outputs (large, regenerable)
-NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/pilot_real/
-NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/pilot_smoke/
-NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/trajectories_*/
+NCKK-Docs/de-tai/harness-eval/pilot_real/
+NCKK-Docs/de-tai/harness-eval/pilot_smoke/
+NCKK-Docs/de-tai/harness-eval/trajectories_*/
 
 # VS Code
 .vscode/

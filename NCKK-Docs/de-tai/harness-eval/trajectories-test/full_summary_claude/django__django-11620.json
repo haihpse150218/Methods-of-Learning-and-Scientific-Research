@@ -1,0 +1,55 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "summary",
+    "backend": "claude"
+  },
+  "condition_id": "full_summary_claude",
+  "total_cost": 0.1864,
+  "context_tokens_used": 12862,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/contrib/auth/models.py"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:17"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/template/loader.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_diff",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:22"
+    },
+    {
+      "turn": 3,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    }
+  ]
+}

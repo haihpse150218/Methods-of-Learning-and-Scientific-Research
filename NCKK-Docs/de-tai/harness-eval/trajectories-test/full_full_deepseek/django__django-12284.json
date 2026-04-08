@@ -1,0 +1,82 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_full_deepseek",
+  "total_cost": 0.0533,
+  "context_tokens_used": 55208,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "git_log",
+      "args": {
+        "n": 10
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "git_log",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:16"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/forms/fields.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:36"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "..............................\n108 passed in 14.00s",
+      "acceptable_tools": [
+        "bash",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    }
+  ]
+}

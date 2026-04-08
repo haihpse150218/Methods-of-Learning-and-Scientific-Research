@@ -1,0 +1,85 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_summary_gpt",
+  "total_cost": 0.1853,
+  "context_tokens_used": 15688,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/http/request.py"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "write",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:34"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/db/models/sql/query.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:27"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/db/models/query.py"
+      },
+      "output": "21 passed, 2 failed in 15.79s",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:01:05"
+    }
+  ]
+}

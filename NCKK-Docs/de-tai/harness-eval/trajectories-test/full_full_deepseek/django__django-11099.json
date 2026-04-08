@@ -1,0 +1,87 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_full_deepseek",
+  "total_cost": 0.0296,
+  "context_tokens_used": 52895,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "glob",
+      "args": {
+        "pattern": "**/django/**/*.py"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "glob",
+        "find",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "git_show",
+      "args": {
+        "ref": "HEAD"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "git_show",
+        "find",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "git_log",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:51"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "git_show",
+        "find"
+      ],
+      "timestamp": "2026-05-01T10:00:44"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/model_fields/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n150 passed in 9.64s",
+      "acceptable_tools": [
+        "bash",
+        "find",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:15"
+    }
+  ]
+}

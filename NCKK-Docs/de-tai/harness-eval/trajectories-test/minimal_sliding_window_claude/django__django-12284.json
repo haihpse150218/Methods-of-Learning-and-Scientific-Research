@@ -1,0 +1,116 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "sliding_window",
+    "backend": "claude"
+  },
+  "condition_id": "minimal_sliding_window_claude",
+  "total_cost": 0.246,
+  "context_tokens_used": 41818,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/utils/dateparse.py"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py"
+      },
+      "output": "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+      "acceptable_tools": [
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:34"
+    },
+    {
+      "turn": 3,
+      "action": "grep",
+      "args": {
+        "pattern": "return ",
+        "path": "django/http/"
+      },
+      "output": "line 136: def save_0(self, *args):\nline 249: def create_1(self, *args):\nline 454: def clean_2(self, *args):\nline 18: def handle_3(self, *args):\nline 56: def delete_4(self, *args):\nline 89: def handle_5(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    },
+    {
+      "turn": 4,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:00"
+    },
+    {
+      "turn": 5,
+      "action": "write",
+      "args": {
+        "path": "django/db/models/query.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:50"
+    },
+    {
+      "turn": 6,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/core/cache/backends/filebased.py"
+      },
+      "output": "38 passed, 3 failed in 16.60s",
+      "acceptable_tools": [
+        "bash",
+        "write",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:12"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "..............................\n195 passed in 15.97s",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:01:17"
+    }
+  ]
+}

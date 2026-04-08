@@ -1,0 +1,57 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "medium_full_deepseek",
+  "total_cost": 0.03,
+  "context_tokens_used": 61080,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "bash",
+        "git_diff",
+        "python"
+      ],
+      "timestamp": "2026-05-01T10:00:11"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/forms/fields.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 3,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/forms_tests/tests/test_fields.py"
+      },
+      "output": "..............................\n32 passed in 21.25s",
+      "acceptable_tools": [
+        "test_runner",
+        "python",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:27"
+    }
+  ]
+}

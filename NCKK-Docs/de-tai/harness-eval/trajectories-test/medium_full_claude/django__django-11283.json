@@ -1,0 +1,57 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "claude"
+  },
+  "condition_id": "medium_full_claude",
+  "total_cost": 0.1914,
+  "context_tokens_used": 72497,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "bash",
+        "python",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:15"
+    },
+    {
+      "turn": 2,
+      "action": "edit",
+      "args": {
+        "path": "django/utils/dateparse.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 3,
+      "action": "test_runner",
+      "args": {
+        "test_path": "tests/forms_tests/tests/test_fields.py"
+      },
+      "output": "..........................\n26 passed in 3.40s",
+      "acceptable_tools": [
+        "test_runner",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:39"
+    }
+  ]
+}

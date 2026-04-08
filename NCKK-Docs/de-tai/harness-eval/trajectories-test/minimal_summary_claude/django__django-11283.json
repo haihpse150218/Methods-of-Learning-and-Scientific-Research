@@ -1,0 +1,56 @@
+{
+  "task_id": "django__django-11283",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "claude"
+  },
+  "condition_id": "minimal_summary_claude",
+  "total_cost": 0.2327,
+  "context_tokens_used": 12434,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "Issue: Migration autodetector crashes with squashed migrations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/db/models/query.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/utils/dateparse.py"
+      },
+      "output": "16 passed, 2 failed in 15.08s",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:27"
+    }
+  ]
+}

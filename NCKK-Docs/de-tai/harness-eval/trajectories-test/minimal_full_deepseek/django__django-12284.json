@@ -1,0 +1,113 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "minimal_full_deepseek",
+  "total_cost": 0.054,
+  "context_tokens_used": 55547,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/template/loader.py"
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:05"
+    },
+    {
+      "turn": 2,
+      "action": "grep",
+      "args": {
+        "pattern": "import ",
+        "path": "django/http/"
+      },
+      "output": "line 83: def validate_0(self, *args):\nline 361: def clean_1(self, *args):\nline 154: def process_2(self, *args):\nline 77: def clean_3(self, *args):\nline 57: def clean_4(self, *args):\nline 61: def clean_5(self, *args):\nline 409: def save_6(self, *args):\nline 234: def clean_7(self, *args):",
+      "acceptable_tools": [
+        "grep",
+        "read",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 3,
+      "action": "read",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py"
+      },
+      "output": "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+      "acceptable_tools": [
+        "read",
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:27"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/http/response.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 5,
+      "action": "write",
+      "args": {
+        "path": "django/http/response.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:01:25"
+    },
+    {
+      "turn": 6,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "63 passed, 4 failed in 2.08s",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:54"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/contrib/admin/views/main.py"
+      },
+      "output": "15 passed, 5 failed in 7.22s",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:02:13"
+    }
+  ]
+}

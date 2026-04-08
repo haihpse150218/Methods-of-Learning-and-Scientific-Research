@@ -1,0 +1,57 @@
+{
+  "task_id": "django__django-11620",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "medium",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "medium_full_gpt",
+  "total_cost": 0.2485,
+  "context_tokens_used": 53961,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "grep",
+      "args": {
+        "pattern": "class ",
+        "path": "django/urls/"
+      },
+      "output": "Issue: When DEBUG is True, technical_404_response() renders context in a confusing way\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "grep",
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:07"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/template/loader.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:20"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "74 passed, 2 failed in 4.23s",
+      "acceptable_tools": [
+        "bash",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:00:51"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "task_id": "django__django-12284",
+  "model": "qwen3.5-122b-a10b",
+  "resolved": true,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "sliding_window",
+    "backend": "claude"
+  },
+  "condition_id": "full_sliding_window_claude",
+  "total_cost": 0.2664,
+  "context_tokens_used": 28015,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "git_log",
+      "args": {
+        "n": 5
+      },
+      "output": "Issue: ORDER BY clauses are not applied to aggregated annotations\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "git_log",
+        "find"
+      ],
+      "timestamp": "2026-05-01T10:00:12"
+    },
+    {
+      "turn": 2,
+      "action": "glob",
+      "args": {
+        "pattern": "**/django/**/*.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "glob",
+        "edit",
+        "git_show"
+      ],
+      "timestamp": "2026-05-01T10:00:28"
+    },
+    {
+      "turn": 3,
+      "action": "read",
+      "args": {
+        "path": "django/utils/dateparse.py"
+      },
+      "output": "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+      "acceptable_tools": [
+        "read",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:30"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/core/cache/backends/filebased.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "git_log",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:01:12"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -c \"from django import *; print('OK')\""
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:01:10"
+    },
+    {
+      "turn": 6,
+      "action": "git_diff",
+      "args": {},
+      "output": "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result",
+      "acceptable_tools": [
+        "git_diff",
+        "test_runner"
+      ],
+      "timestamp": "2026-05-01T10:01:48"
+    },
+    {
+      "turn": 7,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "..............................\n83 passed in 18.36s",
+      "acceptable_tools": [
+        "bash",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:01:45"
+    }
+  ]
+}

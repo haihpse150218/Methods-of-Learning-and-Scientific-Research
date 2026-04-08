@@ -1,0 +1,56 @@
+{
+  "task_id": "django__django-11099",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_full_gpt",
+  "total_cost": 0.2515,
+  "context_tokens_used": 48922,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/forms_tests/tests/test_fields.py -x -q 2>&1 | tail -10"
+      },
+      "output": "Issue: UsernameValidator allows trailing newline in usernames\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "bash",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:13"
+    },
+    {
+      "turn": 2,
+      "action": "write",
+      "args": {
+        "path": "django/db/models/query.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "read",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:26"
+    },
+    {
+      "turn": 3,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/db/models/sql/query.py"
+      },
+      "output": "70 passed, 2 failed in 19.11s",
+      "acceptable_tools": [
+        "bash",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:24"
+    }
+  ]
+}

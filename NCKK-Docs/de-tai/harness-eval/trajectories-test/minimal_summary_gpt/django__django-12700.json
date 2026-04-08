@@ -1,0 +1,83 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen3-max",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "summary",
+    "backend": "gpt"
+  },
+  "condition_id": "minimal_summary_gpt",
+  "total_cost": 0.2159,
+  "context_tokens_used": 16954,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "read",
+      "args": {
+        "path": "django/db/models/sql/query.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "read",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:10"
+    },
+    {
+      "turn": 2,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/template/loader.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "grep"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 3,
+      "action": "write",
+      "args": {
+        "path": "django/http/response.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:33"
+    },
+    {
+      "turn": 4,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/core/cache/backends/filebased.py"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timestamp": "2026-05-01T10:00:56"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && python -m pytest tests/cache/tests.py -x -q 2>&1 | tail -10"
+      },
+      "output": "88 passed, 2 failed in 13.86s",
+      "acceptable_tools": [
+        "bash",
+        "write",
+        "read"
+      ],
+      "timestamp": "2026-05-01T10:01:30"
+    }
+  ]
+}

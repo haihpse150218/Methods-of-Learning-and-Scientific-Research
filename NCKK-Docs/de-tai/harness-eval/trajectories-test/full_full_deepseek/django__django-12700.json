@@ -1,0 +1,89 @@
+{
+  "task_id": "django__django-12700",
+  "model": "qwen2.5-7b-instruct-1m",
+  "resolved": false,
+  "config": {
+    "tool_level": "full",
+    "context_strategy": "full",
+    "backend": "deepseek"
+  },
+  "condition_id": "full_full_deepseek",
+  "total_cost": 0.0386,
+  "context_tokens_used": 62870,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "find",
+      "args": {
+        "path": "django/",
+        "name": "*.py"
+      },
+      "output": "Issue: DateTimeField.from_db_value strips timezone info when USE_TZ=True\n\nSearching for relevant code...",
+      "acceptable_tools": [
+        "find",
+        "python",
+        "git_diff"
+      ],
+      "timestamp": "2026-05-01T10:00:18"
+    },
+    {
+      "turn": 2,
+      "action": "read",
+      "args": {
+        "path": "django/contrib/auth/models.py"
+      },
+      "output": "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+      "acceptable_tools": [
+        "read",
+        "git_log",
+        "bash"
+      ],
+      "timestamp": "2026-05-01T10:00:14"
+    },
+    {
+      "turn": 3,
+      "action": "edit",
+      "args": {
+        "path": "django/core/cache/backends/base.py",
+        "old_string": "    return result",
+        "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result"
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "edit",
+        "python",
+        "git_log"
+      ],
+      "timestamp": "2026-05-01T10:00:48"
+    },
+    {
+      "turn": 4,
+      "action": "write",
+      "args": {
+        "path": "django/views/generic/base.py",
+        "content": "# patched\n"
+      },
+      "output": "ok",
+      "acceptable_tools": [
+        "write",
+        "grep",
+        "edit"
+      ],
+      "timestamp": "2026-05-01T10:00:32"
+    },
+    {
+      "turn": 5,
+      "action": "bash",
+      "args": {
+        "command": "cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' django/db/models/fields/__init__.py"
+      },
+      "output": "47 passed, 1 failed in 3.92s",
+      "acceptable_tools": [
+        "bash",
+        "read",
+        "glob"
+      ],
+      "timestamp": "2026-05-01T10:00:35"
+    }
+  ]
+}
