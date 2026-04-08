@@ -1,5 +1,429 @@
+"""Config Builder tab — Tab 1 of HarnessEval Dashboard.
+
+Provides:
+  1. 3-factor radio selectors (Tool Level, Context Strategy, Backend)
+  2. Active condition summary with badge/chip rendering
+  3. YAML config generation + download
+  4. Run panel (dry-run, max_tasks, sweagent_dir, run/stop, progress, live log)
+  5. 27-condition table with data status
+"""
+
+from __future__ import annotations
+
+import time
+from pathlib import Path
+
 import streamlit as st
+import yaml
+
+from harness_eval.configs.backend_config import BackendConfig, BackendType
+from harness_eval.configs.context_config import ContextConfig, ContextStrategy
+from harness_eval.configs.experiment import CRITICAL_CONDITIONS, ExperimentConfig
+from harness_eval.configs.tool_config import ToolConfig, ToolLevel
+from harness_eval.harness.factory import create_harness_config
+from st_utils.data_loader import scan_trajectories
+from st_utils.run_manager import RunManager
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+TRAJECTORIES_DIR = Path(__file__).parent.parent / "trajectories"
+
+# Tool radio: value -> display label
+TOOL_OPTIONS: dict[str, str] = {
+    "full": "Full (12 tools)",
+    "medium": "Medium (8 tools)",
+    "minimal": "Minimal (5 tools)",
+}
+
+# Context radio: value -> display label
+CONTEXT_OPTIONS: dict[str, str] = {
+    "full": "Full History (no truncation)",
+    "sliding_window": "Sliding Window (50K tokens)",
+    "summary": "Summary / ACC (2K tokens)",
+}
+
+# Backend radio: value -> display label (cost filled at render time)
+BACKEND_LABEL_FMT: dict[str, str] = {
+    "claude": "Claude Sonnet 4 (${cost}/eval)",
+    "gpt": "GPT-4o (${cost}/eval)",
+    "deepseek": "DeepSeek-V3 (${cost}/eval)",
+}
+
+# Full tool list for chip comparison
+FULL_TOOLS = ToolConfig(ToolLevel.FULL).tools
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 
-def render_config_builder():
-    st.info("Config Builder — coming next")
+def _backend_label(backend_val: str) -> str:
+    """Return formatted backend radio label including cost."""
+    cfg = BackendConfig(BackendType(backend_val))
+    cost = cfg.cost_per_eval
+    fmt = BACKEND_LABEL_FMT[backend_val]
+    return fmt.replace("${cost}", f"{cost:.2f}")
+
+
+def _build_yaml(tool: str, context: str, backend: str) -> str:
+    """Generate YAML config dict for the selected condition."""
+    tool_cfg = ToolConfig(ToolLevel(tool))
+    ctx_cfg = ContextConfig(ContextStrategy(context))
+    be_cfg = BackendConfig(BackendType(backend))
+
+    data = {
+        "condition_id": f"{tool}_{context}_{backend}",
+        "tool": {
+            "level": tool,
+            "tools": tool_cfg.tools,
+            "tool_count": tool_cfg.tool_count,
+        },
+        "context": {
+            "strategy": context,
+            "window_size_tokens": ctx_cfg.window_size_tokens,
+            "summary_max_tokens": ctx_cfg.summary_max_tokens,
+        },
+        "backend": {
+            "type": backend,
+            "model_id": be_cfg.model_id,
+            "provider": be_cfg.provider,
+            "cost_per_eval_usd": be_cfg.cost_per_eval,
+            "temperature": be_cfg.temperature,
+        },
+    }
+    return yaml.dump(data, sort_keys=False, allow_unicode=True)
+
+
+def _scan_data_counts() -> dict[str, int]:
+    """Return mapping of condition_id -> file count in TRAJECTORIES_DIR."""
+    counts: dict[str, int] = {}
+    if not TRAJECTORIES_DIR.exists():
+        return counts
+    try:
+        rows = scan_trajectories(TRAJECTORIES_DIR)
+        for row in rows:
+            cid = row["condition_id"]
+            counts[cid] = counts.get(cid, 0) + 1
+    except Exception:  # noqa: BLE001
+        pass
+    return counts
+
+
+def _get_run_manager() -> RunManager:
+    if "run_manager" not in st.session_state:
+        st.session_state.run_manager = RunManager()
+    return st.session_state.run_manager
+
+
+def _log_line_html(line: str) -> str:
+    """Wrap a log line in the appropriate CSS class based on content."""
+    upper = line.upper()
+    if "PASS" in upper or "DONE" in upper:
+        css = "log-line-pass"
+    elif "FAIL" in upper or "ERROR" in upper:
+        css = "log-line-fail"
+    elif "CONDITION:" in upper or "INFO" in upper or upper.startswith("["):
+        css = "log-line-info"
+    else:
+        css = "log-line"
+    return f'<span class="{css}">{line}</span>'
+
+
+# ---------------------------------------------------------------------------
+# Section renderers
+# ---------------------------------------------------------------------------
+
+
+def _render_selectors() -> tuple[str, str, str]:
+    """Render 3-column radio selectors. Returns (tool, context, backend) values."""
+    col_tool, col_ctx, col_be = st.columns(3)
+
+    with col_tool:
+        st.markdown("**Tool Level**")
+        tool_val = st.radio(
+            "tool_level",
+            options=list(TOOL_OPTIONS.keys()),
+            format_func=lambda v: TOOL_OPTIONS[v],
+            key="cb_tool",
+            label_visibility="collapsed",
+        )
+
+    with col_ctx:
+        st.markdown("**Context Strategy**")
+        ctx_val = st.radio(
+            "context_strategy",
+            options=list(CONTEXT_OPTIONS.keys()),
+            format_func=lambda v: CONTEXT_OPTIONS[v],
+            key="cb_context",
+            label_visibility="collapsed",
+        )
+
+    with col_be:
+        st.markdown("**Backend**")
+        be_val = st.radio(
+            "backend",
+            options=list(BACKEND_LABEL_FMT.keys()),
+            format_func=_backend_label,
+            key="cb_backend",
+            label_visibility="collapsed",
+        )
+
+    return tool_val, ctx_val, be_val  # type: ignore[return-value]
+
+
+def _render_condition_summary(tool: str, context: str, backend: str) -> None:
+    """Render the active condition summary card."""
+    condition_id = f"{tool}_{context}_{backend}"
+    is_critical = (tool, context, backend) in CRITICAL_CONDITIONS
+
+    exp = ExperimentConfig()
+    from harness_eval.configs.experiment import Condition
+
+    cond_obj = Condition(
+        tool=ToolConfig(ToolLevel(tool)),
+        context=ContextConfig(ContextStrategy(context)),
+        backend=BackendConfig(BackendType(backend)),
+    )
+    runs = exp.runs_for_condition(cond_obj)
+    num_tasks = exp.num_tasks
+    be_cfg = BackendConfig(BackendType(backend))
+    model_id = be_cfg.model_id
+    cost_per_eval = be_cfg.cost_per_eval
+    est_cost = runs * num_tasks * cost_per_eval
+
+    badge_class = "badge-crit" if is_critical else "badge-norm"
+    badge_label = "CRITICAL" if is_critical else "standard"
+
+    # Tool chips
+    current_tools = ToolConfig(ToolLevel(tool)).tools
+    chips_html = ""
+    for t in FULL_TOOLS:
+        if t in current_tools:
+            chips_html += f'<span class="chip-on">{t}</span>'
+        else:
+            chips_html += f'<span class="chip-off">{t}</span>'
+
+    html = f"""
+<div style="background:#1e2130;border-left:3px solid #4c8dff;border-radius:8px;padding:14px;margin-bottom:12px;">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:15px;font-weight:bold;font-family:monospace;">{condition_id}</span>
+    <span class="{badge_class}">{badge_label}</span>
+    <span style="color:#9ca0ad;font-size:13px;">runs: <b style="color:#e4e6ed;">{runs}</b></span>
+    <span style="color:#9ca0ad;font-size:13px;">tasks: <b style="color:#e4e6ed;">{num_tasks}</b></span>
+    <span style="color:#9ca0ad;font-size:13px;">est. cost: <b style="color:#e4e6ed;">${est_cost:,.0f}</b></span>
+    <span style="color:#9ca0ad;font-size:13px;">model: <b style="color:#e4e6ed;">{model_id}</b></span>
+  </div>
+  <div style="margin-top:8px;">
+    {chips_html}
+  </div>
+</div>
+"""
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def _render_yaml_section(tool: str, context: str, backend: str) -> None:
+    """Render YAML config display and download button."""
+    yaml_text = _build_yaml(tool, context, backend)
+    condition_id = f"{tool}_{context}_{backend}"
+
+    with st.expander("YAML Config", expanded=False):
+        st.code(yaml_text, language="yaml")
+        st.download_button(
+            label="Download config.yaml",
+            data=yaml_text.encode("utf-8"),
+            file_name=f"{condition_id}_config.yaml",
+            mime="text/yaml",
+            key="cb_yaml_download",
+        )
+
+
+def _render_run_panel(tool: str, context: str, backend: str) -> None:
+    """Render the run control panel."""
+    st.markdown("---")
+    st.markdown("#### Run Panel")
+
+    run_mgr = _get_run_manager()
+    status = run_mgr.get_status()
+    is_running = status["status"] == "running"
+
+    # Controls (disabled while running)
+    col_a, col_b = st.columns([1, 2])
+    with col_a:
+        dry_run = st.toggle("Dry Run Mode", value=True, key="cb_dry_run", disabled=is_running)
+    with col_b:
+        max_tasks = st.number_input(
+            "Max tasks per condition",
+            min_value=1,
+            max_value=150,
+            value=5,
+            step=1,
+            key="cb_max_tasks",
+            disabled=is_running,
+        )
+
+    sweagent_dir: str | None = None
+    if not dry_run:
+        sweagent_dir = st.text_input(
+            "SWE-Agent directory",
+            value="./SWE-agent",
+            key="cb_sweagent_dir",
+            disabled=is_running,
+        )
+
+    condition_id = f"{tool}_{context}_{backend}"
+
+    # Run / Stop buttons
+    btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 4])
+    with btn_col1:
+        run_clicked = st.button(
+            "Run",
+            key="cb_run_btn",
+            disabled=is_running,
+            type="primary",
+        )
+    with btn_col2:
+        stop_clicked = st.button(
+            "Stop",
+            key="cb_stop_btn",
+            disabled=not is_running,
+        )
+
+    if run_clicked and not is_running:
+        try:
+            run_mgr.start(
+                conditions=[condition_id],
+                mode="dry-run" if dry_run else "real",
+                max_tasks=int(max_tasks),
+                output_dir=TRAJECTORIES_DIR,
+                sweagent_dir=Path(sweagent_dir) if sweagent_dir else None,
+            )
+            st.rerun()
+        except RuntimeError as exc:
+            st.error(str(exc))
+
+    if stop_clicked:
+        run_mgr.stop()
+        st.rerun()
+
+    # Progress + live log
+    status = run_mgr.get_status()
+    cur_status = status["status"]
+    progress_tuple: tuple[int, int] = status["progress"]
+    logs: list[str] = status["logs"]
+
+    completed, total = progress_tuple
+    if total > 0:
+        frac = completed / total
+    else:
+        frac = 0.0
+
+    if cur_status == "running":
+        st.progress(frac, text=f"Running: {completed}/{total} — {status['current_condition']}")
+    elif cur_status == "done":
+        st.progress(1.0, text="Done")
+        st.success("Run completed.")
+    elif cur_status == "stopped":
+        st.progress(frac, text=f"Stopped at {completed}/{total}")
+        st.warning("Run was stopped.")
+    elif cur_status == "failed":
+        st.progress(frac, text=f"Failed at {completed}/{total}")
+        st.error("Run failed — see logs.")
+    elif cur_status == "idle" and total == 0:
+        st.progress(0.0, text="Idle")
+
+    if logs:
+        lines_html = "<br>".join(_log_line_html(ln) for ln in logs[-80:])
+        st.markdown(
+            f'<div style="background:#0d1117;border-radius:6px;padding:10px;'
+            f'max-height:220px;overflow-y:auto;font-family:monospace;">'
+            f"{lines_html}</div>",
+            unsafe_allow_html=True,
+        )
+
+    if cur_status == "running":
+        time.sleep(1)
+        st.rerun()
+
+
+def _render_conditions_table() -> None:
+    """Render the 27-condition overview table."""
+    import pandas as pd
+
+    st.markdown("---")
+    st.markdown("#### All 27 Conditions")
+
+    data_counts = _scan_data_counts()
+    exp = ExperimentConfig()
+    all_conditions = exp.generate_conditions()
+
+    rows = []
+    for cond in all_conditions:
+        cid = cond.condition_id
+        tool_val = cond.tool.level.value
+        ctx_val = cond.context.strategy.value
+        be_val = cond.backend.backend.value
+        is_crit = (tool_val, ctx_val, be_val) in CRITICAL_CONDITIONS
+        runs = exp.runs_for_condition(cond)
+        est_cost = runs * exp.num_tasks * cond.estimated_cost_per_task
+        data_n = data_counts.get(cid, 0)
+
+        rows.append(
+            {
+                "Condition": cid,
+                "Tool": tool_val,
+                "Context": ctx_val,
+                "Backend": be_val,
+                "Critical": "Yes" if is_crit else "No",
+                "Runs": runs,
+                "Est Cost ($)": round(est_cost, 0),
+                "Data (files)": data_n,
+            }
+        )
+
+    df = pd.DataFrame(rows)
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Condition": st.column_config.TextColumn("Condition", width="medium"),
+            "Tool": st.column_config.TextColumn("Tool", width="small"),
+            "Context": st.column_config.TextColumn("Context", width="medium"),
+            "Backend": st.column_config.TextColumn("Backend", width="small"),
+            "Critical": st.column_config.TextColumn("Critical", width="small"),
+            "Runs": st.column_config.NumberColumn("Runs", width="small"),
+            "Est Cost ($)": st.column_config.NumberColumn("Est Cost ($)", width="small", format="$%.0f"),
+            "Data (files)": st.column_config.NumberColumn("Data (files)", width="small"),
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
+
+
+def render_config_builder() -> None:
+    """Render the Config Builder tab (Tab 1)."""
+    st.markdown("### Config Builder")
+    st.caption("Select a condition, generate its YAML config, and launch a run.")
+
+    # 1. Factor selectors
+    tool, context, backend = _render_selectors()
+
+    st.markdown("---")
+
+    # 2. Active condition summary
+    _render_condition_summary(tool, context, backend)
+
+    # 3. YAML config + download
+    _render_yaml_section(tool, context, backend)
+
+    # 4. Run panel
+    _render_run_panel(tool, context, backend)
+
+    # 5. 27-condition table
+    _render_conditions_table()
