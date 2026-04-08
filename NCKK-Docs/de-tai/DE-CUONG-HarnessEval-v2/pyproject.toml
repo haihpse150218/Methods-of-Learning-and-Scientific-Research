@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "harness-eval"
+version = "0.1.0"
+description = "HarnessEval: Evaluating Coding Agent Scaffolds Through Ablation-Driven Multi-Dimensional Analysis"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{name = "HarnessEval Team"}]
+keywords = ["coding-agent", "harness", "evaluation", "ablation", "swe-bench"]
+
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.11",
+    "scikit-learn>=1.3",
+    "statsmodels>=0.14",
+    "pyyaml>=6.0",
+    "click>=8.1",
+    "rich>=13.0",
+    "streamlit>=1.30",
+    "plotly>=5.18",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1",
+]
+bert = [
+    "torch>=2.0",
+    "bert-score>=0.3.13",
+]
+
+[project.scripts]
+harness-eval = "harness_eval.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["harness_eval*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
