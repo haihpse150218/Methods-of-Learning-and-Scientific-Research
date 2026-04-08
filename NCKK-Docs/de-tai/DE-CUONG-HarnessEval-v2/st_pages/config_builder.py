@@ -347,8 +347,8 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
         st.rerun()
 
 
-def _render_conditions_table() -> None:
-    """Render the 27-condition overview table."""
+def _render_conditions_table(tool: str, context: str, backend: str) -> None:
+    """Render the 27-condition table with sorting by match score and multi-select."""
     import pandas as pd
 
     st.markdown("---")
@@ -357,6 +357,8 @@ def _render_conditions_table() -> None:
     data_counts = _scan_data_counts()
     exp = ExperimentConfig()
     all_conditions = exp.generate_conditions()
+
+    active_cid = f"{tool}_{context}_{backend}"
 
     rows = []
     for cond in all_conditions:
@@ -369,36 +371,90 @@ def _render_conditions_table() -> None:
         est_cost = runs * exp.num_tasks * cond.estimated_cost_per_task
         data_n = data_counts.get(cid, 0)
 
+        # Determine how many of the 3 factors match the current selection
+        matches_tool = tool_val == tool
+        matches_ctx = ctx_val == context
+        matches_be = be_val == backend
+        match_score = int(matches_tool) + int(matches_ctx) + int(matches_be)
+        is_active = cid == active_cid
+
         rows.append(
             {
+                "Select": is_active,  # Pre-select the active condition
                 "Condition": cid,
                 "Tool": tool_val,
                 "Context": ctx_val,
                 "Backend": be_val,
-                "Critical": "Yes" if is_crit else "No",
+                "Critical": "Yes" if is_crit else "",
                 "Runs": runs,
                 "Est Cost ($)": round(est_cost, 0),
-                "Data (files)": data_n,
+                "Data": data_n,
+                "_match_score": match_score,
+                "_is_active": is_active,
             }
         )
 
     df = pd.DataFrame(rows)
 
-    st.dataframe(
-        df,
+    # Sort: active row first, then by match score descending, then by condition id
+    df = df.sort_values(
+        ["_is_active", "_match_score", "Condition"],
+        ascending=[False, False, True],
+    ).reset_index(drop=True)
+
+    # Drop hidden helper columns before handing to data_editor
+    display_df = df.drop(columns=["_match_score", "_is_active"])
+
+    edited_df = st.data_editor(
+        display_df,
         use_container_width=True,
         hide_index=True,
+        disabled=["Condition", "Tool", "Context", "Backend", "Critical", "Runs", "Est Cost ($)", "Data"],
         column_config={
+            "Select": st.column_config.CheckboxColumn("Select", default=False, width="small"),
             "Condition": st.column_config.TextColumn("Condition", width="medium"),
             "Tool": st.column_config.TextColumn("Tool", width="small"),
             "Context": st.column_config.TextColumn("Context", width="medium"),
             "Backend": st.column_config.TextColumn("Backend", width="small"),
             "Critical": st.column_config.TextColumn("Critical", width="small"),
             "Runs": st.column_config.NumberColumn("Runs", width="small"),
-            "Est Cost ($)": st.column_config.NumberColumn("Est Cost ($)", width="small", format="$%.0f"),
-            "Data (files)": st.column_config.NumberColumn("Data (files)", width="small"),
+            "Est Cost ($)": st.column_config.NumberColumn("Est Cost ($)", format="$%.0f", width="small"),
+            "Data": st.column_config.NumberColumn("Data", width="small"),
         },
+        key="conditions_editor",
     )
+
+    # Persist selected conditions; fall back to active condition if nothing ticked
+    selected = edited_df[edited_df["Select"] == True]["Condition"].tolist()  # noqa: E712
+    st.session_state.selected_conditions = selected if selected else [active_cid]
+
+    n_selected = len(st.session_state.selected_conditions)
+    st.caption(f"{n_selected} condition(s) selected  |  active: `{active_cid}`")
+
+    # "Run Selected" button
+    if n_selected > 0:
+        run_mgr = _get_run_manager()
+        status = run_mgr.get_status()
+        if st.button(
+            f"Run {n_selected} Selected Condition(s)",
+            type="primary",
+            disabled=status["status"] == "running",
+            key="run_selected_btn",
+        ):
+            dry_run = st.session_state.get("cb_dry_run", True)
+            max_tasks = int(st.session_state.get("cb_max_tasks", 5))
+            sweagent_dir_str = st.session_state.get("cb_sweagent_dir")
+            try:
+                run_mgr.start(
+                    conditions=st.session_state.selected_conditions,
+                    mode="dry-run" if dry_run else "real",
+                    max_tasks=max_tasks,
+                    output_dir=TRAJECTORIES_DIR,
+                    sweagent_dir=Path(sweagent_dir_str) if sweagent_dir_str else None,
+                )
+                st.rerun()
+            except RuntimeError as exc:
+                st.error(str(exc))
 
 
 # ---------------------------------------------------------------------------
@@ -422,8 +478,12 @@ def render_config_builder() -> None:
     # 3. YAML config + download
     _render_yaml_section(tool, context, backend)
 
+    # Store active condition in session state for cross-tab access
+    st.session_state.active_condition = f"{tool}_{context}_{backend}"
+    st.session_state.active_config = _build_yaml(tool, context, backend)
+
     # 4. Run panel
     _render_run_panel(tool, context, backend)
 
-    # 5. 27-condition table
-    _render_conditions_table()
+    # 5. 27-condition table (receives current selection for sorting/pre-check)
+    _render_conditions_table(tool, context, backend)
