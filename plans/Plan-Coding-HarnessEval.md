@@ -1097,12 +1097,12 @@ BUOC D: ANOVA → evaluate H1-H4 → export paper figures
 
 | File | Noi dung |
 |------|---------|
-| `Plan-HarnessEval.md` | Tong quan toan bo du an (research + coding) |
-| `Plan-Coding-HarnessEval.md` | **FILE NAY** — chi tiet coding + sessions |
-| `DE-CUONG-HarnessEval-v2.md` | De cuong chinh (phien ban cuoi) |
-| `THAO-LUAN-HarnessEval.md` | Phan bien vong 1 (7.3/10) |
-| `THAO-LUAN-HarnessEval-v2.md` | Phan bien vong 2 (8.1/10) |
-| `DE-CUONG-HarnessEval-v2/` | Code folder |
+| `plans/Plan-HarnessEval.md` | Tong quan toan bo du an (research + coding) |
+| `plans/Plan-Coding-HarnessEval.md` | **FILE NAY** — chi tiet coding + sessions |
+| `NCKK-Docs/de-tai/de-cuong/DE-CUONG-HarnessEval-v2.md` | De cuong chinh (phien ban cuoi) |
+| `NCKK-Docs/de-tai/thao-luan/THAO-LUAN-HarnessEval.md` | Phan bien vong 1 (7.3/10) |
+| `NCKK-Docs/de-tai/thao-luan/THAO-LUAN-HarnessEval-v2.md` | Phan bien vong 2 (8.1/10) |
+| `NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/` | Code folder |
 
 ---
 
