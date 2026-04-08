@@ -120,11 +120,20 @@ def render_compare() -> None:
     option_labels: list[str] = list(option_map.keys())
 
     # Pre-fill selections from session_state if present
+    # compare_logs may contain labels ("cond / task") or file paths — handle both
     default_selection: list[str] = []
     if "compare_logs" in st.session_state:
         stored = st.session_state.compare_logs
         if isinstance(stored, list):
-            default_selection = [s for s in stored if s in option_map]
+            # Build reverse map: path -> label for path-based lookups
+            path_to_label = {item["path"]: _option_label(item) for item in all_items}
+            for s in stored:
+                if s in option_map:
+                    # Already a label
+                    default_selection.append(s)
+                elif s in path_to_label:
+                    # It's a path — convert to label
+                    default_selection.append(path_to_label[s])
 
     # ------------------------------------------------------------------
     # 2. Multi-select widget

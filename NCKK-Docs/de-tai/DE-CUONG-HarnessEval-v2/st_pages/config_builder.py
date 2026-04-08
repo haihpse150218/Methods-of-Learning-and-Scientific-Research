@@ -249,7 +249,7 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
     is_running = status["status"] == "running"
 
     # Controls (disabled while running)
-    col_a, col_b = st.columns([1, 2])
+    col_a, col_b, col_c = st.columns([1, 1, 1])
     with col_a:
         dry_run = st.toggle("Dry Run Mode", value=True, key="cb_dry_run", disabled=is_running)
     with col_b:
@@ -262,6 +262,13 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
             key="cb_max_tasks",
             disabled=is_running,
         )
+    with col_c:
+        parallel = st.toggle("Parallel Mode", value=False, key="cb_parallel", disabled=is_running,
+                             help="Run conditions concurrently (faster for 27-condition runs)")
+        if parallel:
+            max_workers = st.number_input("Workers", min_value=2, max_value=16, value=4, key="cb_workers", disabled=is_running)
+        else:
+            max_workers = 1
 
     sweagent_dir: str | None = None
     if not dry_run:
@@ -298,6 +305,8 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
                 max_tasks=int(max_tasks),
                 output_dir=TRAJECTORIES_DIR,
                 sweagent_dir=Path(sweagent_dir) if sweagent_dir else None,
+                parallel=parallel,
+                max_workers=int(max_workers) if parallel else 4,
             )
             st.rerun()
         except RuntimeError as exc:
@@ -444,6 +453,8 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
             dry_run = st.session_state.get("cb_dry_run", True)
             max_tasks = int(st.session_state.get("cb_max_tasks", 5))
             sweagent_dir_str = st.session_state.get("cb_sweagent_dir")
+            is_parallel = st.session_state.get("cb_parallel", False)
+            n_workers = int(st.session_state.get("cb_workers", 4))
             try:
                 run_mgr.start(
                     conditions=st.session_state.selected_conditions,
@@ -451,6 +462,8 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
                     max_tasks=max_tasks,
                     output_dir=TRAJECTORIES_DIR,
                     sweagent_dir=Path(sweagent_dir_str) if sweagent_dir_str else None,
+                    parallel=is_parallel,
+                    max_workers=n_workers if is_parallel else 4,
                 )
                 st.rerun()
             except RuntimeError as exc:
