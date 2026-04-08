@@ -442,34 +442,69 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
     n_selected = len(st.session_state.selected_conditions)
     st.caption(f"{n_selected} condition(s) selected  |  active: `{active_cid}`")
 
+    # Action buttons
+    run_mgr = _get_run_manager()
+    status = run_mgr.get_status()
+    is_busy = status["status"] == "running"
+
+    btn_col_sel, btn_col_all, btn_col_spacer = st.columns([2, 2, 4])
+
     # "Run Selected" button
-    if n_selected > 0:
-        run_mgr = _get_run_manager()
-        status = run_mgr.get_status()
-        if st.button(
-            f"Run {n_selected} Selected Condition(s)",
+    with btn_col_sel:
+        run_selected = st.button(
+            f"Run {n_selected} Selected",
             type="primary",
-            disabled=status["status"] == "running",
+            disabled=is_busy or n_selected == 0,
             key="run_selected_btn",
-        ):
-            dry_run = st.session_state.get("cb_dry_run", True)
-            max_tasks = int(st.session_state.get("cb_max_tasks", 5))
-            sweagent_dir_str = st.session_state.get("cb_sweagent_dir")
-            is_parallel = st.session_state.get("cb_parallel", False)
-            n_workers = int(st.session_state.get("cb_workers", 4))
-            try:
-                run_mgr.start(
-                    conditions=st.session_state.selected_conditions,
-                    mode="dry-run" if dry_run else "real",
-                    max_tasks=max_tasks,
-                    output_dir=TRAJECTORIES_DIR,
-                    sweagent_dir=Path(sweagent_dir_str) if sweagent_dir_str else None,
-                    parallel=is_parallel,
-                    max_workers=n_workers if is_parallel else 4,
-                )
-                st.rerun()
-            except RuntimeError as exc:
-                st.error(str(exc))
+        )
+
+    # "Run All 27" button
+    with btn_col_all:
+        run_all = st.button(
+            "Run All 27 Conditions",
+            disabled=is_busy,
+            key="run_all_btn",
+            help="Auto-run all 27 conditions in parallel (4 workers). Dry-run: ~1s. Real mode: uses rate-limited workers.",
+        )
+
+    def _start_run(condition_list: list[str]) -> None:
+        dry_run = st.session_state.get("cb_dry_run", True)
+        max_tasks = int(st.session_state.get("cb_max_tasks", 5))
+        sweagent_dir_str = st.session_state.get("cb_sweagent_dir")
+        is_parallel = st.session_state.get("cb_parallel", False)
+        n_workers = int(st.session_state.get("cb_workers", 4))
+
+        # Auto-enable parallel for "Run All 27"
+        if len(condition_list) >= 10 and not is_parallel:
+            is_parallel = True
+            n_workers = 4 if dry_run else 3  # 3 for real to avoid rate limits
+
+        try:
+            run_mgr.start(
+                conditions=condition_list,
+                mode="dry-run" if dry_run else "real",
+                max_tasks=max_tasks,
+                output_dir=TRAJECTORIES_DIR,
+                sweagent_dir=Path(sweagent_dir_str) if sweagent_dir_str else None,
+                parallel=is_parallel,
+                max_workers=n_workers,
+            )
+            st.rerun()
+        except RuntimeError as exc:
+            st.error(str(exc))
+
+    if run_selected:
+        _start_run(st.session_state.selected_conditions)
+
+    if run_all:
+        all_27 = [
+            f"{t}_{c}_{b}"
+            for t in ["full", "medium", "minimal"]
+            for c in ["full", "sliding_window", "summary"]
+            for b in ["claude", "gpt", "deepseek"]
+        ]
+        st.session_state.selected_conditions = all_27
+        _start_run(all_27)
 
 
 # ---------------------------------------------------------------------------
