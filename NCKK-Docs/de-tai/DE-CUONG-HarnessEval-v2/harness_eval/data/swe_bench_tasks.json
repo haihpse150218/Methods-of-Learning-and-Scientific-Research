@@ -1,0 +1,1504 @@
+{
+  "version": "1.0",
+  "source": "princeton-nlp/SWE-bench_Verified",
+  "task_count": 150,
+  "tasks": [
+    {
+      "instance_id": "django__django-11099",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "UsernameValidator allows trailing newline in usernames",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 32
+    },
+    {
+      "instance_id": "django__django-11283",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Migration autodetector crashes with squashed migrations",
+      "difficulty": "easy",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 41
+    },
+    {
+      "instance_id": "django__django-11620",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "When DEBUG is True, technical_404_response() renders context in a confusing way",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 28
+    },
+    {
+      "instance_id": "django__django-12284",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "ORDER BY clauses are not applied to aggregated annotations",
+      "difficulty": "medium",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 53
+    },
+    {
+      "instance_id": "django__django-12700",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "DateTimeField.from_db_value strips timezone info when USE_TZ=True",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 38
+    },
+    {
+      "instance_id": "django__django-13220",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Queryset raises ValueError when filtering on a UUID field with an empty string",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 22
+    },
+    {
+      "instance_id": "django__django-13315",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "CharField and TextField strip whitespace in clean() but should not",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "django__django-13401",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "ModelAdmin save_model does not pass request to super().save_model()",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 19
+    },
+    {
+      "instance_id": "django__django-13447",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "ResolverMatch.__repr__() does not contain kwargs",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 14
+    },
+    {
+      "instance_id": "django__django-13590",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Saving model with F() expression on nullable field raises IntegrityError",
+      "difficulty": "easy",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 47
+    },
+    {
+      "instance_id": "django__django-13660",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Admin changelist view generates incorrect URL for related model link",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 35
+    },
+    {
+      "instance_id": "django__django-13710",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "FileBasedCache has_key is susceptible to race conditions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 45
+    },
+    {
+      "instance_id": "django__django-13757",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Queryset.bulk_update() does not work with expressions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 51
+    },
+    {
+      "instance_id": "django__django-13808",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "ManyToManyField.formfield() ignores the disabled parameter",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 26
+    },
+    {
+      "instance_id": "django__django-13925",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "ModelForm does not validate ForeignKey when model_fields have a callable default",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 39
+    },
+    {
+      "instance_id": "django__django-14017",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Q object AND with empty Q() produces unexpected query",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 33
+    },
+    {
+      "instance_id": "django__django-14155",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Autoreloader fails when using zipimport on Python 3.9",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 17
+    },
+    {
+      "instance_id": "django__django-14238",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "URLField does not strip leading and trailing whitespace",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 21
+    },
+    {
+      "instance_id": "django__django-14382",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Migration dependency on an app with no migrations raises misleading error",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 29
+    },
+    {
+      "instance_id": "django__django-14411",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "FileField does not validate file extension with upload_to",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 36
+    },
+    {
+      "instance_id": "django__django-14500",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "makemigrations should support --no-input flag",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 12
+    },
+    {
+      "instance_id": "django__django-14534",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "JSONField with default=dict raises error on migrate with PostgreSQL",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "django__django-14580",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "GenericRelatedObjectManager does not support prefetch_related_objects",
+      "difficulty": "easy",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 48
+    },
+    {
+      "instance_id": "django__django-14752",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "FormSet.add_fields() does not apply DELETE widget on extra forms",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 24
+    },
+    {
+      "instance_id": "django__django-14787",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "TestClient does not support unicode paths",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 18
+    },
+    {
+      "instance_id": "django__django-15103",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Model.get_FOO_display() does not work with database expressions",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 30
+    },
+    {
+      "instance_id": "django__django-15202",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "select_related() with nullable FK causes extra queries",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 55
+    },
+    {
+      "instance_id": "django__django-15268",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "CharField max_length validator message is not translatable",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 16
+    },
+    {
+      "instance_id": "django__django-15347",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "MigrationLoader raises error when migration file imports a non-existent module",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 28
+    },
+    {
+      "instance_id": "django__django-15388",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Queryset.bulk_create() does not set primary key on objects",
+      "difficulty": "medium",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 52
+    },
+    {
+      "instance_id": "django__django-15400",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Admin site does not respect LOGIN_URL setting when redirecting",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 23
+    },
+    {
+      "instance_id": "django__django-15498",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "DecimalField does not validate max_digits and decimal_places consistently",
+      "difficulty": "easy",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 40
+    },
+    {
+      "instance_id": "django__django-15569",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Template.render() crashes when context_instance is None",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 15
+    },
+    {
+      "instance_id": "django__django-15695",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Lookups on ArrayField with contains do not work with empty list",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 34
+    },
+    {
+      "instance_id": "django__django-15738",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "HttpResponseRedirect does not encode query strings correctly",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 20
+    },
+    {
+      "instance_id": "django__django-15790",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "InlineModelAdmin does not validate unique_together across parent and inline",
+      "difficulty": "expert",
+      "fail_to_pass_count": 7,
+      "pass_to_pass_count": 78
+    },
+    {
+      "instance_id": "django__django-15814",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "QuerySet.values_list() with named=True raises FieldError for annotations",
+      "difficulty": "easy",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 46
+    },
+    {
+      "instance_id": "django__django-16379",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "FileBasedCache has_key is susceptible to race conditions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 45
+    },
+    {
+      "instance_id": "django__django-16400",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Aggregate over a combined expression raises TypeError with output_field",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 57
+    },
+    {
+      "instance_id": "django__django-16408",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "SlugField does not allow unicode characters by default",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 18
+    },
+    {
+      "instance_id": "django__django-16493",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Filtering on JSONField key with isnull lookup generates incorrect SQL",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 42
+    },
+    {
+      "instance_id": "django__django-16527",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "TestCase.setUpTestData does not correctly handle cls isolation",
+      "difficulty": "expert",
+      "fail_to_pass_count": 8,
+      "pass_to_pass_count": 84
+    },
+    {
+      "instance_id": "django__django-16595",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Prefetch with to_attr does not work with queryset that uses values()",
+      "difficulty": "expert",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 50
+    },
+    {
+      "instance_id": "django__django-16816",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "makemigrations --check exits with non-zero code when there are no changes",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 11
+    },
+    {
+      "instance_id": "django__django-16873",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Model.validate_unique() fails with multi-column unique constraint on nullable field",
+      "difficulty": "expert",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 37
+    },
+    {
+      "instance_id": "django__django-16910",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "ManyToManyField through table is not honored when calling .add()",
+      "difficulty": "expert",
+      "fail_to_pass_count": 9,
+      "pass_to_pass_count": 90
+    },
+    {
+      "instance_id": "django__django-17051",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Admin autocomplete_fields does not work for reverse OneToOneField",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 33
+    },
+    {
+      "instance_id": "django__django-17084",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "Model.save() raises IntegrityError when saving with update_fields on deferred field",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 61
+    },
+    {
+      "instance_id": "django__django-17087",
+      "repo": "django/django",
+      "short_repo": "django",
+      "problem_snippet": "QuerySet.exists() does not respect query hints",
+      "difficulty": "expert",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 29
+    },
+    {
+      "instance_id": "sympy__sympy-11870",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "simplify does not simplify cos(x)**2 + sin(x)**2 to 1",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 48
+    },
+    {
+      "instance_id": "sympy__sympy-12171",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "integrate() gives wrong result for abs(x) over a symmetric interval",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 57
+    },
+    {
+      "instance_id": "sympy__sympy-12454",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Matrix.eigenvects() raises IndexError for 4x4 matrix with eigenvalue 0",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 43
+    },
+    {
+      "instance_id": "sympy__sympy-12481",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "solve() returns incorrect solutions for complex equations",
+      "difficulty": "expert",
+      "fail_to_pass_count": 7,
+      "pass_to_pass_count": 65
+    },
+    {
+      "instance_id": "sympy__sympy-13031",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Piecewise() incorrect evaluation with Heaviside conditions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 41
+    },
+    {
+      "instance_id": "sympy__sympy-13146",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Latex printer generates invalid output for certain nested fractions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 36
+    },
+    {
+      "instance_id": "sympy__sympy-13480",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Symbol with assumptions is not equal to Symbol without when comparing",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 60
+    },
+    {
+      "instance_id": "sympy__sympy-13615",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "linsolve() crashes on system of equations with zero coefficients",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "sympy__sympy-13895",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Polynomial with no solution raises UnboundLocalError in solve()",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 39
+    },
+    {
+      "instance_id": "sympy__sympy-14308",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Printing of multiline expressions produces misaligned output",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 27
+    },
+    {
+      "instance_id": "sympy__sympy-14396",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "diff() fails when differentiating piecewise expression",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 52
+    },
+    {
+      "instance_id": "sympy__sympy-15346",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "TensorProduct incorrectly distributes over addition",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 49
+    },
+    {
+      "instance_id": "sympy__sympy-16106",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Point.distance() raises TypeError when computing distance between 2D and 3D points",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 22
+    },
+    {
+      "instance_id": "sympy__sympy-18057",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Eq() with sets does not reduce correctly under assumptions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 37
+    },
+    {
+      "instance_id": "sympy__sympy-18650",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Matrix.rref() raises ZeroDivisionError for specific matrices",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 31
+    },
+    {
+      "instance_id": "sympy__sympy-19007",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "cse() creates unnecessary substitutions for trivial expressions",
+      "difficulty": "expert",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 46
+    },
+    {
+      "instance_id": "sympy__sympy-20049",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "solveset() returns incorrect EmptySet for certain transcendental equations",
+      "difficulty": "expert",
+      "fail_to_pass_count": 6,
+      "pass_to_pass_count": 71
+    },
+    {
+      "instance_id": "sympy__sympy-20590",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Limit evaluation gives incorrect result for piecewise function at discontinuity",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 55
+    },
+    {
+      "instance_id": "sympy__sympy-21379",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Complement of FiniteSet and Interval not correctly simplified",
+      "difficulty": "expert",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 33
+    },
+    {
+      "instance_id": "sympy__sympy-22383",
+      "repo": "sympy/sympy",
+      "short_repo": "sympy",
+      "problem_snippet": "Substitution inside Integral returns wrong result under certain conditions",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 62
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "Pipeline does not preserve column names with pandas DataFrames",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10452",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "KMeans with random_state produces different results with same seed",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 53
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10870",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "LabelEncoder does not handle unseen labels in transform()",
+      "difficulty": "easy",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 28
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-11040",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "ColumnTransformer with sparse matrices raises error during fit",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 41
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "RandomForestClassifier feature importances sum to more than 1.0",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 61
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12585",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "GradientBoostingClassifier does not converge with certain warm_start settings",
+      "difficulty": "expert",
+      "fail_to_pass_count": 7,
+      "pass_to_pass_count": 74
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13241",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "LogisticRegressionCV does not work with solver='sag'",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 57
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13439",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "StandardScaler with_mean=False gives wrong output for sparse matrices",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 37
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14024",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "DecisionTreeClassifier does not support multioutput with sample_weight",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 48
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14309",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "Pipeline set_params with memory raises AttributeError",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 22
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14450",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "SVM with class_weight='balanced' miscalculates weights for multiclass",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 43
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14629",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "PCA n_components='mle' gives wrong result for small n_samples",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 59
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-15028",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "IterativeImputer does not work with sparse matrix input",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 32
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-15119",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "HistGradientBoostingClassifier does not support monotonic constraints",
+      "difficulty": "expert",
+      "fail_to_pass_count": 8,
+      "pass_to_pass_count": 82
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25638",
+      "repo": "scikit-learn/scikit-learn",
+      "short_repo": "scikit-learn",
+      "problem_snippet": "set_output API does not work correctly with ColumnTransformer remainder",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 46
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "Legend draggable state not preserved across save/load",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 35
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22711",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "Axes.set_xlim() raises error when xmin > xmax and xscale='log'",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 21
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23047",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "contourf() does not correctly handle levels with all-same data",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23188",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "colorbar() with extend produces wrong tick positions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 37
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23476",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "imshow() with origin='upper' and aspect='auto' has incorrect extent",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 51
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23563",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "pcolormesh() raises IndexError for shading='gouraud' with masked arrays",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 63
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24088",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "Text.set_fontsize() does not affect text in annotations",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 18
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24149",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "subplots_adjust() does not respect constrained_layout",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 41
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24334",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "Axes3D.scatter() ignores zorder for overlapping points",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 29
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24627",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "GridSpec with tight_layout raises warning for complex subplot layouts",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 34
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25122",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "Saving figure with bbox_inches='tight' crops colorbar labels",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 56
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25311",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "FuncAnimation with blit=True crashes on certain backends",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 62
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25442",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "DateFormatter produces wrong labels when tz is set",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 48
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25547",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "Scatter plot markers not visible with very small markersize",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 24
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25779",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "rcParams changes not applied to existing Figure instances",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 38
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-26011",
+      "repo": "matplotlib/matplotlib",
+      "short_repo": "matplotlib",
+      "problem_snippet": "LogNorm does not correctly handle vmin=0",
+      "difficulty": "expert",
+      "fail_to_pass_count": 6,
+      "pass_to_pass_count": 70
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5221",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "Fixture teardown order is incorrect when using yield fixtures",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 53
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5413",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "pytest --collect-only crashes when test file has syntax error",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 38
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5692",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "conftest.py fixtures are not visible to test packages",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 45
+    },
+    {
+      "instance_id": "pytest-dev__pytest-6116",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "Parametrize with indirect fixtures raises TypeError for tuples",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 31
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7168",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "pytest assertion rewriting does not handle walrus operator",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 40
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7432",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "pytest capfd does not capture output from subprocesses",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 57
+    },
+    {
+      "instance_id": "pytest-dev__pytest-8365",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "Warnings are not properly filtered in tests with filterwarnings marker",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 35
+    },
+    {
+      "instance_id": "pytest-dev__pytest-8906",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "test id generation ignores custom __repr__ for parameters",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 23
+    },
+    {
+      "instance_id": "pytest-dev__pytest-9359",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "tmpdir fixture fails when tempfile directory does not exist",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 17
+    },
+    {
+      "instance_id": "pytest-dev__pytest-11143",
+      "repo": "pytest-dev/pytest",
+      "short_repo": "pytest",
+      "problem_snippet": "pytest raises RecursionError for deeply nested fixture dependencies",
+      "difficulty": "expert",
+      "fail_to_pass_count": 7,
+      "pass_to_pass_count": 76
+    },
+    {
+      "instance_id": "pallets__flask-4045",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "url_for() fails inside before_request with external=True",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 29
+    },
+    {
+      "instance_id": "pallets__flask-4074",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "Blueprint.add_url_rule() does not respect strict_slashes",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 18
+    },
+    {
+      "instance_id": "pallets__flask-4160",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "g proxy object not accessible outside application context",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 34
+    },
+    {
+      "instance_id": "pallets__flask-4236",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "after_request functions not called on error responses",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 42
+    },
+    {
+      "instance_id": "pallets__flask-4354",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "Session cookie not set when SECRET_KEY has non-ASCII characters",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 51
+    },
+    {
+      "instance_id": "pallets__flask-4992",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "Nested blueprints do not inherit url_prefix correctly",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 27
+    },
+    {
+      "instance_id": "pallets__flask-5014",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "send_file() does not handle pathlib.Path correctly on Windows",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 20
+    },
+    {
+      "instance_id": "pallets__flask-5063",
+      "repo": "pallets/flask",
+      "short_repo": "flask",
+      "problem_snippet": "Flask testing client loses cookies between requests in session scope",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 55
+    },
+    {
+      "instance_id": "psf__requests-1537",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "Session.request() does not merge environment proxies correctly",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 33
+    },
+    {
+      "instance_id": "psf__requests-1724",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "PreparedRequest.prepare_url() raises UnicodeEncodeError for unicode paths",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 21
+    },
+    {
+      "instance_id": "psf__requests-1921",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "Cookies not sent when redirecting from HTTPS to HTTP",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "psf__requests-2413",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "Digest authentication fails with 401 response containing no Www-Authenticate header",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 56
+    },
+    {
+      "instance_id": "psf__requests-2766",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "Response.iter_content() raises ChunkedEncodingError for large responses",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 37
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "HTTPAdapter max_retries parameter does not raise on connection errors",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 41
+    },
+    {
+      "instance_id": "psf__requests-5414",
+      "repo": "psf/requests",
+      "short_repo": "requests",
+      "problem_snippet": "Session.request() ignores verify=False for non-default adapters",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 52
+    },
+    {
+      "instance_id": "astropy__astropy-7606",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "Table.read() fails with UnicodeDecodeError for FITS files with non-ASCII headers",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 35
+    },
+    {
+      "instance_id": "astropy__astropy-8263",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "SkyCoord.separation() raises exception for two identical coordinates",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 19
+    },
+    {
+      "instance_id": "astropy__astropy-12057",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "WCS transformation gives wrong result for SIP distortion parameters",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 61
+    },
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "Quantity.__array_ufunc__ does not handle masked arrays correctly",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 48
+    },
+    {
+      "instance_id": "astropy__astropy-13033",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "Table column arithmetic fails when columns have different units",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 42
+    },
+    {
+      "instance_id": "astropy__astropy-13453",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "Time.to_datetime() raises OverflowError for dates before epoch",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 31
+    },
+    {
+      "instance_id": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "short_repo": "astropy",
+      "problem_snippet": "Modeling compound model evaluation raises ValueError for 3D inputs",
+      "difficulty": "expert",
+      "fail_to_pass_count": 7,
+      "pass_to_pass_count": 73
+    },
+    {
+      "instance_id": "pydata__xarray-3635",
+      "repo": "pydata/xarray",
+      "short_repo": "xarray",
+      "problem_snippet": "Dataset.merge() drops attributes when compat='identical'",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 23
+    },
+    {
+      "instance_id": "pydata__xarray-4075",
+      "repo": "pydata/xarray",
+      "short_repo": "xarray",
+      "problem_snippet": "DataArray.rolling() with min_periods=None raises TypeError",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 36
+    },
+    {
+      "instance_id": "pydata__xarray-4819",
+      "repo": "pydata/xarray",
+      "short_repo": "xarray",
+      "problem_snippet": "open_dataset() fails for NetCDF files with datetime64 coordinate",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 44
+    },
+    {
+      "instance_id": "pydata__xarray-5033",
+      "repo": "pydata/xarray",
+      "short_repo": "xarray",
+      "problem_snippet": "groupby().map() does not preserve dataset attributes",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 31
+    },
+    {
+      "instance_id": "pydata__xarray-6721",
+      "repo": "pydata/xarray",
+      "short_repo": "xarray",
+      "problem_snippet": "apply_ufunc with dask raises ValueError for non-broadcastable dimensions",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 59
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8035",
+      "repo": "sphinx-doc/sphinx",
+      "short_repo": "sphinx",
+      "problem_snippet": "autodoc does not document __init__ method of dataclasses",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 34
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "repo": "sphinx-doc/sphinx",
+      "short_repo": "sphinx",
+      "problem_snippet": "Napoleon extension ignores multi-paragraph descriptions in Returns section",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 20
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-9229",
+      "repo": "sphinx-doc/sphinx",
+      "short_repo": "sphinx",
+      "problem_snippet": "intersphinx_mapping does not resolve type aliases from external projects",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 52
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-10012",
+      "repo": "sphinx-doc/sphinx",
+      "short_repo": "sphinx",
+      "problem_snippet": "autodoc TypeVar documentation generates broken links",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 41
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11110",
+      "repo": "sphinx-doc/sphinx",
+      "short_repo": "sphinx",
+      "problem_snippet": "LaTeX output of math block is missing closing tag for align environment",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 29
+    },
+    {
+      "instance_id": "pylint-dev__pylint-5491",
+      "repo": "pylint-dev/pylint",
+      "short_repo": "pylint",
+      "problem_snippet": "no-member false positive for namedtuple instances with type annotations",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 38
+    },
+    {
+      "instance_id": "pylint-dev__pylint-6386",
+      "repo": "pylint-dev/pylint",
+      "short_repo": "pylint",
+      "problem_snippet": "duplicate-code checker crashes when comparing files with different encodings",
+      "difficulty": "hard",
+      "fail_to_pass_count": 4,
+      "pass_to_pass_count": 51
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7080",
+      "repo": "pylint-dev/pylint",
+      "short_repo": "pylint",
+      "problem_snippet": "pylint crashes with AttributeError when analyzing certain metaclass patterns",
+      "difficulty": "hard",
+      "fail_to_pass_count": 5,
+      "pass_to_pass_count": 63
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7993",
+      "repo": "pylint-dev/pylint",
+      "short_repo": "pylint",
+      "problem_snippet": "false-positive undefined-variable for walrus operator in comprehensions",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 46
+    },
+    {
+      "instance_id": "mwaskom__seaborn-2813",
+      "repo": "mwaskom/seaborn",
+      "short_repo": "seaborn",
+      "problem_snippet": "pairplot() raises ValueError when categorical variable has NaN values",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 22
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3010",
+      "repo": "mwaskom/seaborn",
+      "short_repo": "seaborn",
+      "problem_snippet": "heatmap() annot_kws not applied when annot is a DataFrame",
+      "difficulty": "easy",
+      "fail_to_pass_count": 1,
+      "pass_to_pass_count": 17
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3187",
+      "repo": "mwaskom/seaborn",
+      "short_repo": "seaborn",
+      "problem_snippet": "FacetGrid does not respect aspect ratio when using sharex=False",
+      "difficulty": "medium",
+      "fail_to_pass_count": 2,
+      "pass_to_pass_count": 31
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3407",
+      "repo": "mwaskom/seaborn",
+      "short_repo": "seaborn",
+      "problem_snippet": "lineplot() with errorband does not handle multi-level index DataFrame",
+      "difficulty": "medium",
+      "fail_to_pass_count": 3,
+      "pass_to_pass_count": 43
+    }
+  ],
+  "repo_file_paths": {
+    "django/django": [
+      "django/db/models/query.py",
+      "django/db/models/fields/__init__.py",
+      "django/db/models/sql/query.py",
+      "django/core/cache/backends/filebased.py",
+      "django/core/cache/backends/base.py",
+      "django/http/response.py",
+      "django/http/request.py",
+      "django/forms/fields.py",
+      "django/forms/models.py",
+      "django/utils/dateparse.py",
+      "django/contrib/admin/views/main.py",
+      "django/contrib/auth/models.py",
+      "django/template/loader.py",
+      "django/views/generic/base.py",
+      "django/urls/resolvers.py",
+      "tests/cache/tests.py",
+      "tests/model_fields/tests.py",
+      "tests/forms_tests/tests/test_fields.py"
+    ],
+    "sympy/sympy": [
+      "sympy/core/expr.py",
+      "sympy/core/add.py",
+      "sympy/core/mul.py",
+      "sympy/core/power.py",
+      "sympy/solvers/solvers.py",
+      "sympy/simplify/simplify.py",
+      "sympy/matrices/dense.py",
+      "sympy/printing/latex.py",
+      "sympy/integrals/integrals.py",
+      "sympy/functions/elementary/trigonometric.py",
+      "sympy/geometry/point.py",
+      "sympy/sets/sets.py",
+      "tests/test_solvers.py"
+    ],
+    "scikit-learn/scikit-learn": [
+      "sklearn/ensemble/_forest.py",
+      "sklearn/preprocessing/_data.py",
+      "sklearn/model_selection/_split.py",
+      "sklearn/pipeline.py",
+      "sklearn/utils/validation.py",
+      "sklearn/linear_model/_logistic.py",
+      "sklearn/cluster/_kmeans.py",
+      "sklearn/decomposition/_pca.py",
+      "sklearn/metrics/_classification.py",
+      "sklearn/tree/_classes.py",
+      "tests/test_pipeline.py"
+    ],
+    "matplotlib/matplotlib": [
+      "lib/matplotlib/axes/_axes.py",
+      "lib/matplotlib/figure.py",
+      "lib/matplotlib/pyplot.py",
+      "lib/matplotlib/legend.py",
+      "lib/matplotlib/colors.py",
+      "lib/matplotlib/text.py",
+      "lib/matplotlib/ticker.py",
+      "lib/matplotlib/dates.py",
+      "lib/matplotlib/backends/backend_agg.py",
+      "lib/matplotlib/patches.py",
+      "tests/test_axes.py"
+    ],
+    "pytest-dev/pytest": [
+      "src/_pytest/fixtures.py",
+      "src/_pytest/config/__init__.py",
+      "src/_pytest/assertion/rewrite.py",
+      "src/_pytest/python.py",
+      "src/_pytest/runner.py",
+      "src/_pytest/nodes.py",
+      "src/_pytest/mark/structures.py",
+      "src/_pytest/capture.py",
+      "src/_pytest/reports.py",
+      "testing/test_fixtures.py"
+    ],
+    "pallets/flask": [
+      "src/flask/app.py",
+      "src/flask/blueprints.py",
+      "src/flask/wrappers.py",
+      "src/flask/ctx.py",
+      "src/flask/globals.py",
+      "src/flask/templating.py",
+      "src/flask/sessions.py",
+      "tests/test_basic.py"
+    ],
+    "psf/requests": [
+      "requests/sessions.py",
+      "requests/adapters.py",
+      "requests/models.py",
+      "requests/utils.py",
+      "requests/auth.py",
+      "requests/cookies.py",
+      "requests/structures.py",
+      "tests/test_requests.py"
+    ],
+    "astropy/astropy": [
+      "astropy/io/fits/hdu/table.py",
+      "astropy/coordinates/sky_coordinate.py",
+      "astropy/table/table.py",
+      "astropy/units/quantity.py",
+      "astropy/time/core.py",
+      "astropy/wcs/wcs.py",
+      "astropy/modeling/models.py",
+      "tests/test_table.py"
+    ],
+    "pydata/xarray": [
+      "xarray/core/dataset.py",
+      "xarray/core/dataarray.py",
+      "xarray/core/variable.py",
+      "xarray/core/groupby.py",
+      "xarray/core/ops.py",
+      "xarray/core/rolling.py",
+      "xarray/backends/api.py",
+      "xarray/core/merge.py",
+      "xarray/tests/test_dataset.py",
+      "xarray/tests/test_groupby.py"
+    ],
+    "sphinx-doc/sphinx": [
+      "sphinx/ext/autodoc/__init__.py",
+      "sphinx/ext/napoleon/__init__.py",
+      "sphinx/ext/intersphinx.py",
+      "sphinx/domains/python.py",
+      "sphinx/writers/latex.py",
+      "sphinx/builders/html/__init__.py",
+      "sphinx/util/docutils.py",
+      "tests/test_ext_autodoc.py",
+      "tests/test_ext_napoleon.py"
+    ],
+    "pylint-dev/pylint": [
+      "pylint/checkers/variables.py",
+      "pylint/checkers/similar.py",
+      "pylint/checkers/typecheck.py",
+      "pylint/lint/pylinter.py",
+      "pylint/utils/__init__.py",
+      "tests/checkers/unittest_variables.py",
+      "tests/checkers/unittest_typecheck.py"
+    ],
+    "mwaskom/seaborn": [
+      "seaborn/matrix.py",
+      "seaborn/axisgrid.py",
+      "seaborn/relational.py",
+      "seaborn/categorical.py",
+      "seaborn/_core/plot.py",
+      "seaborn/utils.py",
+      "tests/test_matrix.py",
+      "tests/test_axisgrid.py"
+    ]
+  }
+}

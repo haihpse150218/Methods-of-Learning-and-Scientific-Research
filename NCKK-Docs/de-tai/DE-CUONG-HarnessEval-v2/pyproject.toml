@@ -34,12 +34,18 @@ bert = [
     "torch>=2.0",
     "bert-score>=0.3.13",
 ]
+data = [
+    "datasets>=2.14",
+]
 
 [project.scripts]
 harness-eval = "harness_eval.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["harness_eval*"]
+
+[tool.setuptools.package-data]
+"harness_eval.data" = ["*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

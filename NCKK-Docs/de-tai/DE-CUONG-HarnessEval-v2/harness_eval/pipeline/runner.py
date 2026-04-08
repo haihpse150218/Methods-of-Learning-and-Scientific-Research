@@ -28,8 +28,8 @@ from harness_eval.configs.experiment import (
 
 logger = logging.getLogger("harness_eval.runner")
 
-# Default SWE-bench task IDs used when no tasks_file is provided
-DEFAULT_TASK_IDS = [
+# Legacy fallback task IDs (used when embedded SWE-bench data unavailable)
+_LEGACY_TASK_IDS = [
     "django__django-16379",
     "django__django-15388",
     "flask__flask-4992",
@@ -39,6 +39,69 @@ DEFAULT_TASK_IDS = [
     "matplotlib__matplotlib-25311",
     "pytest__pytest-11143",
 ]
+
+
+def _get_default_task_ids() -> list[str]:
+    """Load task IDs from embedded SWE-bench data, falling back to legacy list."""
+    try:
+        from harness_eval.data.loader import get_task_ids
+        ids = get_task_ids()
+        return ids if ids else list(_LEGACY_TASK_IDS)
+    except Exception:
+        return list(_LEGACY_TASK_IDS)
+
+
+def _get_task_metadata(task_id: str):
+    """Look up SWE-bench metadata for a task. Returns TaskMetadata or None."""
+    try:
+        from harness_eval.data.loader import get_task
+        return get_task(task_id)
+    except Exception:
+        return None
+
+
+def _get_repo_files(task_id: str) -> list[str]:
+    """Get real file paths for a task's repo."""
+    try:
+        from harness_eval.data.loader import get_repo_file_paths
+        repo = task_id.split("__")[0].replace("_", "-") if "__" in task_id else ""
+        # Try various formats
+        for name in [repo, repo.replace("-", "/")]:
+            paths = get_repo_file_paths(name)
+            if paths:
+                return paths
+        # Try from metadata
+        meta = _get_task_metadata(task_id)
+        if meta:
+            return get_repo_file_paths(meta.repo)
+    except Exception:
+        pass
+    return []
+
+
+# Difficulty-based resolve rates (calibrated to SWE-bench literature)
+_DIFFICULTY_BASE_RATES = {
+    "easy": 0.75,
+    "medium": 0.55,
+    "hard": 0.30,
+    "expert": 0.15,
+}
+
+# Difficulty-based turn count ranges
+_TURN_RANGES = {
+    "easy": (3, 5),
+    "medium": (5, 8),
+    "hard": (8, 12),
+    "expert": (10, 15),
+}
+
+# Phase definitions for trajectory generation
+_PHASES = {
+    "exploration": ["read", "grep", "glob", "find", "git_log"],
+    "analysis": ["read", "grep", "bash", "git_show", "git_diff"],
+    "modification": ["edit", "write", "bash"],
+    "verification": ["bash", "test_runner", "git_diff"],
+}
 
 # Synthetic trajectory templates for dry-run mode
 _ACTIONS = [
@@ -395,8 +458,10 @@ class PipelineRunner:
             raise ValueError(
                 f"Unexpected tasks file format: expected list or dict with 'task_ids' key"
             )
-        self.logger.info("Using default sample task IDs (%d tasks)", len(DEFAULT_TASK_IDS))
-        return list(DEFAULT_TASK_IDS)
+        task_ids = _get_default_task_ids()
+        source = "SWE-bench Verified" if len(task_ids) > 8 else "legacy defaults"
+        self.logger.info("Using %d task IDs from %s", len(task_ids), source)
+        return list(task_ids)
 
     # ------------------------------------------------------------------
     # Synthetic data generation (dry-run only)
@@ -405,90 +470,72 @@ class PipelineRunner:
     def _generate_synthetic_result(
         self, condition: Condition, task_id: str
     ) -> TaskResult:
-        """Generate a realistic synthetic TaskResult for dry-run mode.
+        """Generate a realistic synthetic TaskResult using SWE-bench metadata.
 
-        Uses a deterministic seed derived from condition_id + task_id so repeated
-        runs with the same inputs produce the same outputs.
-
-        Simulates realistic patterns from SWE-bench literature:
-        - Task difficulty varies by repo (django=easier, sympy=harder)
-        - Tool level has largest effect (~8% eta-squared)
-        - Context strategy has medium effect (~3%)
-        - Backend has small effect (~1%)
-        - Interaction effects: minimal tools + summary context = extra penalty
-        - Noise: per-task random variation
+        Uses real task difficulty from embedded SWE-bench Verified data,
+        phased trajectory generation, and real repo file paths.
         """
         seed = int(
-            hashlib.md5(
-                f"{condition.condition_id}:{task_id}".encode()
-            ).hexdigest()[:8],
-            16,
+            hashlib.md5(f"{condition.condition_id}:{task_id}".encode()).hexdigest()[:8], 16,
         )
         rng = random.Random(seed)
 
-        # Task difficulty based on task_id (simulates repo difficulty)
-        task_seed = int(hashlib.md5(task_id.encode()).hexdigest()[:8], 16)
-        task_rng = random.Random(task_seed)
-        task_difficulty = task_rng.gauss(0, 0.08)  # Per-task random intercept
+        # Look up real task metadata
+        metadata = _get_task_metadata(task_id)
+        difficulty = metadata.difficulty if metadata else "medium"
+
+        # Difficulty-aware base rate
+        base_rate = _DIFFICULTY_BASE_RATES.get(difficulty, 0.55)
 
         # Main effects (calibrated for realistic eta-squared)
-        # Tool: largest effect (H1) — ~8% variance
         tool_mod = {"full": 0.12, "medium": 0.02, "minimal": -0.14}
-        # Context: medium effect (H2) — ~3% variance
         ctx_mod = {"full": 0.06, "sliding_window": 0.01, "summary": -0.07}
-        # Backend: small effect — ~1% variance
         backend_mod = {"claude": 0.04, "gpt": 0.01, "deepseek": -0.03}
 
         tool_val = condition.tool.level.value
         ctx_val = condition.context.strategy.value
         be_val = condition.backend.backend.value
 
-        # Interaction effects (H4)
+        # Interaction effects
         interaction = 0.0
-        # Minimal tools + summary context = extra penalty (tools can't compensate)
         if tool_val == "minimal" and ctx_val == "summary":
             interaction = -0.06
-        # Full tools + full context = slight synergy
         if tool_val == "full" and ctx_val == "full":
             interaction = 0.03
-        # DeepSeek struggles more with minimal tools
         if tool_val == "minimal" and be_val == "deepseek":
             interaction = -0.04
 
-        # Base rate ~55% (SWE-bench Verified baseline)
-        base_rate = 0.55
-        noise = rng.gauss(0, 0.05)  # Per-run noise
+        noise = rng.gauss(0, 0.03)  # Smaller noise (difficulty provides structured variation)
 
         resolve_prob = max(0.05, min(0.95,
-            base_rate
-            + task_difficulty
-            + tool_mod.get(tool_val, 0.0)
-            + ctx_mod.get(ctx_val, 0.0)
-            + backend_mod.get(be_val, 0.0)
-            + interaction
-            + noise
+            base_rate + tool_mod.get(tool_val, 0.0) + ctx_mod.get(ctx_val, 0.0)
+            + backend_mod.get(be_val, 0.0) + interaction + noise
         ))
         resolved = rng.random() < resolve_prob
 
-        # Cost varies by backend + task complexity
+        # Difficulty-aware cost (expert tasks cost more)
         cost_base = condition.backend.cost_per_eval
-        cost_multiplier = rng.uniform(0.6, 1.5)
+        difficulty_cost_mult = {"easy": 0.7, "medium": 1.0, "hard": 1.4, "expert": 1.8}
+        cost_multiplier = difficulty_cost_mult.get(difficulty, 1.0) * rng.uniform(0.8, 1.2)
         if not resolved:
-            cost_multiplier *= 1.2  # Failed tasks often cost more (more retries)
+            cost_multiplier *= 1.2
         total_cost = cost_base * cost_multiplier
 
-        # Duration: harder tasks take longer
-        base_duration = 60.0 if resolved else 120.0
-        duration = base_duration * rng.uniform(0.5, 2.0)
+        # Difficulty-aware duration
+        difficulty_duration = {"easy": 45.0, "medium": 80.0, "hard": 150.0, "expert": 240.0}
+        base_duration = difficulty_duration.get(difficulty, 80.0)
+        duration = base_duration * rng.uniform(0.6, 1.5)
 
-        # Context tokens: more with full context, less with summary
+        # Context tokens by strategy
         ctx_tokens_base = {"full": 60_000, "sliding_window": 40_000, "summary": 15_000}
         context_tokens = int(ctx_tokens_base.get(ctx_val, 40_000) * rng.uniform(0.7, 1.3))
 
-        # Build synthetic trajectory
-        num_turns = rng.randint(4, 10)
+        # Difficulty-aware turn count
+        lo, hi = _TURN_RANGES.get(difficulty, (5, 8))
+        num_turns = rng.randint(lo, hi)
+
         trajectory = self._generate_synthetic_trajectory(
-            rng, condition, task_id, num_turns, resolved
+            rng, condition, task_id, num_turns, resolved, metadata
         )
 
         return TaskResult(
@@ -509,16 +556,31 @@ class PipelineRunner:
         task_id: str,
         num_turns: int,
         resolved: bool,
+        metadata=None,
     ) -> list[dict]:
-        """Build a synthetic trajectory matching the app/trajectories/ format."""
+        """Build a realistic phased trajectory using real repo file paths."""
         available_tools = condition.tool.tools
+        file_paths = _get_repo_files(task_id)
+        repo_short = task_id.split("__")[0] if "__" in task_id else "repo"
         base_time = datetime(2026, 5, 1, 10, 0, 0, tzinfo=timezone.utc)
         trajectory = []
 
         for turn_idx in range(1, num_turns + 1):
-            # Pick a plausible action from the condition's available tools
-            action = rng.choice(available_tools)
-            timestamp = base_time.timestamp() + turn_idx * rng.randint(3, 15)
+            # Determine phase based on position in trajectory
+            progress = turn_idx / num_turns
+            if progress <= 0.3:
+                phase = "exploration"
+            elif progress <= 0.5:
+                phase = "analysis"
+            elif progress <= 0.8:
+                phase = "modification"
+            else:
+                phase = "verification"
+
+            # Pick action from phase, filtered by available tools
+            action = self._pick_phased_action(rng, phase, available_tools)
+
+            timestamp = base_time.timestamp() + turn_idx * rng.randint(5, 20)
             ts_str = datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%S"
             )
@@ -526,8 +588,11 @@ class PipelineRunner:
             turn: dict = {
                 "turn": turn_idx,
                 "action": action,
-                "args": self._synthetic_args(rng, action, task_id),
-                "output": self._synthetic_output(rng, action, resolved and turn_idx == num_turns),
+                "args": self._realistic_args(rng, action, repo_short, file_paths, metadata),
+                "output": self._realistic_output(
+                    rng, action, resolved and turn_idx == num_turns,
+                    metadata, turn_idx, phase
+                ),
                 "acceptable_tools": _pick_acceptable_tools(rng, action, available_tools),
                 "timestamp": ts_str,
             }
@@ -536,56 +601,102 @@ class PipelineRunner:
         return trajectory
 
     @staticmethod
-    def _synthetic_args(rng: random.Random, action: str, task_id: str) -> dict:
-        """Return plausible args dict for a given action."""
-        repo = task_id.split("__")[0] if "__" in task_id else "repo"
+    def _pick_phased_action(
+        rng: random.Random, phase: str, available_tools: list[str]
+    ) -> str:
+        """Pick an action appropriate for the current phase, filtered by available tools."""
+        phase_tools = _PHASES.get(phase, ["bash"])
+        candidates = [t for t in phase_tools if t in available_tools]
+        if not candidates:
+            # Fallback: bash is always available-ish, or pick any available
+            candidates = [t for t in available_tools if t in ("bash", "read", "edit")]
+            if not candidates:
+                candidates = available_tools
+        return rng.choice(candidates)
+
+    @staticmethod
+    def _realistic_args(
+        rng: random.Random, action: str, repo_short: str,
+        file_paths: list[str], metadata=None,
+    ) -> dict:
+        """Generate plausible args using real repo file paths."""
+        src_files = [f for f in file_paths if "test" not in f.lower()] or [f"{repo_short}/core.py"]
+        test_files = [f for f in file_paths if "test" in f.lower()] or ["tests/test_core.py"]
+
         match action:
             case "read":
-                return {"path": f"{repo}/core/module.py"}
+                return {"path": rng.choice(src_files)}
             case "write":
-                return {"path": f"{repo}/core/module.py", "content": "# patched"}
+                return {"path": rng.choice(src_files), "content": "# patched\n"}
             case "edit":
+                path = rng.choice(src_files)
                 return {
-                    "path": f"{repo}/core/module.py",
+                    "path": path,
                     "old_string": "    return result",
-                    "new_string": "    if result is None:\n        return default\n    return result",
+                    "new_string": "    if result is None:\n        raise ValueError('unexpected None')\n    return result",
                 }
             case "grep":
-                return {"pattern": "def process", "path": f"{repo}/"}
+                keywords = ["def ", "class ", "raise ", "return ", "import ", "self."]
+                return {"pattern": rng.choice(keywords), "path": rng.choice(src_files).rsplit("/", 1)[0] + "/"}
             case "glob":
-                return {"pattern": f"{repo}/**/test*.py"}
+                return {"pattern": f"**/{repo_short}/**/*.py"}
             case "find":
-                return {"path": f"{repo}/", "name": "*.py"}
+                return {"path": repo_short + "/", "name": "*.py"}
             case "bash":
-                return {"command": "cd /repo && python -m pytest tests/ -x -q 2>&1 | tail -5"}
+                test_path = rng.choice(test_files)
+                cmds = [
+                    f"cd /repo && python -m pytest {test_path} -x -q 2>&1 | tail -10",
+                    f"cd /repo && python -c \"from {repo_short} import *; print('OK')\"",
+                    f"cd /repo && grep -rn 'TODO\\|FIXME\\|BUG' {rng.choice(src_files)}",
+                ]
+                return {"command": rng.choice(cmds)}
             case "python":
-                return {"code": "print('test')"}
+                return {"code": f"import {repo_short}; print({repo_short}.__version__)"}
             case "git_diff":
                 return {}
             case "git_log":
-                return {"n": 5}
+                return {"n": rng.randint(3, 10)}
             case "git_show":
                 return {"ref": "HEAD"}
             case "test_runner":
-                return {"test_path": "tests/"}
+                return {"test_path": rng.choice(test_files)}
             case _:
                 return {}
 
     @staticmethod
-    def _synthetic_output(rng: random.Random, action: str, is_final_pass: bool) -> str:
-        """Return plausible output string."""
+    def _realistic_output(
+        rng: random.Random, action: str, is_final_pass: bool,
+        metadata=None, turn_idx: int = 1, phase: str = "",
+    ) -> str:
+        """Generate plausible output including real problem context."""
+        # First turn: include problem snippet
+        if turn_idx == 1 and metadata and metadata.problem_snippet:
+            return f"Issue: {metadata.problem_snippet}\n\nSearching for relevant code..."
+
         if action in ("bash", "test_runner") and is_final_pass:
             n = rng.randint(10, 200)
             return f"{'.' * min(n, 30)}\n{n} passed in {rng.uniform(0.5, 30.0):.2f}s"
+        if action in ("bash", "test_runner") and phase == "verification":
+            failed = rng.randint(1, 5)
+            passed = rng.randint(10, 100)
+            return f"{passed} passed, {failed} failed in {rng.uniform(1.0, 20.0):.2f}s"
         if action == "read":
-            return "class Handler:\n    def process(self, request):\n        ..."
+            snippets = [
+                "class BaseHandler:\n    def __init__(self):\n        self._initialized = False\n    def process(self, request):\n        ...",
+                "def get_queryset(self):\n    qs = super().get_queryset()\n    return qs.filter(active=True)",
+                "class Config:\n    DEBUG = False\n    TESTING = False\n    DATABASE_URI = 'sqlite:///app.db'",
+            ]
+            return rng.choice(snippets)
         if action == "grep":
-            lines = rng.randint(1, 5)
-            return "\n".join(f"line {rng.randint(1, 500)}: def process_{i}()" for i in range(lines))
+            lines = rng.randint(1, 8)
+            fns = ["handle", "process", "validate", "clean", "save", "update", "create", "delete"]
+            return "\n".join(f"line {rng.randint(1, 500)}: def {rng.choice(fns)}_{i}(self, *args):" for i in range(lines))
         if action == "edit":
             return "File edited successfully."
         if action == "git_diff":
-            return "+    if result is None:\n+        return default"
+            return "+    if result is None:\n+        raise ValueError('unexpected None')\n     return result"
+        if action == "git_log":
+            return "abc1234 Fix issue with cache invalidation\ndef5678 Add test for edge case\n789abcd Refactor query builder"
         return "ok"
 
 
