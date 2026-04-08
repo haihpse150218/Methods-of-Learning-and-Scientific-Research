@@ -82,9 +82,9 @@ def _metric_card_html(metric_id: str, meta: dict) -> str:
 # Main render function
 # ---------------------------------------------------------------------------
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=5)
 def _cached_scan(base_dir: str) -> list[dict]:
-    """Cache-wrapped scan_trajectories call. base_dir is str for hashability."""
+    """Cache-wrapped scan_trajectories call (5s TTL so new files appear quickly)."""
     results = scan_trajectories(Path(base_dir))
     # Make 'path' JSON-serializable (convert Path → str) for cache compatibility
     for item in results:
@@ -94,6 +94,13 @@ def _cached_scan(base_dir: str) -> list[dict]:
 
 def render_log_viewer():
     render_pipeline_banner()
+
+    # Refresh button to clear cache
+    _, refresh_col = st.columns([8, 1])
+    with refresh_col:
+        if st.button("Refresh", key="lv_refresh", help="Rescan trajectory files"):
+            _cached_scan.clear()
+            st.rerun()
 
     # ── Guard: trajectories directory must exist ─────────────────────────────
     if not TRAJECTORIES_DIR.exists():
