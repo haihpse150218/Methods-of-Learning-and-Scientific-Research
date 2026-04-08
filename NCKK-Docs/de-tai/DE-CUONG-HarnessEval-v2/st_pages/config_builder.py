@@ -333,12 +333,13 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
         try:
             run_mgr.start(
                 conditions=[condition_id],
-                mode="dry-run" if dry_run else "real",
+                mode=run_mode,
                 max_tasks=int(max_tasks),
                 output_dir=TRAJECTORIES_DIR,
                 sweagent_dir=Path(sweagent_dir) if sweagent_dir else None,
                 parallel=parallel,
                 max_workers=int(max_workers) if parallel else 4,
+                ollama_model=ollama_model if run_mode == "ollama" else None,
             )
             st.rerun()
         except RuntimeError as exc:
