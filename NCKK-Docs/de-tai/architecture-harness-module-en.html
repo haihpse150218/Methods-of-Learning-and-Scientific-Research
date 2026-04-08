@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval — Modular Harness Architecture & Ablation Design</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f8f9fc;color:#1a1a2e;line-height:1.7}
+.container{max-width:1300px;margin:0 auto;padding:20px}
+
+/* Header */
+.header{text-align:center;padding:40px 20px 20px}
+.header h1{font-size:2.2em;color:#1565c0;margin-bottom:8px}
+.header .sub{color:#546e7a;font-size:1.05em}
+
+/* Sections */
+.section{background:#ffffff;border-radius:16px;padding:30px;margin:30px 0;border:1px solid #e0e0e0;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.section.red::before{background:linear-gradient(90deg,#e53935,#ff7043)}
+.section.blue::before{background:linear-gradient(90deg,#1e88e5,#5c6bc0)}
+.section.green::before{background:linear-gradient(90deg,#43a047,#00acc1)}
+.section.purple::before{background:linear-gradient(90deg,#8e24aa,#5c6bc0)}
+.section.orange::before{background:linear-gradient(90deg,#fb8c00,#f4511e)}
+
+h2{font-size:1.5em;margin-bottom:20px;display:flex;align-items:center;gap:12px;color:#1a1a2e}
+h2 .num{background:#e3f2fd;color:#1565c0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85em;flex-shrink:0;border:2px solid #90caf9}
+h3{color:#1565c0;margin:18px 0 10px;font-size:1.1em}
+
+/* Compare side by side */
+.compare{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;margin:20px 0;align-items:stretch}
+.compare-box{border-radius:12px;padding:24px;position:relative}
+.compare-before{background:#fff5f5;border:2px solid #e53935}
+.compare-after{background:#f1f8e9;border:2px solid #43a047}
+.compare-arrow{display:flex;align-items:center;justify-content:center;font-size:2.5em;color:#fb8c00}
+.compare-label{position:absolute;top:-12px;left:20px;padding:2px 14px;border-radius:12px;font-size:.75em;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
+.label-before{background:#e53935;color:#fff}
+.label-after{background:#43a047;color:#fff}
+
+/* Code blocks */
+pre{background:#fafbff;border:1px solid #d0d7e5;border-radius:10px;padding:18px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.85em;overflow-x:auto;line-height:1.8;margin:12px 0}
+.kw{color:#d32f2f}
+.fn{color:#7b1fa2}
+.str{color:#1565c0}
+.cm{color:#78909c;font-style:italic}
+.var{color:#e65100}
+.type{color:#0277bd}
+
+/* Architecture diagram */
+.arch{display:flex;flex-direction:column;gap:0;align-items:center;margin:20px 0}
+.arch-layer{width:100%;max-width:900px;border-radius:14px;padding:20px 28px;position:relative;border:2px solid}
+.arch-layer .layer-title{font-weight:bold;font-size:1em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.arch-layer .layer-title .icon{font-size:1.3em}
+.arch-connector{width:4px;height:30px;position:relative;display:flex;flex-direction:column;align-items:center}
+.arch-connector .line{width:4px;height:20px;border-radius:2px}
+.arch-connector .arrow{font-size:1.2em;line-height:1}
+
+.layer-tool{background:#f3e5f5;border-color:#8e24aa}
+.layer-tool .layer-title{color:#6a1b9a}
+.layer-context{background:#e3f2fd;border-color:#1e88e5}
+.layer-context .layer-title{color:#0d47a1}
+.layer-llm{background:#e8f5e9;border-color:#43a047}
+.layer-llm .layer-title{color:#1b5e20}
+
+/* Options grid */
+.options{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.opt{border-radius:10px;padding:14px;text-align:center;cursor:default;transition:transform .2s}
+.opt:hover{transform:scale(1.03);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.opt-name{font-weight:bold;font-size:.95em;margin-bottom:4px}
+.opt-desc{font-size:.78em;opacity:.8}
+.opt-a{background:#ede7f6;border:1px solid #8e24aa;color:#4a148c}
+.opt-b{background:#e3f2fd;border:1px solid #1e88e5;color:#0d47a1}
+.opt-c{background:#e8f5e9;border:1px solid #43a047;color:#1b5e20}
+
+/* Interface badge */
+.iface{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.75em;font-weight:bold;background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;margin-left:auto}
+
+/* Flow steps */
+.flow{display:flex;flex-direction:column;gap:0;margin:20px 0}
+.flow-step{display:flex;align-items:center;gap:16px;padding:16px 20px;background:#f5f7ff;border-radius:12px;border:1px solid #e0e0e0}
+.flow-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;flex-shrink:0;font-size:.9em}
+.flow-arrow{text-align:center;font-size:1.4em;color:#1e88e5;padding:4px 0}
+.flow-content{flex:1}
+.flow-title{font-weight:bold;color:#1a1a2e}
+.flow-desc{font-size:.85em;color:#546e7a;margin-top:3px}
+
+/* Variance bars */
+.vbar{display:flex;align-items:center;gap:12px;margin:8px 0}
+.vbar-label{width:140px;text-align:right;font-size:.9em;color:#455a64}
+.vbar-track{flex:1;height:28px;background:#e8ecf0;border-radius:6px;overflow:hidden;position:relative}
+.vbar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:bold;font-size:.8em;color:#fff;transition:width 1s ease}
+.vbar-val{width:50px;font-weight:bold;font-size:.95em;color:#37474f}
+
+/* Example run */
+.run-box{background:#fffbf0;border:2px solid #fb8c00;border-radius:14px;padding:24px;margin:20px 0;position:relative}
+.run-box::before{content:'EXPERIMENT RUN #14';position:absolute;top:-12px;left:20px;background:#fb8c00;color:#fff;padding:2px 14px;border-radius:12px;font-size:.75em;font-weight:bold}
+.run-config{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.run-config-item{text-align:center;padding:12px;border-radius:10px;background:#f5f7ff;border:1px solid #e0e0e0}
+.run-config-item .label{font-size:.75em;color:#78909c;text-transform:uppercase;letter-spacing:1px}
+.run-config-item .value{font-size:1.2em;font-weight:bold;margin-top:4px}
+.run-results{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.run-result{text-align:center;padding:14px;border-radius:10px}
+.run-result .rlabel{font-size:.8em;color:#78909c}
+.run-result .rvalue{font-size:1.8em;font-weight:bold;margin-top:4px}
+.run-result .runit{font-size:.75em;color:#90a4ae}
+
+/* Analogy */
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}
+.analogy-card{border-radius:12px;padding:20px;text-align:center}
+.analogy-icon{font-size:2.5em;margin-bottom:10px}
+.analogy-title{font-weight:bold;font-size:1.1em;margin-bottom:8px}
+.analogy-items{text-align:left;font-size:.9em}
+.analogy-items li{margin:4px 0;list-style:none;padding-left:16px;position:relative}
+.analogy-items li::before{content:'=';position:absolute;left:0;color:#e65100;font-weight:bold}
+
+/* Key insight */
+.insight{background:linear-gradient(135deg,#e3f2fd,#bbdefb);border-radius:14px;padding:24px;margin:20px 0;border:1px solid #90caf9;color:#0d47a1}
+.insight-title{color:#1565c0;font-weight:bold;font-size:1.1em;margin-bottom:10px}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin:15px 0;font-size:.88em}
+th,td{padding:10px 14px;border:1px solid #e0e0e0;text-align:center}
+th{background:#e8eaf6;color:#283593;font-weight:700}
+td{background:#fff}
+tr:hover td{background:#f5f7ff}
+
+/* Responsive */
+@media(max-width:768px){
+  .compare{grid-template-columns:1fr}
+  .compare-arrow{transform:rotate(90deg);padding:10px}
+  .options{grid-template-columns:1fr}
+  .analogy{grid-template-columns:1fr}
+  .run-config,.run-results{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>HarnessEval &mdash; Modular Harness Architecture</h1>
+  <div class="sub">From monolithic to pluggable: How to decouple the harness from the LLM to measure each component independently</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 0: ANALOGY -->
+<!-- ============================================================ -->
+<div class="section orange">
+<h2><span class="num">0</span> Analogy: Why can we separate them?</h2>
+
+<div class="analogy">
+  <div class="analogy-card" style="background:#f3e5f5;border:1px solid #8e24aa">
+    <div class="analogy-icon">&#x1F3CE;</div>
+    <div class="analogy-title" style="color:#6a1b9a">Formula 1 Racing</div>
+    <ul class="analogy-items">
+      <li>Driver = LLM (the brain)</li>
+      <li>Race car = Harness (the scaffold)</li>
+      <li>Engine = Tool Dispatch</li>
+      <li>Tires = Context Strategy</li>
+      <li>Gearbox = LLM Backend API</li>
+    </ul>
+  </div>
+  <div class="analogy-card" style="background:#e3f2fd;border:1px solid #1e88e5">
+    <div class="analogy-icon">&#x1F4A1;</div>
+    <div class="analogy-title" style="color:#0d47a1">Research Questions</div>
+    <ul class="analogy-items">
+      <li>Did we win because of the driver or the car?</li>
+      <li>Swap the engine &rarr; how much impact?</li>
+      <li>Swap the tires &rarr; how much impact?</li>
+      <li>Weak driver + great car &gt; great driver + weak car?</li>
+      <li>ANOVA answers: % contribution of each factor</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: MONOLITHIC vs MODULAR -->
+<!-- ============================================================ -->
+<div class="section red">
+<h2><span class="num">1</span> The Problem: Monolithic Harness</h2>
+
+<div class="compare">
+  <!-- BEFORE -->
+  <div class="compare-box compare-before">
+    <span class="compare-label label-before">BEFORE &mdash; Original SWE-Agent</span>
+    <h3 style="color:#c62828;margin-top:8px">Everything is hardcoded</h3>
+    <pre><span class="kw">def</span> <span class="fn">solve</span>(task):
+    <span class="cm"># Tools: fixed, cannot be changed</span>
+    tools = [edit, terminal, git, search]
+
+    <span class="cm"># Context: fixed, cannot be changed</span>
+    context = <span class="fn">get_full_history</span>()
+
+    <span class="cm"># LLM: fixed, cannot be changed</span>
+    response = <span class="var">openai</span>.<span class="fn">chat</span>(context)
+
+    <span class="cm"># =&gt; Changing 1 part = rewriting EVERYTHING</span></pre>
+    <div class="insight" style="background:#ffebee;border-color:#e53935">
+      <div class="insight-title" style="color:#c62828">The Problem</div>
+      All 3 components are <strong>tightly coupled</strong> via direct function calls.<br>
+      Cannot change one while keeping the other two constant.<br>
+      &rarr; Ablation experiments are impossible.
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="compare-arrow">&rarr;</div>
+
+  <!-- AFTER -->
+  <div class="compare-box compare-after">
+    <span class="compare-label label-after">AFTER &mdash; Modular Fork</span>
+    <h3 style="color:#2e7d32;margin-top:8px">Dependency Injection</h3>
+    <pre><span class="kw">def</span> <span class="fn">solve</span>(task, <span class="type">tool_provider</span>,
+              <span class="type">context_strategy</span>,
+              <span class="type">llm_backend</span>):
+
+    <span class="cm"># Tools: swappable</span>
+    tools = <span class="type">tool_provider</span>.<span class="fn">get_tools</span>()
+
+    <span class="cm"># Context: swappable</span>
+    context = <span class="type">context_strategy</span>.<span class="fn">build</span>(history)
+
+    <span class="cm"># LLM: swappable</span>
+    response = <span class="type">llm_backend</span>.<span class="fn">generate</span>(context)
+
+    <span class="cm"># =&gt; Change 1 part, keep the other 2</span></pre>
+    <div class="insight" style="background:#e8f5e9;border-color:#43a047">
+      <div class="insight-title" style="color:#2e7d32">The Solution</div>
+      Use <strong>Interfaces</strong> to decouple each layer.<br>
+      Each layer has multiple implementations, selected via <strong>YAML config</strong>.<br>
+      &rarr; Techniques: <strong>Strategy Pattern + Dependency Injection</strong>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: MODULAR ARCHITECTURE -->
+<!-- ============================================================ -->
+<div class="section blue">
+<h2><span class="num">2</span> Modular Harness Architecture &mdash; 3 Swappable Layers</h2>
+
+<div class="arch">
+
+  <!-- TOOL LAYER -->
+  <div class="arch-layer layer-tool">
+    <div class="layer-title">
+      <span class="icon">&#x1F527;</span>
+      LAYER 1: Tool Dispatch Layer
+      <span class="iface">interface: ToolProvider</span>
+    </div>
+    <div class="options">
+      <div class="opt opt-a">
+        <div class="opt-name">Config A: Full</div>
+        <div class="opt-desc">file_edit + terminal + git + search<br>Complete toolset matching original SWE-Agent</div>
+      </div>
+      <div class="opt opt-b">
+        <div class="opt-name">Config B: Minimal</div>
+        <div class="opt-desc">file_edit only<br>Agent must do everything with a single tool</div>
+      </div>
+      <div class="opt opt-c">
+        <div class="opt-name">Config C: No-Git</div>
+        <div class="opt-desc">file_edit + terminal + search<br>No git &mdash; measures the role of version control</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="arch-connector">
+    <div class="line" style="background:#5c6bc0"></div>
+    <div class="arrow" style="color:#5c6bc0">&#x25BC;</div>
+  </div>
+
+  <!-- CONTEXT LAYER -->
+  <div class="arch-layer layer-context">
+    <div class="layer-title">
+      <span class="icon">&#x1F4DD;</span>
+      LAYER 2: Context Management Layer
+      <span class="iface">interface: ContextStrategy</span>
+    </div>
+    <div class="options">
+      <div class="opt opt-a">
+        <div class="opt-name">Strategy 1: Full History</div>
+        <div class="opt-desc">Retains the entire conversation history<br>Best information quality, highest token cost</div>
+      </div>
+      <div class="opt opt-b">
+        <div class="opt-name">Strategy 2: Sliding Window</div>
+        <div class="opt-desc">Keeps only the last 10 steps<br>Saves tokens, loses distant context</div>
+      </div>
+      <div class="opt opt-c">
+        <div class="opt-name">Strategy 3: ACC</div>
+        <div class="opt-desc">Adaptive Context Compaction<br>Keeps important info, compresses the rest</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="arch-connector">
+    <div class="line" style="background:#26a69a"></div>
+    <div class="arrow" style="color:#26a69a">&#x25BC;</div>
+  </div>
+
+  <!-- LLM LAYER -->
+  <div class="arch-layer layer-llm">
+    <div class="layer-title">
+      <span class="icon">&#x1F9E0;</span>
+      LAYER 3: LLM Backend Layer
+      <span class="iface">interface: LLMBackend</span>
+    </div>
+    <div class="options">
+      <div class="opt opt-a">
+        <div class="opt-name">Backend I: GPT-4o</div>
+        <div class="opt-desc">OpenAI &mdash; widely-used commercial model</div>
+      </div>
+      <div class="opt opt-b">
+        <div class="opt-name">Backend II: Claude Sonnet</div>
+        <div class="opt-desc">Anthropic &mdash; strong at code reasoning</div>
+      </div>
+      <div class="opt opt-c">
+        <div class="opt-name">Backend III: DeepSeek</div>
+        <div class="opt-desc">Open-source &mdash; cost-effective, high performance</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Config YAML -->
+<h3>Select combinations via Config file (YAML)</h3>
+<pre><span class="cm"># experiment_config.yaml</span>
+<span class="var">experiments</span>:
+  <span class="var">run_01</span>:
+    <span class="var">tool_provider</span>: <span class="str">"full"</span>         <span class="cm"># Config A</span>
+    <span class="var">context_strategy</span>: <span class="str">"full"</span>     <span class="cm"># Strategy 1</span>
+    <span class="var">llm_backend</span>: <span class="str">"gpt-4o"</span>        <span class="cm"># Backend I</span>
+
+  <span class="var">run_14</span>:
+    <span class="var">tool_provider</span>: <span class="str">"minimal"</span>      <span class="cm"># Config B</span>
+    <span class="var">context_strategy</span>: <span class="str">"acc"</span>       <span class="cm"># Strategy 3</span>
+    <span class="var">llm_backend</span>: <span class="str">"claude-sonnet"</span> <span class="cm"># Backend II</span>
+
+  <span class="var">run_27</span>:
+    <span class="var">tool_provider</span>: <span class="str">"no-git"</span>      <span class="cm"># Config C</span>
+    <span class="var">context_strategy</span>: <span class="str">"window"</span>   <span class="cm"># Strategy 2</span>
+    <span class="var">llm_backend</span>: <span class="str">"deepseek"</span>     <span class="cm"># Backend III</span></pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: ABLATION 27 COMBINATIONS -->
+<!-- ============================================================ -->
+<div class="section purple">
+<h2><span class="num">3</span> Ablation Experiment: 3 &times; 3 &times; 3 = 27 Combinations</h2>
+
+<div class="insight">
+  <div class="insight-title">What is Ablation?</div>
+  <strong>Ablation</strong> = systematically removing or replacing individual components to measure their impact.<br>
+  Similar to a neuroscientist deactivating specific brain regions to see what each one controls.<br>
+  Here: vary each layer (Tool / Context / LLM) &rarr; measure the change in outcomes.
+</div>
+
+<h3>Full 27-Combination Table (Full Factorial Design)</h3>
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Tool Layer</th>
+  <th>Context Layer</th>
+  <th>LLM Backend</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left">Baseline &mdash; full configuration</td></tr>
+<tr><td>2</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">Claude</td><td style="text-align:left">Swap LLM, keep harness constant</td></tr>
+<tr><td>3</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left">Swap LLM, keep harness constant</td></tr>
+<tr><td>4</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left">Truncate context &rarr; impact?</td></tr>
+<tr><td>5</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>6</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr><td>7</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left">Adaptive context compaction</td></tr>
+<tr><td>8</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>9</td><td style="color:#7b1fa2">Full</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr style="border-top:2px solid #fb8c00"><td>10</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left">Strip tools &rarr; how much degradation?</td></tr>
+<tr><td>11</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>12</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr><td>13</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left"></td></tr>
+<tr><td style="color:#e65100;font-weight:bold">14</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">Claude</td><td style="text-align:left;color:#e65100">Illustrative example &darr;</td></tr>
+<tr><td>15</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>16</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr><td>17</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left"></td></tr>
+<tr><td>18</td><td style="color:#7b1fa2">Minimal</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr style="border-top:2px solid #ef6c00"><td>19</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left">Remove git &rarr; how much degradation?</td></tr>
+<tr><td>20</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>21</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">Full History</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr><td>22</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left"></td></tr>
+<tr><td>23</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>24</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">Window</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left"></td></tr>
+<tr><td>25</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">GPT-4o</td><td style="text-align:left"></td></tr>
+<tr><td>26</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">Claude</td><td style="text-align:left"></td></tr>
+<tr><td>27</td><td style="color:#7b1fa2">No-Git</td><td style="color:#1565c0">ACC</td><td style="color:#2e7d32">DeepSeek</td><td style="text-align:left">Final combination</td></tr>
+</tbody>
+</table>
+
+<!-- Example Run -->
+<div class="run-box">
+  <h3 style="margin-top:5px">Concrete Example: Running Combination #14</h3>
+  <div class="run-config">
+    <div class="run-config-item">
+      <div class="label">Tool Layer</div>
+      <div class="value" style="color:#7b1fa2">Minimal</div>
+      <div style="font-size:.75em;color:#78909c">file_edit only</div>
+    </div>
+    <div class="run-config-item">
+      <div class="label">Context Strategy</div>
+      <div class="value" style="color:#1565c0">ACC</div>
+      <div style="font-size:.75em;color:#78909c">adaptive compaction</div>
+    </div>
+    <div class="run-config-item">
+      <div class="label">LLM Backend</div>
+      <div class="value" style="color:#2e7d32">Claude Sonnet</div>
+      <div style="font-size:.75em;color:#78909c">Anthropic</div>
+    </div>
+  </div>
+  <div style="text-align:center;color:#78909c;font-size:.9em;margin:10px 0">
+    &darr; Run on 150 tasks from SWE-Bench Verified &darr;
+  </div>
+  <div class="run-results">
+    <div class="run-result" style="background:#e8f5e9;border:1px solid #43a047">
+      <div class="rlabel">Resolve Rate</div>
+      <div class="rvalue" style="color:#2e7d32">52%</div>
+      <div class="runit">78/150 tasks passed</div>
+    </div>
+    <div class="run-result" style="background:#e3f2fd;border:1px solid #1e88e5">
+      <div class="rlabel">Token Usage</div>
+      <div class="rvalue" style="color:#1565c0">12.4K</div>
+      <div class="runit">avg tokens/task</div>
+    </div>
+    <div class="run-result" style="background:#fff3e0;border:1px solid #ef6c00">
+      <div class="rlabel">Latency</div>
+      <div class="rvalue" style="color:#e65100">45s</div>
+      <div class="runit">avg/task</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: ANOVA ANALYSIS -->
+<!-- ============================================================ -->
+<div class="section green">
+<h2><span class="num">4</span> Three-Way ANOVA Analysis: Who contributes how much?</h2>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-num" style="background:#7c4dff">1</div>
+    <div class="flow-content">
+      <div class="flow-title">Collect Data</div>
+      <div class="flow-desc">27 combinations &times; 150 tasks = 4,050 results (pass/fail + tokens + time)</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step">
+    <div class="flow-num" style="background:#42a5f5">2</div>
+    <div class="flow-content">
+      <div class="flow-title">Three-Way ANOVA</div>
+      <div class="flow-desc">Decompose variance: Tool &times; Context &times; Backend + interaction effects</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step">
+    <div class="flow-num" style="background:#66bb6a">3</div>
+    <div class="flow-content">
+      <div class="flow-title">Results: % contribution per factor</div>
+      <div class="flow-desc">Answer: "Is the harness or the LLM more important?" with p &lt; 0.05</div>
+    </div>
+  </div>
+</div>
+
+<h3>Expected Results (illustrative)</h3>
+<div class="vbar">
+  <div class="vbar-label">Tool Dispatch</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:35%;background:linear-gradient(90deg,#7c4dff,#b388ff)">35%</div></div>
+  <div class="vbar-val" style="color:#5c6bc0">35%</div>
+</div>
+<div class="vbar">
+  <div class="vbar-label">Context Mgmt</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:20%;background:linear-gradient(90deg,#42a5f5,#80d8ff)">20%</div></div>
+  <div class="vbar-val" style="color:#1e88e5">20%</div>
+</div>
+<div class="vbar">
+  <div class="vbar-label">LLM Backend</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:30%;background:linear-gradient(90deg,#66bb6a,#a5d6a7)">30%</div></div>
+  <div class="vbar-val" style="color:#2e7d32">30%</div>
+</div>
+<div class="vbar">
+  <div class="vbar-label">Tool&times;Context</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:8%;background:linear-gradient(90deg,#ffa726,#ffcc80)">8%</div></div>
+  <div class="vbar-val" style="color:#ef6c00">8%</div>
+</div>
+<div class="vbar">
+  <div class="vbar-label">Tool&times;LLM</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:4%;background:linear-gradient(90deg,#ef5350,#ef9a9a)">4%</div></div>
+  <div class="vbar-val" style="color:#c62828">4%</div>
+</div>
+<div class="vbar">
+  <div class="vbar-label">Context&times;LLM</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:2%;background:linear-gradient(90deg,#78909c,#b0bec5)">2%</div></div>
+  <div class="vbar-val" style="color:#546e7a">2%</div>
+</div>
+<div class="vbar">
+  <div class="vbar-label">Residual</div>
+  <div class="vbar-track"><div class="vbar-fill" style="width:1%;background:#546e7a">1%</div></div>
+  <div class="vbar-val" style="color:#78909c">1%</div>
+</div>
+
+<div class="insight" style="margin-top:24px">
+  <div class="insight-title">How to read the results</div>
+  <strong>Tool Dispatch (35%) + Context (20%) = 55% &mdash; the Harness</strong> contributes more than half!<br>
+  <strong>LLM Backend (30%)</strong> &mdash; the LLM accounts for only one-third.<br>
+  &rarr; Conclusion: <em>"A mediocre model with a great harness can outperform a powerful model with a weak harness."</em><br>
+  &rarr; This provides quantitative evidence for the claim by Lou et al. [2].
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: FULL PIPELINE -->
+<!-- ============================================================ -->
+<div class="section orange">
+<h2><span class="num">5</span> End-to-End Pipeline: From Refactor to Conclusion</h2>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-num" style="background:#ef5350">1</div>
+    <div class="flow-content">
+      <div class="flow-title">Fork SWE-Agent</div>
+      <div class="flow-desc">Clone the SWE-Agent source code from GitHub (Princeton)</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+
+  <div class="flow-step">
+    <div class="flow-num" style="background:#ff7043">2</div>
+    <div class="flow-content">
+      <div class="flow-title">Refactor &rarr; Modular</div>
+      <div class="flow-desc">Create 3 interfaces: ToolProvider, ContextStrategy, LLMBackend<br>
+      Techniques: Strategy Pattern + Dependency Injection + Factory Pattern</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+
+  <div class="flow-step">
+    <div class="flow-num" style="background:#ffa726">3</div>
+    <div class="flow-content">
+      <div class="flow-title">Equivalence Verification (&plusmn;3%)</div>
+      <div class="flow-desc">Run 50 tasks with original SWE-Agent config &rarr; ensure refactor didn't break anything</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+
+  <div class="flow-step">
+    <div class="flow-num" style="background:#66bb6a">4</div>
+    <div class="flow-content">
+      <div class="flow-title">Pilot Study (5 &times; 20)</div>
+      <div class="flow-desc">Run the 5 most critical combinations &times; 20 tasks = 100 runs &rarr; validate setup</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+
+  <div class="flow-step">
+    <div class="flow-num" style="background:#42a5f5">5</div>
+    <div class="flow-content">
+      <div class="flow-title">Full Ablation (27 &times; 150)</div>
+      <div class="flow-desc">Run all 27 combinations &times; 150 tasks = 4,050 runs &rarr; collect data</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+
+  <div class="flow-step">
+    <div class="flow-num" style="background:#7c4dff">6</div>
+    <div class="flow-content">
+      <div class="flow-title">Three-Way ANOVA + GLMM</div>
+      <div class="flow-desc">Decompose variance &rarr; % contribution Tool vs Context vs LLM<br>
+      Statistical testing: p &lt; 0.05 after Bonferroni correction</div>
+    </div>
+  </div>
+  <div class="flow-arrow">&darr;</div>
+
+  <div class="flow-step">
+    <div class="flow-num" style="background:#ec407a">7</div>
+    <div class="flow-content">
+      <div class="flow-title">Conclusions + Open-Source Release</div>
+      <div class="flow-desc">Publish results + release evaluation toolkit on GitHub (RO5)</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: KEY DESIGN PATTERNS -->
+<!-- ============================================================ -->
+<div class="section blue">
+<h2><span class="num">6</span> Key Techniques: Dependency Injection Explained</h2>
+
+<h3>Strategy Pattern &mdash; Multiple implementations per layer</h3>
+<pre><span class="cm"># Interface (contract)</span>
+<span class="kw">class</span> <span class="type">ContextStrategy</span>(<span class="type">ABC</span>):
+    <span class="kw">def</span> <span class="fn">build</span>(self, history) -&gt; str:
+        ...  <span class="cm"># each subclass implements this</span>
+
+<span class="cm"># Implementation 1: Keep everything</span>
+<span class="kw">class</span> <span class="type">FullHistoryStrategy</span>(<span class="type">ContextStrategy</span>):
+    <span class="kw">def</span> <span class="fn">build</span>(self, history):
+        <span class="kw">return</span> <span class="str">"\n"</span>.join(history)  <span class="cm"># keep all</span>
+
+<span class="cm"># Implementation 2: Keep last 10 steps</span>
+<span class="kw">class</span> <span class="type">WindowStrategy</span>(<span class="type">ContextStrategy</span>):
+    <span class="kw">def</span> <span class="fn">build</span>(self, history):
+        <span class="kw">return</span> <span class="str">"\n"</span>.join(history[<span class="var">-10</span>:])  <span class="cm"># last 10 steps</span>
+
+<span class="cm"># Implementation 3: Adaptive compression</span>
+<span class="kw">class</span> <span class="type">ACCStrategy</span>(<span class="type">ContextStrategy</span>):
+    <span class="kw">def</span> <span class="fn">build</span>(self, history):
+        <span class="kw">return</span> self.<span class="fn">compress</span>(history)  <span class="cm"># smart compression</span></pre>
+
+<h3>Factory Pattern &mdash; Select implementation from config</h3>
+<pre><span class="cm"># Read YAML config &rarr; create correct object</span>
+<span class="kw">def</span> <span class="fn">create_experiment</span>(config):
+    tool = <span class="type">ToolFactory</span>.<span class="fn">create</span>(config[<span class="str">"tool_provider"</span>])
+    ctx  = <span class="type">ContextFactory</span>.<span class="fn">create</span>(config[<span class="str">"context_strategy"</span>])
+    llm  = <span class="type">LLMFactory</span>.<span class="fn">create</span>(config[<span class="str">"llm_backend"</span>])
+    <span class="kw">return</span> <span class="type">ModularHarness</span>(tool, ctx, llm)
+
+<span class="cm"># Usage</span>
+harness = <span class="fn">create_experiment</span>({
+    <span class="str">"tool_provider"</span>: <span class="str">"minimal"</span>,
+    <span class="str">"context_strategy"</span>: <span class="str">"acc"</span>,
+    <span class="str">"llm_backend"</span>: <span class="str">"claude-sonnet"</span>
+})
+result = harness.<span class="fn">solve</span>(task)  <span class="cm"># run!</span></pre>
+
+<div class="insight">
+  <div class="insight-title">Technical Summary</div>
+  <table>
+  <tr><th>Technique</th><th>Role</th><th>Analogy</th></tr>
+  <tr><td>Interface / ABC</td><td>Defines the "contract" each layer must follow</td><td>Standard power outlet &mdash; any appliance can plug in</td></tr>
+  <tr><td>Strategy Pattern</td><td>Multiple ways to do the same job</td><td>3 tire types for the same car</td></tr>
+  <tr><td>Dependency Injection</td><td>Pass implementation from outside</td><td>Swap tires at the pit stop without replacing the car</td></tr>
+  <tr><td>Factory Pattern</td><td>Create the right object from config</td><td>Pit crew reads "soft tires" order &rarr; picks the correct set</td></tr>
+  </table>
+</div>
+</div>
+
+<!-- FOOTER -->
+<div style="text-align:center;color:#90a4ae;padding:30px;font-size:.85em">
+  HarnessEval Research Proposal &mdash; FPT University MSE-AI Program &mdash; April 2026<br>
+  Architecture visualization for Section 1.1 &amp; RO2 understanding
+</div>
+
+</div>
+</body>
+</html>

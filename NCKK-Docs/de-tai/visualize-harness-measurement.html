@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval — Cach Do 3 Chieu Harness (Visualization)</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent-blue: #58a6ff;
+    --accent-green: #3fb950;
+    --accent-orange: #d29922;
+    --accent-red: #f85149;
+    --accent-purple: #bc8cff;
+    --accent-cyan: #39d2c0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-blue); }
+  h2 { font-size: 1.4rem; margin: 2rem 0 1rem; color: var(--accent-green); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; color: var(--accent-orange); }
+  .subtitle { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 2rem; }
+
+  .key-insight {
+    background: linear-gradient(135deg, #1a2332, #162216);
+    border: 2px solid var(--accent-green);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .key-insight .label {
+    color: var(--accent-green);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  .warning-box {
+    background: linear-gradient(135deg, #2a1a1a, #261f16);
+    border: 2px solid var(--accent-orange);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .warning-box .label {
+    color: var(--accent-orange);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Diagram containers ── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  .diagram-title {
+    font-size: 0.85rem;
+    color: var(--accent-purple);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  pre {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* ── Flow diagram with boxes ── */
+  .flow-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    text-align: center;
+    min-width: 140px;
+    position: relative;
+  }
+  .flow-box.highlight-blue { border-color: var(--accent-blue); }
+  .flow-box.highlight-green { border-color: var(--accent-green); }
+  .flow-box.highlight-orange { border-color: var(--accent-orange); }
+  .flow-box.highlight-red { border-color: var(--accent-red); }
+  .flow-box.highlight-purple { border-color: var(--accent-purple); }
+  .flow-box .box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+  .flow-box .box-desc { font-size: 0.75rem; color: var(--text-dim); }
+  .flow-arrow { font-size: 1.5rem; color: var(--text-dim); }
+
+  /* ── Comparison table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  th { background: var(--surface2); color: var(--accent-blue); font-weight: 600; }
+  td { background: var(--surface); }
+  tr:hover td { background: var(--surface2); }
+
+  /* ── Section numbers ── */
+  .section-num {
+    display: inline-block;
+    background: var(--accent-blue);
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+  }
+
+  /* ── Code-like inline ── */
+  code {
+    background: var(--surface2);
+    color: var(--accent-cyan);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', monospace;
+    font-size: 0.85rem;
+  }
+
+  .probe-marker {
+    display: inline-block;
+    background: var(--accent-red);
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .layer-tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .layer-tag.tool { background: #1a3a2a; color: var(--accent-green); border: 1px solid var(--accent-green); }
+  .layer-tag.ctx { background: #2a2a1a; color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+  .layer-tag.backend { background: #1a1a3a; color: var(--accent-purple); border: 1px solid var(--accent-purple); }
+
+  .step-grid {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 0rem 1rem;
+    margin: 1rem 0;
+  }
+  .step-num {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    text-align: right;
+    opacity: 0.4;
+  }
+  .step-content {
+    border-left: 2px solid var(--border);
+    padding-left: 1rem;
+    padding-bottom: 1.5rem;
+  }
+
+  ul { margin: 0.5rem 0; padding-left: 1.5rem; }
+  li { margin: 0.3rem 0; }
+
+  .emoji { font-size: 1.1rem; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>HarnessEval: Cach Do 3 Chieu Harness</h1>
+<p class="subtitle">
+  Visualize cach fork SWE-Agent thanh module + dat "dau do" (probe) de do tung chieu
+  <br>Khong phai "inject code vao LLM" — ma la <strong>boc LLM trong cac lop config khac nhau va do output</strong>
+</p>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">0</span> Cau hoi cot loi: "Inject code" hay gi?</h2>
+
+<div class="key-insight">
+  <div class="label">Tra loi ngan</div>
+  <strong>Khong inject code vao LLM.</strong> Chung ta <strong>thay doi moi truong xung quanh</strong> LLM (tools nao co san, context duoc cat nhu nao, LLM nao duoc dung), roi <strong>do hanh vi cua ca he thong</strong> qua log files.<br><br>
+  Giong nhu: ban khong mo nao bo ra de do — ban thay doi <strong>phong thi</strong> (de bai, thoi gian, dung cu) roi do <strong>ket qua bai thi</strong>.
+</div>
+
+<div class="warning-box">
+  <div class="label">Van de "Harness gan lien voi LLM"</div>
+  Dung — harness va LLM la <strong>vong lap kin</strong>: harness cung cap tools → LLM chon tool → harness dispatch → ket qua ve LLM → ...<br>
+  Chung ta <strong>KHONG the tach roi 100%</strong>. Nhung chung ta co the:
+  <ul>
+    <li><strong>Do main effect:</strong> Trung binh qua tat ca LLM, harness config X co hieu qua hon config Y khong?</li>
+    <li><strong>Do interaction:</strong> Harness config X tot hon voi Claude nhung xau voi DeepSeek?</li>
+    <li>Ca hai deu la ket qua khoa hoc co gia tri.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">1</span> Kien truc tong the: SWE-Agent goc vs. Modular Fork</h2>
+
+<div class="diagram">
+  <div class="diagram-title">So sanh: Truoc va Sau khi fork</div>
+<pre style="color: var(--text);">
+<span style="color: var(--accent-red);">SWE-AGENT GOC (monolithic)</span>                 <span style="color: var(--accent-green);">HARNESS-EVAL FORK (modular)</span>
+================================                 ====================================
+
+┌──────────────────────────┐                     ┌──────────────────────────────────┐
+│      SWE-Agent           │                     │        ModularHarness            │
+│                          │                     │                                  │
+│  tools = [fixed list]    │    ──── fork ───→   │  ┌──────────────────────────┐    │
+│  context = full history  │                     │  │ <span style="color: var(--accent-green);">ToolProvider</span>      [swap]  │    │
+│  model = GPT-4o          │                     │  │  Full(12) / Med(8) / Min(5) │  │
+│                          │                     │  └──────────────────────────┘    │
+│  TAT CA CUNG 1 FILE      │                     │  ┌──────────────────────────┐    │
+│  CONFIG duy nhat         │                     │  │ <span style="color: var(--accent-orange);">ContextStrategy</span>   [swap]  │    │
+│                          │                     │  │  Full / Sliding / Summary    │  │
+│  Khong the thay doi      │                     │  └──────────────────────────┘    │
+│  tung thanh phan         │                     │  ┌──────────────────────────┐    │
+│  de do rieng             │                     │  │ <span style="color: var(--accent-purple);">LLMBackend</span>        [swap]  │    │
+│                          │                     │  │  Claude / GPT / DeepSeek     │  │
+└──────────────────────────┘                     │  └──────────────────────────┘    │
+                                                 │                                  │
+                                                 │  Factory: create_harness(config) │
+                                                 └──────────────────────────────────┘
+</pre>
+</div>
+
+<div class="key-insight">
+  <div class="label">Ky thuat chinh</div>
+  <strong>Strategy Pattern + Dependency Injection + Factory Pattern</strong><br><br>
+  Moi "condition" thuc nghiem la 1 to hop 3 config files YAML duoc <strong>compose</strong> lai:
+  <code>base.yaml</code> + <code>tool_full.yaml</code> + <code>ctx_sliding.yaml</code> + <code>be_claude.yaml</code>
+  <br>→ SWE-Agent doc config nay va hanh xu tuong ung. <strong>Code SWE-Agent khong bi sua</strong> — chi config bi thay doi.
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">2</span> Vong lap Harness-LLM va 5 diem dat "Dau do" (Probe)</h2>
+
+<div class="diagram">
+  <div class="diagram-title">Agent Loop voi 5 Probe Points</div>
+<pre style="color: var(--text);">
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                        MODULAR HARNESS                                  │
+    │                                                                         │
+    │   <span style="color: var(--accent-red);">P1</span>                    <span style="color: var(--accent-red);">P2</span>                    <span style="color: var(--accent-red);">P3</span>                     │
+    │   ▼                     ▼                     ▼                     │
+    │  ┌─────────┐      ┌───────────┐         ┌──────────┐                │
+    │  │ CONTEXT │      │   TOOL    │         │   LLM    │                │
+    │  │ MANAGER │      │ DISPATCH  │         │ BACKEND  │                │
+    │  │         │      │           │         │          │                │
+    │  │ Cat/nen │      │ Danh sach │         │ API call │                │
+    │  │ history │      │ tools co  │         │ + nhan   │                │
+    │  │ truoc   │      │ san de    │         │ response │                │
+    │  │ khi gui │      │ LLM chon  │         │          │                │
+    │  │ cho LLM │      │           │         │          │                │
+    │  └────┬────┘      └─────┬─────┘         └────┬─────┘                │
+    │       │                 │                     │                      │
+    │       └────────┐        │         ┌───────────┘                      │
+    │                ▼        ▼         ▼                                  │
+    │         ┌──────────────────────────────┐                            │
+    │         │                              │                            │
+    │         │      <span style="color: var(--accent-blue); font-weight: bold;">PROMPT → LLM → RESPONSE</span>    │                            │
+    │         │                              │                            │
+    │         │  "Day la context...          │                            │
+    │         │   Ban co cac tools:          │                            │
+    │         │   [bash, read, edit, grep]   │                            │
+    │         │   Hay giai quyet bug #123"   │                            │
+    │         │                              │    <span style="color: var(--accent-red);">P4</span>                      │
+    │         │   LLM tra loi:               │    ▼                      │
+    │         │   "Toi se goi grep de tim    │  ┌──────────┐             │
+    │         │    loi trong file X"         │  │ LOG TOOL │             │
+    │         │                              │  │ CALL     │             │
+    │         └──────────────┬───────────────┘  │ (tool,   │             │
+    │                        │                  │  args,   │             │
+    │                        ▼                  │  result) │             │
+    │                ┌───────────────┐          └──────────┘             │
+    │                │ EXECUTE TOOL  │                                    │
+    │                │ (bash, grep,  │                                    │
+    │                │  edit, etc.)  │                                    │
+    │                └───────┬───────┘                                    │
+    │                        │                  <span style="color: var(--accent-red);">P5</span>                      │
+    │                        │                  ▼                        │
+    │                        │            ┌────────────┐                 │
+    │                        └───────────→│ LOG RESULT │                 │
+    │                                     │ (output,   │                 │
+    │                                     │  resolve?) │                 │
+    │                   ┌─────────────────└────────────┘                 │
+    │                   │                                                │
+    │                   ▼                                                │
+    │            Quay lai vong lap (next turn)                           │
+    │                                                                    │
+    └─────────────────────────────────────────────────────────────────────┘
+
+
+    <span style="color: var(--accent-red); font-weight: bold;">5 PROBE POINTS — Noi chung ta "dat dau do":</span>
+
+    <span style="color: var(--accent-red);">P1</span> CONTEXT PROBE     — Ghi lai: context gui cho LLM co bao nhieu token?
+                            Thong tin quan trong co bi cat khong?
+                            → Do <span style="color: var(--accent-orange);">Chieu 2: Context Utilization</span>
+
+    <span style="color: var(--accent-red);">P2</span> TOOL LIST PROBE   — Ghi lai: LLM duoc cung cap nhung tool nao?
+                            (Full: 12, Medium: 8, Minimal: 5)
+                            → Anh huong <span style="color: var(--accent-green);">Chieu 1: Tool Dispatch</span>
+
+    <span style="color: var(--accent-red);">P3</span> BACKEND PROBE     — Ghi lai: LLM nao dang xu ly? Latency? Cost?
+                            → Do <span style="color: var(--accent-purple);">Chieu 3: Backend Portability</span>
+
+    <span style="color: var(--accent-red);">P4</span> TOOL CALL LOG     — Ghi lai: LLM chon tool nao? Arguments gi?
+                            Co dung tool khong? Co thua khong?
+                            → Do <span style="color: var(--accent-green);">Chieu 1: Tool Dispatch</span> (M1.1, M1.2, M1.3)
+
+    <span style="color: var(--accent-red);">P5</span> RESULT LOG        — Ghi lai: Task resolve thanh cong?
+                            Bao nhieu turns? Bao nhieu tokens?
+                            → Do <span style="color: var(--accent-orange);">Chieu 2</span> + input cho ANOVA
+</pre>
+</div>
+
+<div class="key-insight">
+  <div class="label">Khong phai "inject" — ma la "instrument" (dat dau do)</div>
+  SWE-Agent <strong>da ghi log san</strong> tat ca tool calls va ket qua vao file JSON (trajectory files).<br>
+  Chung ta chi can:
+  <ol>
+    <li><strong>Thay doi config</strong> (tool set, context strategy, backend) truoc khi chay</li>
+    <li><strong>Doc trajectory log</strong> sau khi chay</li>
+    <li><strong>Tinh metrics</strong> tu log data</li>
+  </ol>
+  Giong nhu: dat camera ghi hinh phong thi, KHONG can mo dau thi sinh.
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">3</span> Cach do cu the tung chieu</h2>
+
+<h3><span class="layer-tag tool">CHIEU 1</span> Tool Dispatch Efficiency — "LLM co chon dung tool khong?"</h3>
+
+<div class="diagram">
+  <div class="diagram-title">Cach do: Doc log → so sanh voi "acceptable tools"</div>
+<pre style="color: var(--text);">
+    <span style="color: var(--accent-green); font-weight: bold;">HARNESS THAY DOI GI:</span>
+    Config A: Full (12 tools)    →  LLM thay: [bash, python, read, write, edit,
+                                               glob, grep, find, git_diff, git_log,
+                                               git_show, test_runner]
+
+    Config B: Medium (8 tools)   →  LLM thay: [bash, python, read, write, edit,
+                                               grep, git_diff, test_runner]
+
+    Config C: Minimal (5 tools)  →  LLM thay: [bash, read, write, edit, grep]
+
+    <span style="color: var(--accent-blue); font-weight: bold;">LOG GHI LAI GI (trajectory.json):</span>
+    {
+      "turn": 3,
+      "action": "tool_call",
+      "tool": "grep",                    ← LLM chon tool nay
+      "args": {"pattern": "def parse", "file": "src/parser.py"},
+      "output": "line 42: def parse(...)...",
+      "output_used_in_turns": [4, 5]     ← Output duoc dung o turn 4, 5
+    }
+
+    <span style="color: var(--accent-orange); font-weight: bold;">METRICS TINH TU LOG:</span>
+
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  M1.1  correct_selection_rate                                   │
+    │                                                                 │
+    │  = (so tool calls chon tool HOP LE) / (tong so tool calls)     │
+    │                                                                 │
+    │  "Hop le" = tool nam trong tap acceptable_tools cho task do     │
+    │  Vi du: Task "tim bug" → acceptable = {grep, read, git_diff}   │
+    │         LLM goi grep  → DUNG  ✓                                │
+    │         LLM goi write → SAI   ✗ (chua can sua, dang tim)       │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  M1.2  redundant_call_rate                                      │
+    │                                                                 │
+    │  = (so tool calls ma output KHONG duoc dung trong 3 turn)      │
+    │    / (tong so tool calls)                                       │
+    │                                                                 │
+    │  Vi du: LLM goi grep → output khong xuat hien trong turn       │
+    │         4, 5, 6 → THUA  (LLM goi ma khong dung ket qua)       │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  M1.3  utilization_breadth                                      │
+    │                                                                 │
+    │  = (so tool KHAC NHAU da dung) / (tong so tools CO SAN)        │
+    │                                                                 │
+    │  Vi du: Co 12 tools, dung 4 → breadth = 0.33                   │
+    │         Co 5 tools, dung 4  → breadth = 0.80                   │
+    └─────────────────────────────────────────────────────────────────┘
+
+    <span style="color: var(--accent-red); font-weight: bold;">SO SANH 3 CONFIGS (cung 1 task, cung 1 LLM):</span>
+
+    Task: django__django-16379 (fix URL resolver bug)
+
+    Full (12 tools):    grep→read→edit→test   | M1.1=1.00  M1.2=0.00  M1.3=0.33
+    Medium (8 tools):   grep→read→edit→test   | M1.1=1.00  M1.2=0.00  M1.3=0.50
+    Minimal (5 tools):  bash→read→edit→bash   | M1.1=0.75  M1.2=0.25  M1.3=0.60
+                        ↑ bash thay grep (cham hon, co the sai)
+                        ↑ 1 bash goi thua (khong dung output)
+</pre>
+</div>
+
+<h3><span class="layer-tag ctx">CHIEU 2</span> Context Utilization — "Harness quan ly context tot khong?"</h3>
+
+<div class="diagram">
+  <div class="diagram-title">Cach do: So sanh context gui cho LLM voi "ground truth"</div>
+<pre style="color: var(--text);">
+    <span style="color: var(--accent-green); font-weight: bold;">HARNESS THAY DOI GI:</span>
+
+    Strategy 1: FULL           → Gui TAT CA history cho LLM (co the 200K tokens)
+    Strategy 2: SLIDING WINDOW → Chi giu 50K tokens gan nhat
+    Strategy 3: SUMMARY / ACC  → Nen thanh 2K tokens tom tat
+
+    <span style="color: var(--accent-blue); font-weight: bold;">HIEU UNG LEN LLM:</span>
+
+    ┌────────────────────────────────────────────────────────────────┐
+    │ FULL HISTORY (200K tokens)                                     │
+    │                                                                │
+    │ Turn 1: [user task]                                            │
+    │ Turn 2: [LLM: goi grep] [result: 50 lines output]             │
+    │ Turn 3: [LLM: goi read] [result: 200 lines file]              │
+    │ ...                                                            │
+    │ Turn 20: [LLM: goi edit] [result: OK]                         │
+    │                                                                │
+    │ Pro: LLM thay TAT CA thong tin                                 │
+    │ Con: Token dat ($$$), LLM co the "lac" trong noise             │
+    └────────────────────────────────────────────────────────────────┘
+
+    ┌────────────────────────────────────────────────────────────────┐
+    │ SLIDING WINDOW (50K tokens)                                    │
+    │                                                                │
+    │ [... Turn 1-10 bi cat ...]                                     │
+    │ Turn 11: [LLM: goi grep] [result: 30 lines]                   │
+    │ ...                                                            │
+    │ Turn 20: [LLM: goi edit] [result: OK]                         │
+    │                                                                │
+    │ Pro: Re hon, LLM tap trung                                     │
+    │ Con: Mat thong tin tu cac turn dau (co the can!)               │
+    └────────────────────────────────────────────────────────────────┘
+
+    ┌────────────────────────────────────────────────────────────────┐
+    │ SUMMARY / ACC (2K tokens)                                      │
+    │                                                                │
+    │ "Ban da doc file X, tim thay bug o dong 42, da sua             │
+    │  file Y. Bay gio can chay test."                               │
+    │                                                                │
+    │ Pro: Cuc re, cuc nhanh                                         │
+    │ Con: Mat chi tiet — LLM co the quen context quan trong         │
+    └────────────────────────────────────────────────────────────────┘
+
+
+    <span style="color: var(--accent-orange); font-weight: bold;">METRICS TINH TU LOG:</span>
+
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  M2.1  info_retention_score                                     │
+    │                                                                 │
+    │  So sanh context DA GUI cho LLM voi "ground truth"              │
+    │  (full history) bang Jaccard similarity hoac BERTScore           │
+    │                                                                 │
+    │  Full:    retention = 1.00 (khong mat gi)                       │
+    │  Sliding: retention = 0.75 (mat 25% thong tin dau)              │
+    │  Summary: retention = 0.30 (chi giu y chinh)                    │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  M2.2  effective_token_ratio                                    │
+    │                                                                 │
+    │  = (tokens THUC SU HUU ICH) / (tong tokens gui cho LLM)        │
+    │                                                                 │
+    │  Full:    50K useful / 200K total = 0.25 (75% la noise!)        │
+    │  Sliding: 40K useful / 50K total  = 0.80 (hieu qua hon)        │
+    │  Summary: 1.5K useful / 2K total  = 0.75                       │
+    └─────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<h3><span class="layer-tag backend">CHIEU 3</span> Backend Portability — "Harness co hoat dong tot voi moi LLM?"</h3>
+
+<div class="diagram">
+  <div class="diagram-title">Cach do: Cung 1 harness config, doi LLM, so sanh resolve rate</div>
+<pre style="color: var(--text);">
+    <span style="color: var(--accent-green); font-weight: bold;">GIU NGUYEN HARNESS, DOI LLM:</span>
+
+    Condition:  Full tools + Full history + <span style="color: var(--accent-blue);">[Claude]</span>  → Resolve 45/150 = 30.0%
+    Condition:  Full tools + Full history + <span style="color: var(--accent-orange);">[GPT-4o]</span>  → Resolve 40/150 = 26.7%
+    Condition:  Full tools + Full history + <span style="color: var(--accent-purple);">[DeepSeek]</span> → Resolve 25/150 = 16.7%
+
+    <span style="color: var(--accent-orange); font-weight: bold;">METRICS:</span>
+
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  M3.1  cross_backend_stddev                                     │
+    │                                                                 │
+    │  = std([30.0, 26.7, 16.7]) = 5.66                              │
+    │                                                                 │
+    │  Cang THAP → harness hoat dong DONG DEU tren moi LLM           │
+    │  Cang CAO  → harness "thien vi" 1 LLM cu the                   │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  M3.2  min_max_ratio                                            │
+    │                                                                 │
+    │  = min(RR) / max(RR) = 16.7 / 30.0 = 0.56                      │
+    │                                                                 │
+    │  Cang GAN 1.0 → portability tot (moi LLM gan nhu nhau)         │
+    │  Cang GAN 0.0 → harness chi tot cho 1 LLM                      │
+    └─────────────────────────────────────────────────────────────────┘
+
+
+    <span style="color: var(--accent-red); font-weight: bold;">VI SAO CHIEU NAY QUAN TRONG:</span>
+
+    Neu harness THAT SU "doc lap voi LLM":
+    ┌─────────────────────────────────────────────────┐
+    │  Harness tot   + Claude  = 70%                   │
+    │  Harness tot   + GPT     = 68%                   │
+    │  Harness tot   + DeepSeek = 65%                  │  ← stddev THAP
+    │                                                   │
+    │  Harness xau   + Claude  = 40%                   │
+    │  Harness xau   + GPT     = 35%                   │
+    │  Harness xau   + DeepSeek = 20%                  │  ← stddev CAO
+    └─────────────────────────────────────────────────┘
+    → Harness tot giup MOI LLM, khong chi LLM manh
+    → Harness xau lam LLM yeu bi anh huong NHIEU HON
+    → Day la interaction effect (H4 trong de cuong)
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">4</span> Toan canh: Tu Config → Do luong → ANOVA</h2>
+
+<div class="diagram">
+  <div class="diagram-title">Pipeline do luong end-to-end</div>
+<pre style="color: var(--text);">
+  <span style="color: var(--accent-blue); font-weight: bold;">BUOC 1: TAO 27 CONFIGS</span>
+  ┌─────────────┐
+  │  Factory     │   create_harness_config("full", "sliding_window", "claude")
+  │  Pattern     │   → HarnessConfig {
+  │              │       tool: FullToolProvider,
+  │              │       context: SlidingWindowContextProvider,
+  │              │       backend: ClaudeBackendProvider
+  │              │     }
+  │              │   → YAML files: base.yaml + tool_full.yaml + ctx_sliding.yaml + be_claude.yaml
+  └──────┬──────┘
+         │
+         ▼
+  <span style="color: var(--accent-green); font-weight: bold;">BUOC 2: CHAY SWE-AGENT VOI TUNG CONFIG</span>
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │                                                                             │
+  │   python -m sweagent run-batch \                                            │
+  │     --config config/harness_eval/base.yaml \                                │
+  │     --config config/harness_eval/tool_full.yaml \            ← <span style="color: var(--accent-green);">THAY DOI</span>     │
+  │     --config config/harness_eval/ctx_sliding_window.yaml \   ← <span style="color: var(--accent-orange);">THAY DOI</span>     │
+  │     --config config/harness_eval/be_claude.yaml \            ← <span style="color: var(--accent-purple);">THAY DOI</span>     │
+  │     --output_dir trajectories/harness_eval/full_sliding_window_claude       │
+  │                                                                             │
+  │   SWE-Agent doc config → thay doi hanh vi → chay 150 tasks → ghi LOG       │
+  │                                                                             │
+  └──────┬──────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+  <span style="color: var(--accent-orange); font-weight: bold;">BUOC 3: PARSE LOG FILES (trajectory.json)</span>
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │                                                                             │
+  │   trajectories/harness_eval/full_sliding_window_claude/                     │
+  │   ├── django__django-16379.json     ← 1 file log cho moi task              │
+  │   ├── django__django-16400.json                                            │
+  │   ├── ...                                                                   │
+  │   └── sympy__sympy-24066.json       ← 150 files tong cong                  │
+  │                                                                             │
+  │   Moi file chua:                                                            │
+  │   {                                                                         │
+  │     "task_id": "django__django-16379",                                      │
+  │     "resolved": true,                                                       │
+  │     "turns": [                                                              │
+  │       {"action": "tool_call", "tool": "grep", "args": {...}, ...},         │
+  │       {"action": "tool_call", "tool": "edit", "args": {...}, ...},         │
+  │     ],                                                                      │
+  │     "total_tokens": 45000,                                                  │
+  │     "total_cost": 0.32                                                      │
+  │   }                                                                         │
+  │                                                                             │
+  │   <span style="color: var(--accent-cyan);">parsers/trajectory.py</span> doc file nay → ParsedTrajectory object              │
+  │                                                                             │
+  └──────┬──────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+  <span style="color: var(--accent-purple); font-weight: bold;">BUOC 4: TINH 7 METRICS</span>
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │                                                                             │
+  │   Cho moi condition (27 configs) × moi task (150 tasks):                    │
+  │                                                                             │
+  │   <span style="color: var(--accent-green);">D1: Tool Dispatch</span>                                                       │
+  │     M1.1 = correct_selection_rate(trajectory, acceptable_tools)             │
+  │     M1.2 = redundant_call_rate(trajectory)                                 │
+  │     M1.3 = utilization_breadth(trajectory, available_tools)                │
+  │                                                                             │
+  │   <span style="color: var(--accent-orange);">D2: Context Utilization</span>                                                 │
+  │     M2.1 = info_retention_score(sent_context, full_history)                │
+  │     M2.2 = effective_token_ratio(trajectory)                               │
+  │                                                                             │
+  │   <span style="color: var(--accent-purple);">D3: Backend Portability</span>  (tinh tren NHOM conditions cung harness)        │
+  │     M3.1 = cross_backend_stddev([RR_claude, RR_gpt, RR_deepseek])         │
+  │     M3.2 = min_max_ratio([RR_claude, RR_gpt, RR_deepseek])                │
+  │                                                                             │
+  └──────┬──────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+  <span style="color: var(--accent-red); font-weight: bold;">BUOC 5: ANOVA 2 CHIEU — PHAN TACH VARIANCE</span>
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │                                                                             │
+  │   DATA TABLE (4,050 rows = 27 conditions × 150 tasks):                      │
+  │                                                                             │
+  │   tool_config | ctx_config      | backend  | task_id              | resolved│
+  │   ─────────────────────────────────────────────────────────────────────────│
+  │   full        | full            | claude   | django-16379         | 1       │
+  │   full        | full            | claude   | django-16400         | 0       │
+  │   full        | sliding_window  | gpt      | django-16379         | 1       │
+  │   minimal     | summary         | deepseek | sympy-24066          | 0       │
+  │   ...         | ...             | ...      | ...                  | ...     │
+  │                                                                             │
+  │   <span style="color: var(--accent-cyan);">pipeline/analysis.py</span> → compute_three_way_anova(data)                     │
+  │                                                                             │
+  │   ┌─────────────────────────────────────────────────────────┐               │
+  │   │  ANOVA TABLE                                             │               │
+  │   │                                                          │               │
+  │   │  Source              SS     df    F       p       η²     │               │
+  │   │  ────────────────────────────────────────────────────── │               │
+  │   │  <span style="color: var(--accent-green);">Tool config</span>         XX.XX   2   XX.XX  0.001   <span style="color: var(--accent-green);">0.25</span>   │ ← 25% variance│
+  │   │  <span style="color: var(--accent-orange);">Context strategy</span>    XX.XX   2   XX.XX  0.003   <span style="color: var(--accent-orange);">0.12</span>   │ ← 12% variance│
+  │   │  <span style="color: var(--accent-purple);">LLM backend</span>         XX.XX   2   XX.XX  0.000   <span style="color: var(--accent-purple);">0.30</span>   │ ← 30% variance│
+  │   │  <span style="color: var(--accent-red);">Tool × Context</span>      XX.XX   4   XX.XX  0.045   <span style="color: var(--accent-red);">0.08</span>   │               │
+  │   │  <span style="color: var(--accent-red);">Tool × Backend</span>      XX.XX   4   XX.XX  0.012   <span style="color: var(--accent-red);">0.10</span>   │ ← INTERACTION! │
+  │   │  <span style="color: var(--accent-red);">Context × Backend</span>   XX.XX   4   XX.XX  0.200   0.03   │               │
+  │   │  <span style="color: var(--accent-red);">Tool×Ctx×Backend</span>    XX.XX   8   XX.XX  0.150   0.02   │               │
+  │   │  Error               XX.XX  XXX                  0.10   │               │
+  │   │  ────────────────────────────────────────────────────── │               │
+  │   │  Total                                           1.00   │               │
+  │   └─────────────────────────────────────────────────────────┘               │
+  │                                                                             │
+  │   <span style="color: var(--accent-green); font-weight: bold;">KET LUAN (vi du):</span>                                                       │
+  │   • Tool config giai thich 25% variance → H1 duoc xac nhan                 │
+  │   • LLM backend giai thich 30% → LLM VAN QUAN TRONG (khong bat ngo)        │
+  │   • Tool × Backend = 10% → co interaction (LLM yeu bi anh huong hon)       │
+  │   • Tong harness (Tool + Context + interactions) = ~45%                     │
+  │     → Harness CO ANH HUONG DANG KE, du khong "doc lap"                     │
+  │                                                                             │
+  └─────────────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">5</span> Buc tranh lon: Tai sao thiet ke nay hoat dong DU harness-LLM gan chat?</h2>
+
+<div class="diagram">
+  <div class="diagram-title">Analogy: Do anh huong cua "truong hoc" vs. "hoc sinh"</div>
+<pre style="color: var(--text);">
+    VAN DE TUONG TU: Truong hoc tot co giup hoc sinh hoc gioi hon?
+
+    "Truong" va "hoc sinh" <span style="color: var(--accent-red);">KHONG doc lap</span>:
+    - Thay tot day bai kho hon → hoc sinh gioi vuot qua, hoc sinh yeu that bai
+    - Hoc sinh gioi chon truong tot → selection bias
+    - Lop hoc nho giup hoc sinh yeu NHIEU HON hoc sinh gioi
+
+    Nhung ta VAN DO DUOC bang cach:
+    ┌────────────────────────────────────────────────────────────────────────┐
+    │                                                                        │
+    │  Thay doi TRUONG (giu nguyen HOC SINH):                                │
+    │    • Cung nhom hoc sinh → truong A vs B vs C                           │
+    │    • Do diem thi                                                       │
+    │    • ANOVA: Truong giai thich bao nhieu % variance cua diem?           │
+    │                                                                        │
+    │  ═══════════════════════════════════════════════════                    │
+    │                                                                        │
+    │  Thay doi HARNESS (giu nguyen LLM):                                    │
+    │    • Cung 1 LLM (Claude) → harness A vs B vs C                         │
+    │    • Do resolve rate                                                   │
+    │    • ANOVA: Harness giai thich bao nhieu % variance cua resolve rate?  │
+    │                                                                        │
+    │  Thay doi LLM (giu nguyen HARNESS):                                    │
+    │    • Cung 1 harness config → Claude vs GPT vs DeepSeek                 │
+    │    • Do resolve rate                                                   │
+    │    • ANOVA: LLM giai thich bao nhieu % variance?                       │
+    │                                                                        │
+    │  Thay doi CA HAI:                                                       │
+    │    • 27 to hop → ANOVA phan tach tung phan                              │
+    │    • <span style="color: var(--accent-red);">INTERACTION EFFECT = phan khong the tach roi</span>                      │
+    │    • Day CUNG LA ket qua khoa hoc!                                      │
+    │                                                                        │
+    └────────────────────────────────────────────────────────────────────────┘
+
+
+    <span style="color: var(--accent-green); font-weight: bold;">3 KICH BAN KET QUA VA Y NGHIA:</span>
+
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  KICH BAN A: Harness main effect LON, Interaction NHO               │
+    │                                                                      │
+    │  η²(Harness) = 0.35    η²(LLM) = 0.30    η²(H×L) = 0.05           │
+    │                                                                      │
+    │  → Harness ANH HUONG MANH va TUONG DOI DOC LAP voi LLM             │
+    │  → "Harness tot giup MOI LLM tuong tu nhau"                         │
+    │  → Day la ket qua LY TUONG cho de tai                               │
+    ├──────────────────────────────────────────────────────────────────────┤
+    │  KICH BAN B: Harness main effect VUA, Interaction LON               │
+    │                                                                      │
+    │  η²(Harness) = 0.20    η²(LLM) = 0.25    η²(H×L) = 0.25           │
+    │                                                                      │
+    │  → Harness anh huong NHUNG PHU THUOC vao LLM nao dang dung          │
+    │  → "Harness tot chi giup LLM manh, LLM yeu van yeu"                 │
+    │  → Ket qua VAN CO GIA TRI — cho thay harness can THIET KE RIENG    │
+    │    cho tung loai LLM (practical insight!)                            │
+    ├──────────────────────────────────────────────────────────────────────┤
+    │  KICH BAN C: Harness main effect NHO, LLM main effect LON           │
+    │                                                                      │
+    │  η²(Harness) = 0.08    η²(LLM) = 0.55    η²(H×L) = 0.10           │
+    │                                                                      │
+    │  → LLM quan trong hon harness RAT NHIEU                              │
+    │  → "Doi LLM tot hon la cach nhanh nhat tang performance"             │
+    │  → BAC BO H3 nhung VAN LA DONG GOP — vi chua ai chung minh dieu nay│
+    └──────────────────────────────────────────────────────────────────────┘
+
+    <span style="color: var(--accent-cyan); font-weight: bold;">DU LA KICH BAN NAO, DE TAI DEU CO DONG GOP:</span>
+    "Lan dau tien DINH LUONG duoc ty le dong gop cua harness vs. LLM"
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">6</span> Code thuc te: Tu interface → config → do luong</h2>
+
+<div class="diagram">
+  <div class="diagram-title">File mapping trong codebase hien tai</div>
+<pre style="color: var(--text);">
+    harness_eval/
+    │
+    ├── <span style="color: var(--accent-green);">harness/</span>                          ← TANG HOAN DOI
+    │   ├── <span style="color: var(--accent-cyan);">interfaces.py</span>                 ← ABC classes: ToolProvider, ContextStrategyProvider,
+    │   │                                    LLMBackendProvider
+    │   │                                    + 9 concrete implementations
+    │   │                                    + 3 factory functions
+    │   │
+    │   └── <span style="color: var(--accent-cyan);">factory.py</span>                    ← HarnessConfig dataclass
+    │                                        create_harness_config("full", "sliding", "claude")
+    │                                        generate_all_configs() → 27 HarnessConfigs
+    │                                        generate_sweagent_command() → CLI string
+    │
+    ├── <span style="color: var(--accent-orange);">configs/</span>                          ← ENUM + THONG SO
+    │   ├── tool_config.py                ← ToolLevel.FULL (12), MEDIUM (8), MINIMAL (5)
+    │   ├── context_config.py             ← ContextStrategy.FULL, SLIDING_WINDOW, SUMMARY
+    │   ├── backend_config.py             ← BackendType.CLAUDE, GPT, DEEPSEEK + costs
+    │   └── experiment.py                 ← 27 Conditions, 10 CRITICAL, 7050 evals
+    │
+    ├── <span style="color: var(--accent-purple);">metrics/</span>                          ← 7 METRICS (DAU DO)
+    │   ├── tool_dispatch.py              ← M1.1, M1.2, M1.3  (doc trajectory log)
+    │   ├── context_utilization.py        ← M2.1, M2.2        (so sanh context)
+    │   └── backend_portability.py        ← M3.1, M3.2        (so sanh cross-backend)
+    │
+    ├── <span style="color: var(--accent-red);">parsers/</span>                          ← DOC LOG
+    │   └── trajectory.py                 ← Parse SWE-Agent JSON logs → ParsedTrajectory
+    │
+    └── <span style="color: var(--accent-blue);">pipeline/</span>                         ← CHAY + PHAN TICH
+        ├── runner.py                     ← Chay SWE-Agent voi tung config
+        └── analysis.py                   ← ANOVA 2/3 chieu, Cohen's d, Tukey HSD
+
+
+    <span style="color: var(--accent-green); font-weight: bold;">LUONG DU LIEU:</span>
+
+    configs/  →  harness/factory  →  SWE-Agent CLI  →  trajectory JSON logs
+                                                              │
+    metrics/  ←  parsers/trajectory  ←────────────────────────┘
+       │
+       ▼
+    pipeline/analysis  →  ANOVA table  →  KET LUAN
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-num">7</span> Tom tat: Tra loi "inject code hay sao?"</h2>
+
+<div class="diagram">
+<pre style="color: var(--text);">
+    ┌──────────────────────────────────────────────────────────────────┐
+    │                                                                  │
+    │   <span style="color: var(--accent-red);">✗ KHONG PHAI "inject code vao LLM"</span>                              │
+    │     LLM la hop den — khong the va khong can mo ra                │
+    │                                                                  │
+    │   <span style="color: var(--accent-red);">✗ KHONG PHAI "hack" hay "patch" SWE-Agent</span>                      │
+    │     Chi thay doi CONFIG files, khong sua core code               │
+    │                                                                  │
+    │   <span style="color: var(--accent-green);">✓ THAY DOI MOI TRUONG XUNG QUANH</span>                              │
+    │     Tool set:    12 → 8 → 5 tools    (qua config YAML)          │
+    │     Context:     Full → Sliding → Summary  (qua config YAML)    │
+    │     LLM backend: Claude → GPT → DeepSeek   (qua config YAML)   │
+    │                                                                  │
+    │   <span style="color: var(--accent-green);">✓ DO HANH VI QUA LOG FILES</span>                                     │
+    │     SWE-Agent GHI SAN moi tool call, moi response               │
+    │     Parsers doc log → Metrics tinh diem → ANOVA phan tach       │
+    │                                                                  │
+    │   <span style="color: var(--accent-green);">✓ KET LUAN TU THONG KE</span>                                        │
+    │     ANOVA noi: "Thay doi tool set giai thich X% variance"       │
+    │     Khong can biet LLM "nghi gi" — chi can biet KET QUA         │
+    │                                                                  │
+    │                                                                  │
+    │   <span style="color: var(--accent-cyan); font-weight: bold;">PHEP AN DU CUOI CUNG:</span>                                        │
+    │                                                                  │
+    │   LLM  = dau bep (khong the mo nao de xem ky nang)              │
+    │   Harness = nha bep (dao, chao, nguyen lieu, cong thuc)         │
+    │   Task = mon an can nau                                          │
+    │                                                                  │
+    │   Thay doi NHA BEP (bot dao, doi bep, giam nguyen lieu)          │
+    │   Giu nguyen DAU BEP (cung 1 nguoi)                              │
+    │   Do MON AN (ngon hay do?)                                       │
+    │                                                                  │
+    │   → "Nha bep" giai thich bao nhieu % chat luong mon an?          │
+    │   → "Dau bep" giai thich bao nhieu %?                            │
+    │   → Co "interaction" khong? (dau bep gioi thich nghi voi         │
+    │     nha bep xau, dau bep yeu thi khong?)                         │
+    │                                                                  │
+    └──────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+</body>
+</html>

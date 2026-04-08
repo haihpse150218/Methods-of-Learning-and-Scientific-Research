@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval — Interactive Config &amp; Metrics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--s1:#1a1d27;--s2:#232733;--s3:#2c3040;--s4:#353b4d;
+  --bd:#333a4a;--tx:#e4e6ed;--tx2:#9ca0ad;--tx3:#636879;
+  --blue:#4c8dff;--blue2:#2563eb;--green:#22c55e;--green2:#16a34a;
+  --orange:#f59e0b;--red:#ef4444;--purple:#a78bfa;--cyan:#22d3ee;
+  --r:12px;--rs:8px;--rr:6px;
+}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6;min-height:100vh}
+
+/* Layout */
+.app{max-width:1200px;margin:0 auto;padding:15px}
+.app-header{text-align:center;padding:20px 0 10px}
+.app-header h1{font-size:1.5em;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.app-header p{color:var(--tx3);font-size:.85em}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--bd);margin:15px 0 0;overflow-x:auto}
+.tab-btn{padding:10px 20px;background:none;border:none;color:var(--tx3);font-size:.88em;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-family:inherit}
+.tab-btn:hover{color:var(--tx2);background:var(--s2);border-radius:var(--rs) var(--rs) 0 0}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--s1);border-radius:var(--rs) var(--rs) 0 0}
+.tab-btn .tab-num{display:inline-block;width:20px;height:20px;border-radius:50%;font-size:.72em;line-height:20px;text-align:center;margin-right:6px;background:var(--s3);color:var(--tx3)}
+.tab-btn.active .tab-num{background:var(--blue);color:#fff}
+.tab-content{display:none;padding:20px 0}
+.tab-content.active{display:block}
+
+/* Cards */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin:12px 0}
+.card-title{font-size:1em;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title .ico{font-size:1.2em}
+
+/* Config builder */
+.config-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.factor-col{background:var(--s2);border-radius:var(--rs);padding:16px;border-top:3px solid var(--bd)}
+.factor-col.tool{border-top-color:var(--blue)}
+.factor-col.ctx{border-top-color:var(--green)}
+.factor-col.be{border-top-color:var(--purple)}
+.factor-label{font-size:.72em;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:6px}
+.factor-name{font-size:1.05em;font-weight:700;margin-bottom:12px}
+
+/* Radio buttons */
+.radio-group{display:flex;flex-direction:column;gap:6px}
+.radio-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s3);border-radius:var(--rr);cursor:pointer;border:1px solid transparent;transition:all .15s}
+.radio-item:hover{border-color:var(--bd);background:var(--s4)}
+.radio-item.selected{border-color:var(--blue);background:rgba(76,141,255,.08)}
+.radio-item input{display:none}
+.radio-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--tx3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.radio-item.selected .radio-dot{border-color:var(--blue)}
+.radio-item.selected .radio-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.radio-label{font-weight:600;font-size:.88em;flex:1}
+.radio-detail{font-size:.75em;color:var(--tx3)}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{padding:3px 10px;border-radius:5px;font-size:.75em;font-weight:600;font-family:'Consolas',monospace}
+.chip-on{background:rgba(76,141,255,.15);color:var(--blue);border:1px solid rgba(76,141,255,.25)}
+.chip-off{background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.15);text-decoration:line-through;opacity:.45}
+
+/* Result box */
+.result-box{background:var(--s2);border-radius:var(--rs);padding:16px;margin:15px 0;border:1px solid var(--bd)}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--s3)}
+.result-row:last-child{border-bottom:none}
+.result-key{font-size:.82em;color:var(--tx2)}
+.result-val{font-weight:700;font-size:.92em}
+.crit-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.72em;font-weight:700}
+.crit-yes{background:rgba(76,141,255,.15);color:var(--blue);border:1px solid rgba(76,141,255,.3)}
+.crit-no{background:var(--s3);color:var(--tx3)}
+
+/* YAML */
+.yaml-box{background:#1e1e2e;border-radius:var(--rs);padding:14px;font-family:'Consolas',monospace;font-size:.8em;color:var(--cyan);line-height:1.7;overflow-x:auto;position:relative;margin:10px 0;border:1px solid var(--bd)}
+.yaml-box .comment{color:var(--tx3)}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--s3);border:1px solid var(--bd);color:var(--tx2);padding:4px 12px;border-radius:var(--rr);font-size:.75em;cursor:pointer;transition:all .15s;font-family:inherit}
+.copy-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* Log viewer */
+.drop-zone{border:2px dashed var(--bd);border-radius:var(--r);padding:40px;text-align:center;cursor:pointer;transition:all .2s;margin:10px 0}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:rgba(76,141,255,.05)}
+.drop-zone .dz-icon{font-size:2.5em;margin-bottom:8px}
+.drop-zone .dz-text{color:var(--tx2);font-size:.9em}
+.drop-zone .dz-sub{color:var(--tx3);font-size:.78em;margin-top:4px}
+
+/* Turns */
+.turn-list{display:flex;flex-direction:column;gap:8px}
+.turn-card{background:var(--s2);border-radius:var(--rs);border:1px solid var(--bd);overflow:hidden}
+.turn-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s}
+.turn-header:hover{background:var(--s3)}
+.turn-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78em;font-weight:700;color:#fff;flex-shrink:0}
+.turn-action{font-weight:700;font-family:'Consolas',monospace;font-size:.9em}
+.turn-args{font-size:.78em;color:var(--tx3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.turn-status{font-size:.78em;padding:2px 8px;border-radius:4px;font-weight:600}
+.turn-body{display:none;padding:0 14px 14px;border-top:1px solid var(--s3)}
+.turn-body.open{display:block}
+.turn-output{background:var(--s3);border-radius:var(--rr);padding:10px;font-family:'Consolas',monospace;font-size:.78em;color:var(--tx2);max-height:200px;overflow:auto;margin:8px 0;white-space:pre-wrap;line-height:1.6}
+.turn-meta{display:flex;gap:15px;flex-wrap:wrap;font-size:.78em;color:var(--tx3);margin-top:8px}
+
+/* Metrics panel */
+.metrics-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin:15px 0}
+.m-card{background:var(--s2);border-radius:var(--rs);padding:14px;display:flex;align-items:center;gap:12px;border:1px solid var(--bd)}
+.m-id{font-size:.72em;font-weight:700;padding:5px 8px;border-radius:5px;min-width:38px;text-align:center}
+.m-id.d1{background:rgba(76,141,255,.12);color:var(--blue)}
+.m-id.d2{background:rgba(34,197,94,.12);color:var(--green)}
+.m-id.d3{background:rgba(167,139,250,.12);color:var(--purple)}
+.m-info{flex:1;min-width:0}
+.m-name{font-size:.82em;font-weight:600;margin-bottom:4px}
+.m-bar-bg{height:8px;background:var(--s3);border-radius:4px;overflow:hidden}
+.m-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.m-score{font-size:1.1em;font-weight:700;min-width:55px;text-align:right}
+
+/* Info bar */
+.info-bar{background:var(--s2);border-radius:var(--rs);padding:12px 16px;display:flex;gap:20px;flex-wrap:wrap;margin:10px 0;border-left:3px solid var(--cyan);font-size:.85em}
+.info-bar .ib-item{display:flex;align-items:center;gap:6px}
+.info-bar .ib-label{color:var(--tx3)}
+.info-bar .ib-val{font-weight:700}
+
+/* Buttons */
+.btn{padding:8px 18px;border-radius:var(--rr);font-size:.85em;font-weight:600;cursor:pointer;border:1px solid var(--bd);transition:all .15s;font-family:inherit}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue2)}
+.btn-ghost{background:transparent;color:var(--tx2)}
+.btn-ghost:hover{background:var(--s3);color:var(--tx)}
+.btn-row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+
+/* Compare tab */
+.compare-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.85em}
+.compare-table th,.compare-table td{padding:10px 14px;border-bottom:1px solid var(--s3);text-align:center}
+.compare-table th{color:var(--tx3);font-size:.78em;text-transform:uppercase;letter-spacing:.5px;background:var(--s2)}
+.compare-table td:first-child{text-align:left;font-weight:600;color:var(--tx2)}
+.compare-table tr:hover td{background:var(--s2)}
+
+/* Placeholder */
+.placeholder{text-align:center;padding:60px 20px;color:var(--tx3)}
+.placeholder .ph-icon{font-size:3em;margin-bottom:12px;opacity:.4}
+.placeholder p{font-size:.9em}
+
+/* Responsive */
+@media(max-width:800px){
+  .config-grid{grid-template-columns:1fr}
+  .metrics-panel{grid-template-columns:1fr}
+  .tabs{flex-wrap:nowrap}
+  .tab-btn{padding:8px 12px;font-size:.8em}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="app-header">
+  <h1>HarnessEval Interactive</h1>
+  <p>Config Builder &bull; Pipeline Viewer &bull; Log Viewer &bull; Compare &bull; ANOVA</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('config')"><span class="tab-num">1</span>Config Builder</button>
+  <button class="tab-btn" onclick="switchTab('pipeline')"><span class="tab-num">2</span>Pipeline</button>
+  <button class="tab-btn" onclick="switchTab('logs')"><span class="tab-num">3</span>Log Viewer</button>
+  <button class="tab-btn" onclick="switchTab('compare')"><span class="tab-num">4</span>Compare</button>
+  <button class="tab-btn" onclick="switchTab('anova')"><span class="tab-num">5</span>ANOVA</button>
+</div>
+
+<!-- ============================== TAB 1: CONFIG BUILDER ============================== -->
+<div class="tab-content active" id="tab-config">
+  <div class="card">
+    <div class="card-title"><span class="ico">&#9881;</span> Experiment Config Builder</div>
+
+    <div class="config-grid">
+      <!-- TOOL -->
+      <div class="factor-col tool">
+        <div class="factor-label">Factor A</div>
+        <div class="factor-name" style="color:var(--blue)">Tool Configuration</div>
+        <div class="radio-group" id="tool-radios"></div>
+      </div>
+      <!-- CONTEXT -->
+      <div class="factor-col ctx">
+        <div class="factor-label">Factor B</div>
+        <div class="factor-name" style="color:var(--green)">Context Strategy</div>
+        <div class="radio-group" id="ctx-radios"></div>
+      </div>
+      <!-- BACKEND -->
+      <div class="factor-col be">
+        <div class="factor-label">Factor C</div>
+        <div class="factor-name" style="color:var(--purple)">LLM Backend</div>
+        <div class="radio-group" id="be-radios"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tools detail -->
+  <div class="card">
+    <div class="card-title"><span class="ico">&#128295;</span> Tools Included / Removed</div>
+    <div id="tool-chips-display"></div>
+  </div>
+
+  <!-- Result -->
+  <div class="card">
+    <div class="card-title"><span class="ico">&#128203;</span> Condition Summary</div>
+    <div class="result-box" id="condition-summary"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generateYaml()">Generate YAML Config</button>
+      <button class="btn btn-ghost" onclick="addToQueue()">+ Add to Run Queue</button>
+      <button class="btn btn-ghost" onclick="showRunQueue()">View Queue (<span id="queue-count">0</span>)</button>
+    </div>
+    <div id="yaml-output" style="display:none"></div>
+    <div id="run-queue-display" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ============================== TAB 2: PIPELINE (placeholder) ============================== -->
+<div class="tab-content" id="tab-pipeline">
+  <div class="card">
+    <div class="card-title"><span class="ico">&#9654;</span> Pipeline Viewer</div>
+    <div id="pipeline-display"></div>
+  </div>
+</div>
+
+<!-- ============================== TAB 3: LOG VIEWER ============================== -->
+<div class="tab-content" id="tab-logs">
+  <div class="card">
+    <div class="card-title"><span class="ico">&#128196;</span> Trajectory Log Viewer</div>
+
+    <div id="log-upload-zone" class="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('file-input').click()">
+      <div class="dz-icon">&#128194;</div>
+      <div class="dz-text">Drop trajectory JSON here or click to upload</div>
+      <div class="dz-sub">Accepts SWE-Agent trajectory format (.json)</div>
+      <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleFileSelect(event)">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="loadSampleLog()">Load Sample Log (demo)</button>
+    </div>
+  </div>
+
+  <!-- Log content (hidden until file loaded) -->
+  <div id="log-content" style="display:none">
+    <div class="info-bar" id="log-info-bar"></div>
+
+    <div class="card">
+      <div class="card-title"><span class="ico">&#128203;</span> Turns (<span id="turn-count">0</span>)</div>
+      <div class="turn-list" id="turn-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ico">&#128200;</span> Computed Metrics</div>
+      <div class="metrics-panel" id="metrics-panel"></div>
+      <div style="margin-top:15px">
+        <canvas id="metrics-chart" height="200"></canvas>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-ghost" onclick="exportMetrics()">Export Metrics JSON</button>
+        <button class="btn btn-ghost" onclick="addToCompare()">+ Add to Compare</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== TAB 4: COMPARE ============================== -->
+<div class="tab-content" id="tab-compare">
+  <div class="card">
+    <div class="card-title"><span class="ico">&#128200;</span> Compare Conditions</div>
+    <div id="compare-content">
+      <div class="placeholder" id="compare-empty">
+        <div class="ph-icon">&#128202;</div>
+        <p>No conditions to compare yet.</p>
+        <p style="font-size:.82em;margin-top:8px;color:var(--tx3)">Load logs in Tab 3 and click "Add to Compare"</p>
+      </div>
+    </div>
+    <div id="compare-table-wrap" style="display:none">
+      <table class="compare-table" id="compare-table"></table>
+      <div style="margin-top:15px">
+        <canvas id="compare-chart" height="250"></canvas>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="clearCompare()">Clear All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== TAB 5: ANOVA (placeholder) ============================== -->
+<div class="tab-content" id="tab-anova">
+  <div class="card">
+    <div class="card-title"><span class="ico">&#931;</span> ANOVA Results</div>
+    <div class="placeholder">
+      <div class="ph-icon">&#128202;</div>
+      <p>Upload results.csv after running full experiment</p>
+      <p style="font-size:.82em;margin-top:8px;color:var(--tx3)">Three-way ANOVA: Tool(3) x Context(3) x Backend(3)</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ====================== DATA ======================
+const TOOLS = {
+  full: ['bash','python','read','write','edit','glob','grep','find','git_diff','git_log','git_show','test_runner'],
+  medium: ['bash','python','read','write','edit','grep','git_diff','test_runner'],
+  minimal: ['bash','read','write','edit','grep']
+};
+const TOOL_LEVELS = [
+  {id:'full', name:'Full', count:12, detail:'All SWE-Agent tools'},
+  {id:'medium', name:'Medium', count:8, detail:'Core development tools'},
+  {id:'minimal', name:'Minimal', count:5, detail:'Essential only'}
+];
+const CTX_STRATEGIES = [
+  {id:'full', name:'Full Context', detail:'No truncation'},
+  {id:'sliding_window', name:'Sliding Window', detail:'50,000 tokens'},
+  {id:'summary', name:'Summary', detail:'Compress old context'}
+];
+const BACKENDS = [
+  {id:'claude', name:'Claude Sonnet 4', detail:'$0.35/eval', cost:0.35, color:'#f97316'},
+  {id:'gpt', name:'GPT-4o', detail:'$0.30/eval', cost:0.30, color:'#22c55e'},
+  {id:'deepseek', name:'DeepSeek-V3', detail:'$0.15/eval', cost:0.15, color:'#4c8dff'}
+];
+const CRITICAL = new Set([
+  'full_full_claude','full_full_gpt','full_full_deepseek',
+  'minimal_full_claude','minimal_full_gpt',
+  'full_summary_claude','full_summary_gpt',
+  'minimal_summary_claude','minimal_summary_gpt','minimal_summary_deepseek'
+]);
+const TOOL_COLORS = {bash:'#ef4444',python:'#f59e0b',read:'#22c55e',write:'#4c8dff',edit:'#a78bfa',glob:'#22d3ee',grep:'#f472b6',find:'#fb923c',git_diff:'#818cf8',git_log:'#34d399',git_show:'#fbbf24',test_runner:'#f87171'};
+
+// State
+let state = {tool:'full', ctx:'full', be:'claude'};
+let runQueue = JSON.parse(localStorage.getItem('harnessEvalQueue')||'[]');
+let currentLog = null;
+let compareData = JSON.parse(localStorage.getItem('harnessEvalCompare')||'[]');
+let metricsChart = null;
+let compareChart = null;
+
+// ====================== TAB SWITCHING ======================
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const tabs = ['config','pipeline','logs','compare','anova'];
+    b.classList.toggle('active', tabs[i]===id);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='compare') renderCompare();
+  if(id==='pipeline') renderPipeline();
+}
+
+// ====================== TAB 1: CONFIG BUILDER ======================
+function buildRadios() {
+  const toolEl = document.getElementById('tool-radios');
+  toolEl.innerHTML = TOOL_LEVELS.map(t =>
+    `<label class="radio-item ${state.tool===t.id?'selected':''}" onclick="selectTool('${t.id}')">
+      <input type="radio" name="tool" value="${t.id}" ${state.tool===t.id?'checked':''}>
+      <div class="radio-dot"></div>
+      <span class="radio-label">${t.name} (${t.count})</span>
+      <span class="radio-detail">${t.detail}</span>
+    </label>`
+  ).join('');
+
+  const ctxEl = document.getElementById('ctx-radios');
+  ctxEl.innerHTML = CTX_STRATEGIES.map(c =>
+    `<label class="radio-item ${state.ctx===c.id?'selected':''}" onclick="selectCtx('${c.id}')">
+      <input type="radio" name="ctx" value="${c.id}" ${state.ctx===c.id?'checked':''}>
+      <div class="radio-dot"></div>
+      <span class="radio-label">${c.name}</span>
+      <span class="radio-detail">${c.detail}</span>
+    </label>`
+  ).join('');
+
+  const beEl = document.getElementById('be-radios');
+  beEl.innerHTML = BACKENDS.map(b =>
+    `<label class="radio-item ${state.be===b.id?'selected':''}" onclick="selectBe('${b.id}')">
+      <input type="radio" name="be" value="${b.id}" ${state.be===b.id?'checked':''}>
+      <div class="radio-dot"></div>
+      <span class="radio-label">${b.name}</span>
+      <span class="radio-detail">${b.detail}</span>
+    </label>`
+  ).join('');
+}
+
+function selectTool(id){state.tool=id;updateConfig();}
+function selectCtx(id){state.ctx=id;updateConfig();}
+function selectBe(id){state.be=id;updateConfig();}
+
+function updateConfig() {
+  buildRadios();
+  // Tool chips
+  const active = TOOLS[state.tool];
+  const all = TOOLS.full;
+  document.getElementById('tool-chips-display').innerHTML =
+    all.map(t => `<span class="chip ${active.includes(t)?'chip-on':'chip-off'}">${t}</span>`).join('');
+
+  // Summary
+  const condId = `${state.tool}_${state.ctx}_${state.be}`;
+  const isCrit = CRITICAL.has(condId);
+  const runs = isCrit ? 3 : 1;
+  const be = BACKENDS.find(b=>b.id===state.be);
+  const cost = (runs * 150 * be.cost).toFixed(0);
+  const ctxInfo = CTX_STRATEGIES.find(c=>c.id===state.ctx);
+
+  document.getElementById('condition-summary').innerHTML = `
+    <div class="result-row"><span class="result-key">Condition ID</span><span class="result-val" style="font-family:Consolas,monospace;color:var(--cyan)">${condId}</span></div>
+    <div class="result-row"><span class="result-key">Status</span><span class="crit-badge ${isCrit?'crit-yes':'crit-no'}">${isCrit?'CRITICAL (3 runs)':'Normal (1 run)'}</span></div>
+    <div class="result-row"><span class="result-key">Tools</span><span class="result-val">${active.length} / ${all.length}</span></div>
+    <div class="result-row"><span class="result-key">Context</span><span class="result-val">${ctxInfo.name} — ${ctxInfo.detail}</span></div>
+    <div class="result-row"><span class="result-key">Backend</span><span class="result-val">${be.name}</span></div>
+    <div class="result-row"><span class="result-key">Cost per eval</span><span class="result-val" style="color:var(--orange)">$${be.cost.toFixed(2)}</span></div>
+    <div class="result-row"><span class="result-key">Total evals</span><span class="result-val">${runs} runs × 150 tasks = ${runs*150}</span></div>
+    <div class="result-row"><span class="result-key">Estimated cost</span><span class="result-val" style="color:var(--green)">~$${cost}</span></div>
+  `;
+}
+
+function generateYaml() {
+  const condId = `${state.tool}_${state.ctx}_${state.be}`;
+  const be = BACKENDS.find(b=>b.id===state.be);
+  const tools = TOOLS[state.tool];
+  const ctxMap = {full:'[]  # keep all',sliding_window:`\n    - type: LastNObservations\n      n: 15`,summary:`\n    - type: LastNObservations\n      n: 5\n    - type: RemoveRegex\n      pattern: "(.{500}).*"\n      replacement: "\\\\1... [truncated]"`};
+
+  const yaml = `<span class="comment"># HarnessEval condition: ${condId}</span>
+<span class="comment"># Generated: ${new Date().toISOString().slice(0,10)}</span>
+
+<span class="comment"># Factor A: Tool Configuration (${state.tool})</span>
+tools:
+  bundles: ${tools.map(t=>`\n    - ${t}`).join('')}
+  enable_bash_tool: true
+
+<span class="comment"># Factor B: Context Strategy (${state.ctx})</span>
+agent:
+  history_processors: ${ctxMap[state.ctx]}
+
+<span class="comment"># Factor C: LLM Backend (${state.be})</span>
+model:
+  name: ${be.name}
+  temperature: 0.0
+  provider: ${state.be==='claude'?'anthropic':state.be==='gpt'?'openai':'deepseek'}`;
+
+  const el = document.getElementById('yaml-output');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="yaml-box"><button class="copy-btn" onclick="copyYaml()">Copy</button>${yaml}</div>`;
+}
+
+function copyYaml() {
+  const text = document.querySelector('.yaml-box').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    document.querySelector('.copy-btn').textContent='Copied!';
+    setTimeout(()=>document.querySelector('.copy-btn').textContent='Copy',1500);
+  });
+}
+
+function addToQueue() {
+  const condId = `${state.tool}_${state.ctx}_${state.be}`;
+  if(runQueue.find(q=>q.id===condId)){alert('Already in queue');return;}
+  const be = BACKENDS.find(b=>b.id===state.be);
+  const runs = CRITICAL.has(condId)?3:1;
+  runQueue.push({id:condId,tool:state.tool,ctx:state.ctx,be:state.be,runs,cost:(runs*150*be.cost).toFixed(0)});
+  localStorage.setItem('harnessEvalQueue',JSON.stringify(runQueue));
+  document.getElementById('queue-count').textContent=runQueue.length;
+  showRunQueue();
+}
+
+function showRunQueue() {
+  const el = document.getElementById('run-queue-display');
+  el.style.display='block';
+  if(!runQueue.length){el.innerHTML='<div style="color:var(--tx3);font-size:.85em;padding:10px">Queue is empty</div>';return;}
+  const totalCost = runQueue.reduce((s,q)=>s+parseFloat(q.cost),0);
+  const totalEvals = runQueue.reduce((s,q)=>s+q.runs*150,0);
+  el.innerHTML = `
+    <div style="margin-top:10px;font-size:.82em;color:var(--tx3)">Run Queue — ${runQueue.length} conditions, ${totalEvals.toLocaleString()} evals, ~$${totalCost}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">${runQueue.map(q=>
+      `<span class="chip chip-on" style="cursor:pointer" onclick="removeFromQueue('${q.id}')" title="Click to remove">${q.id} (${q.runs}x) $${q.cost}</span>`
+    ).join('')}</div>
+    <button class="btn btn-ghost" onclick="clearQueue()" style="font-size:.78em;margin-top:4px">Clear queue</button>`;
+}
+function removeFromQueue(id){runQueue=runQueue.filter(q=>q.id!==id);localStorage.setItem('harnessEvalQueue',JSON.stringify(runQueue));document.getElementById('queue-count').textContent=runQueue.length;showRunQueue();}
+function clearQueue(){runQueue=[];localStorage.setItem('harnessEvalQueue','[]');document.getElementById('queue-count').textContent=0;showRunQueue();}
+
+// ====================== TAB 2: PIPELINE ======================
+function renderPipeline() {
+  const condId = `${state.tool}_${state.ctx}_${state.be}`;
+  const be = BACKENDS.find(b=>b.id===state.be);
+  const runs = CRITICAL.has(condId)?3:1;
+  const steps = [
+    {name:'Task Selection',detail:`150 tasks from SWE-Bench Verified`,color:var_blue,icon:'&#128196;'},
+    {name:'Load Config',detail:`${state.tool} tools, ${state.ctx} ctx, ${state.be}`,color:var_cyan,icon:'&#9881;'},
+    {name:'Run SWE-Agent',detail:`${runs} run(s) × 150 tasks = ${runs*150} evals`,color:var_green,icon:'&#129302;'},
+    {name:'Collect Logs',detail:'Trajectory JSON per task',color:var_orange,icon:'&#128203;'},
+    {name:'Compute Metrics',detail:'7 metrics (M1.1-M3.2)',color:var_purple,icon:'&#128200;'},
+    {name:'Statistical Analysis',detail:'ANOVA + Cohen\'s d',color:var_red,icon:'&#931;'}
+  ];
+  const var_blue='var(--blue)',var_cyan='var(--cyan)',var_green='var(--green)',var_orange='var(--orange)',var_purple='var(--purple)',var_red='var(--red)';
+
+  document.getElementById('pipeline-display').innerHTML = `
+    <div class="info-bar">
+      <div class="ib-item"><span class="ib-label">Condition:</span><span class="ib-val" style="font-family:Consolas,monospace;color:var(--cyan)">${condId}</span></div>
+      <div class="ib-item"><span class="ib-label">Runs:</span><span class="ib-val">${runs}</span></div>
+      <div class="ib-item"><span class="ib-label">Cost:</span><span class="ib-val" style="color:var(--green)">~$${(runs*150*be.cost).toFixed(0)}</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:15px 0">
+      ${['Task Selection|150 tasks from SWE-Bench Verified|var(--blue)|&#128196;',
+         'Load Config|'+state.tool+' tools, '+state.ctx+' ctx, '+state.be+'|var(--cyan)|&#9881;',
+         'Run SWE-Agent|'+runs+' run(s) x 150 tasks = '+(runs*150)+' evals|var(--green)|&#129302;',
+         'Collect Logs|Trajectory JSON per task|var(--orange)|&#128203;',
+         'Compute Metrics|7 metrics (M1.1-M3.2)|var(--purple)|&#128200;',
+         'ANOVA Analysis|Three-way + Cohen d + Tukey HSD|var(--red)|&#931;'
+        ].map((s,i) => {
+          const [name,detail,color,icon] = s.split('|');
+          return `<div style="display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:1.1em;flex-shrink:0;border:2px solid ${color}">${icon}</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:.9em">${name}</div>
+              <div style="font-size:.78em;color:var(--tx3)">${detail}</div>
+            </div>
+            <div style="font-size:.78em;color:var(--tx3)">Step ${i+1}</div>
+          </div>
+          ${i<5?'<div style="margin-left:18px;height:16px;border-left:2px dashed var(--bd)"></div>':''}`;
+        }).join('')}
+    </div>`;
+}
+
+// ====================== TAB 3: LOG VIEWER ======================
+function handleDragOver(e){e.preventDefault();e.currentTarget.classList.add('dragover');}
+function handleDragLeave(e){e.currentTarget.classList.remove('dragover');}
+function handleDrop(e){e.preventDefault();e.currentTarget.classList.remove('dragover');const f=e.dataTransfer.files[0];if(f)readLogFile(f);}
+function handleFileSelect(e){const f=e.target.files[0];if(f)readLogFile(f);}
+
+function readLogFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      currentLog = JSON.parse(e.target.result);
+      renderLog(currentLog);
+    }catch(err){alert('Invalid JSON: '+err.message);}
+  };
+  reader.readAsText(file);
+}
+
+function loadSampleLog() {
+  const sample = {"task_id":"django__django-16379","model":"claude-sonnet-4-20250514","resolved":true,"config":{"tool_level":"full","context_strategy":"full","backend":"claude"},"condition_id":"full_full_claude","total_cost":0.27,"context_tokens_used":42150,"trajectory":[{"turn":1,"action":"read","args":{"path":"django/db/models/query.py"},"output":"class QuerySet:\n    def __init__(self, model=None, query=None, using=None, hints=None):\n        self.model = model\n        self._db = using\n        self._hints = hints or {}\n        self.query = query or sql.Query(self.model)\n        ...\n    def filter(self, *args, **kwargs):\n        clone = self._filter_or_exclude(False, args, kwargs)\n        return clone\n    def exclude(self, *args, **kwargs):\n        clone = self._filter_or_exclude(True, args, kwargs)\n        return clone","acceptable_tools":["read","grep","bash"],"timestamp":"2026-05-01T10:00:01"},{"turn":2,"action":"grep","args":{"pattern":"def _filter_or_exclude","path":"django/db/models/query.py"},"output":"line 1284: def _filter_or_exclude(self, negate, args, kwargs):\nline 1285:     if negate:\nline 1286:         return self.exclude(*args, **kwargs)\nline 1287:     clone = self._chain()\nline 1288:         clone.query.add_q(Q(*args, **kwargs))\nline 1289:     return clone","acceptable_tools":["grep","read","bash"],"timestamp":"2026-05-01T10:00:05"},{"turn":3,"action":"read","args":{"path":"django/db/models/sql/query.py","offset":1280,"limit":30},"output":"class Query:\n    def add_q(self, q_object):\n        existing_inner = set(\n            (a for a in self.alias_map if self.alias_map[a].join_type == INNER)\n        )\n        clause, _ = self._add_q(q_object, self.used_aliases)\n        if clause:\n            self.where.add(clause, AND)\n        self.demote_joins(existing_inner)","acceptable_tools":["read"],"timestamp":"2026-05-01T10:00:12"},{"turn":4,"action":"glob","args":{"pattern":"django/db/models/**/test*.py"},"output":"django/db/models/tests/test_query.py\ndjango/db/models/tests/test_lookups.py\ndjango/db/models/tests/test_aggregation.py","acceptable_tools":["glob","find","bash"],"timestamp":"2026-05-01T10:00:18"},{"turn":5,"action":"read","args":{"path":"tests/queryset_pickle/tests.py"},"output":"from django.test import TestCase\nfrom .models import Event, Group\n\nclass QuerySetPickleTests(TestCase):\n    def test_pickle_query(self):\n        qs = Event.objects.filter(group__name='test')\n        pickled = pickle.dumps(qs.query)\n        restored = pickle.loads(pickled)\n        self.assertEqual(str(qs.query), str(restored))","acceptable_tools":["read","grep"],"timestamp":"2026-05-01T10:00:25"},{"turn":6,"action":"edit","args":{"path":"django/db/models/query.py","old_string":"    def _filter_or_exclude(self, negate, args, kwargs):\n        if negate:\n            return self.exclude(*args, **kwargs)","new_string":"    def _filter_or_exclude(self, negate, args, kwargs):\n        if negate and not args and not kwargs:\n            return self.all()\n        if negate:\n            return self.exclude(*args, **kwargs)"},"output":"File edited successfully: django/db/models/query.py","acceptable_tools":["edit","write"],"timestamp":"2026-05-01T10:00:35"},{"turn":7,"action":"bash","args":{"command":"cd /repo && python -m pytest tests/queryset_pickle/tests.py -x -q 2>&1 | head -20"},"output":"....\n4 passed in 0.52s","acceptable_tools":["bash","test_runner"],"timestamp":"2026-05-01T10:00:48"},{"turn":8,"action":"bash","args":{"command":"cd /repo && python -m pytest tests/queries/tests.py -x -q 2>&1 | tail -5"},"output":"...........................\n142 passed, 3 skipped in 12.38s","acceptable_tools":["bash","test_runner"],"timestamp":"2026-05-01T10:01:15"}]};
+  currentLog = sample;
+  renderLog(sample);
+}
+
+function renderLog(log) {
+  document.getElementById('log-content').style.display='block';
+  document.getElementById('log-upload-zone').style.display='none';
+
+  // Info bar
+  document.getElementById('log-info-bar').innerHTML = `
+    <div class="ib-item"><span class="ib-label">Task:</span><span class="ib-val">${log.task_id}</span></div>
+    <div class="ib-item"><span class="ib-label">Status:</span><span class="ib-val" style="color:${log.resolved?'var(--green)':'var(--red)'}">${log.resolved?'RESOLVED':'FAILED'}</span></div>
+    <div class="ib-item"><span class="ib-label">Model:</span><span class="ib-val">${log.model||'—'}</span></div>
+    <div class="ib-item"><span class="ib-label">Turns:</span><span class="ib-val">${log.trajectory.length}</span></div>
+    <div class="ib-item"><span class="ib-label">Cost:</span><span class="ib-val">$${(log.total_cost||0).toFixed(2)}</span></div>
+    <div class="ib-item"><span class="ib-label">Condition:</span><span class="ib-val" style="font-family:Consolas,monospace;color:var(--cyan)">${log.condition_id||'—'}</span></div>
+  `;
+
+  document.getElementById('turn-count').textContent = log.trajectory.length;
+
+  // Turns
+  document.getElementById('turn-list').innerHTML = log.trajectory.map((t,i) => {
+    const color = TOOL_COLORS[t.action]||'#888';
+    const acceptable = t.acceptable_tools||[];
+    const isCorrect = acceptable.length ? acceptable.includes(t.action) : null;
+    const statusHtml = isCorrect===null?'':isCorrect
+      ?'<span class="turn-status" style="background:rgba(34,197,94,.12);color:var(--green)">Correct</span>'
+      :'<span class="turn-status" style="background:rgba(239,68,68,.12);color:var(--red)">Wrong tool</span>';
+    const argsStr = t.args?Object.entries(t.args).map(([k,v])=>`${k}=${typeof v==='string'?'"'+v.slice(0,40)+(v.length>40?'...':'')+'"':JSON.stringify(v).slice(0,40)}`).join(', '):'';
+
+    return `<div class="turn-card">
+      <div class="turn-header" onclick="toggleTurn(${i})">
+        <div class="turn-num" style="background:${color}">${t.turn||i+1}</div>
+        <span class="turn-action" style="color:${color}">${t.action}</span>
+        <span class="turn-args">${argsStr}</span>
+        ${statusHtml}
+      </div>
+      <div class="turn-body" id="turn-body-${i}">
+        ${t.args?`<div style="font-size:.78em;color:var(--tx3);margin:8px 0">Args: <code style="color:var(--cyan)">${JSON.stringify(t.args)}</code></div>`:''}
+        <div style="font-size:.78em;color:var(--tx3);margin-bottom:4px">Output:</div>
+        <div class="turn-output">${escHtml(t.output||'(no output)')}</div>
+        <div class="turn-meta">
+          ${acceptable.length?`<span>Acceptable: ${acceptable.map(a=>`<code style="color:${a===t.action?'var(--green)':'var(--tx3)'}">${a}</code>`).join(', ')}</span>`:''}
+          ${t.timestamp?`<span>Time: ${t.timestamp}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Compute & render metrics
+  const metrics = computeMetrics(log);
+  renderMetrics(metrics);
+}
+
+function toggleTurn(i){document.getElementById('turn-body-'+i).classList.toggle('open');}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ====================== METRICS ENGINE ======================
+function computeMetrics(log) {
+  const traj = log.trajectory;
+  const toolLevel = log.config?.tool_level || 'full';
+  const available = TOOLS[toolLevel] || TOOLS.full;
+
+  // M1.1: Correct Selection Rate
+  const annotated = traj.filter(t=>t.acceptable_tools&&t.acceptable_tools.length);
+  const correct = annotated.filter(t=>t.acceptable_tools.includes(t.action));
+  const m11 = annotated.length ? correct.length/annotated.length : 0;
+
+  // M1.2: Redundant Call Rate
+  let redundant = 0;
+  const evaluable = Math.max(traj.length-1,0);
+  for(let i=0;i<traj.length-1;i++){
+    const out = (traj[i].output||'').slice(0,50);
+    if(!out) continue;
+    const future = traj.slice(i+1,i+4);
+    const used = future.some(f=>(f.output||'').includes(out));
+    if(!used) redundant++;
+  }
+  const m12 = evaluable>0 ? redundant/evaluable : 0;
+
+  // M1.3: Utilization Breadth
+  const usedTools = new Set(traj.map(t=>t.action));
+  const validUsed = [...usedTools].filter(t=>available.includes(t));
+  const m13 = available.length ? validUsed.length/available.length : 0;
+
+  // M2.1: Info Retention (simplified — need 2 runs for real BERTScore)
+  const m21 = null; // Requires paired runs
+
+  // M2.2: Effective Token Ratio (simplified — estimate from output lengths)
+  const totalTokens = traj.reduce((s,t)=>s+(t.output||'').split(/\s+/).length,0);
+  const relevantTokens = traj.filter(t=>{
+    const acc = t.acceptable_tools||[];
+    return !acc.length || acc.includes(t.action);
+  }).reduce((s,t)=>s+(t.output||'').split(/\s+/).length,0);
+  const m22 = totalTokens>0 ? relevantTokens/totalTokens : 0;
+
+  return {
+    m11:{value:m11,label:'M1.1 Correct Selection',dim:'d1',detail:`${correct.length}/${annotated.length} correct`},
+    m12:{value:m12,label:'M1.2 Redundant Calls',dim:'d1',detail:`${redundant}/${evaluable} redundant`,invert:true},
+    m13:{value:m13,label:'M1.3 Utilization Breadth',dim:'d1',detail:`${validUsed.length}/${available.length} tools used`},
+    m21:{value:m21,label:'M2.1 Info Retention',dim:'d2',detail:'Requires paired runs'},
+    m22:{value:m22,label:'M2.2 Effective Tokens',dim:'d2',detail:`${relevantTokens}/${totalTokens} tokens`},
+    m31:{value:null,label:'M3.1 Cross-Backend StdDev',dim:'d3',detail:'Requires multiple backends'},
+    m32:{value:null,label:'M3.2 Min/Max Ratio',dim:'d3',detail:'Requires multiple backends'}
+  };
+}
+
+function renderMetrics(m) {
+  const panel = document.getElementById('metrics-panel');
+  const entries = Object.values(m);
+  panel.innerHTML = entries.map(e => {
+    const hasVal = e.value!==null;
+    const pct = hasVal?(e.invert?1-e.value:e.value)*100:0;
+    const display = hasVal?(e.value*100).toFixed(1)+'%':'N/A';
+    const barColor = e.dim==='d1'?'var(--blue)':e.dim==='d2'?'var(--green)':'var(--purple)';
+    return `<div class="m-card">
+      <div class="m-id ${e.dim}">${e.label.split(' ')[0]}</div>
+      <div class="m-info">
+        <div class="m-name">${e.label.split(' ').slice(1).join(' ')}</div>
+        <div class="m-bar-bg"><div class="m-bar-fill" style="width:${hasVal?pct:0}%;background:${barColor}"></div></div>
+        <div style="font-size:.72em;color:var(--tx3);margin-top:3px">${e.detail}</div>
+      </div>
+      <div class="m-score" style="color:${hasVal?(pct>=70?'var(--green)':pct>=40?'var(--orange)':'var(--red)'):'var(--tx3)'}">${display}</div>
+    </div>`;
+  }).join('');
+
+  // Chart
+  const chartData = entries.filter(e=>e.value!==null);
+  if(metricsChart) metricsChart.destroy();
+  metricsChart = new Chart(document.getElementById('metrics-chart'), {
+    type:'bar',
+    data:{
+      labels:chartData.map(e=>e.label),
+      datasets:[{
+        data:chartData.map(e=>(e.value*100).toFixed(1)),
+        backgroundColor:chartData.map(e=>e.dim==='d1'?'rgba(76,141,255,.6)':e.dim==='d2'?'rgba(34,197,94,.6)':'rgba(167,139,250,.6)'),
+        borderColor:chartData.map(e=>e.dim==='d1'?'#4c8dff':e.dim==='d2'?'#22c55e':'#a78bfa'),
+        borderWidth:1,borderRadius:4
+      }]
+    },
+    options:{
+      indexAxis:'y',responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
+      scales:{x:{max:100,grid:{color:'#333a4a'},ticks:{color:'#9ca0ad',callback:v=>v+'%'}},y:{grid:{display:false},ticks:{color:'#e4e6ed',font:{size:11}}}}
+    }
+  });
+}
+
+function exportMetrics() {
+  if(!currentLog) return;
+  const m = computeMetrics(currentLog);
+  const data = {task_id:currentLog.task_id,condition_id:currentLog.condition_id,metrics:{}};
+  Object.entries(m).forEach(([k,v])=>data.metrics[k]=v.value);
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`metrics_${currentLog.task_id}.json`;
+  a.click();
+}
+
+// ====================== TAB 4: COMPARE ======================
+function addToCompare() {
+  if(!currentLog) return;
+  const m = computeMetrics(currentLog);
+  const entry = {id:currentLog.condition_id||currentLog.task_id,task:currentLog.task_id,resolved:currentLog.resolved,metrics:{}};
+  Object.entries(m).forEach(([k,v])=>entry.metrics[k]={value:v.value,label:v.label});
+  if(compareData.find(c=>c.id===entry.id&&c.task===entry.task)){alert('Already in compare');return;}
+  compareData.push(entry);
+  localStorage.setItem('harnessEvalCompare',JSON.stringify(compareData));
+  switchTab('compare');
+}
+
+function renderCompare() {
+  if(!compareData.length){
+    document.getElementById('compare-empty').style.display='block';
+    document.getElementById('compare-table-wrap').style.display='none';
+    return;
+  }
+  document.getElementById('compare-empty').style.display='none';
+  document.getElementById('compare-table-wrap').style.display='block';
+
+  const metricKeys = ['m11','m12','m13','m22'];
+  const metricLabels = {'m11':'M1.1 Correct Selection','m12':'M1.2 Redundant Calls','m13':'M1.3 Utilization Breadth','m22':'M2.2 Effective Tokens'};
+
+  let html = '<thead><tr><th>Metric</th>';
+  compareData.forEach(c => html+=`<th>${c.id}<br><small style="color:var(--tx3)">${c.task}</small></th>`);
+  html+='</tr></thead><tbody>';
+  html+=`<tr><td>Resolved</td>${compareData.map(c=>`<td style="color:${c.resolved?'var(--green)':'var(--red)'}"><strong>${c.resolved?'Yes':'No'}</strong></td>`).join('')}</tr>`;
+  metricKeys.forEach(k=>{
+    html+=`<tr><td>${metricLabels[k]||k}</td>`;
+    compareData.forEach(c=>{
+      const v=c.metrics[k]?.value;
+      html+=`<td style="font-weight:700;color:${v!==null&&v!==undefined?(v*100>=70?'var(--green)':v*100>=40?'var(--orange)':'var(--red)'):'var(--tx3)'}">${v!==null&&v!==undefined?(v*100).toFixed(1)+'%':'N/A'}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('compare-table').innerHTML=html;
+
+  // Chart
+  if(compareChart) compareChart.destroy();
+  const colors = ['rgba(76,141,255,.7)','rgba(34,197,94,.7)','rgba(167,139,250,.7)','rgba(245,158,11,.7)','rgba(239,68,68,.7)'];
+  compareChart = new Chart(document.getElementById('compare-chart'),{
+    type:'bar',
+    data:{
+      labels:metricKeys.map(k=>metricLabels[k]||k),
+      datasets:compareData.map((c,i)=>({
+        label:c.id,
+        data:metricKeys.map(k=>{const v=c.metrics[k]?.value;return v!==null&&v!==undefined?(v*100).toFixed(1):0;}),
+        backgroundColor:colors[i%colors.length],
+        borderRadius:4
+      }))
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#e4e6ed'}}},
+      scales:{y:{max:100,grid:{color:'#333a4a'},ticks:{color:'#9ca0ad',callback:v=>v+'%'}},x:{grid:{display:false},ticks:{color:'#e4e6ed',font:{size:10}}}}
+    }
+  });
+}
+
+function clearCompare(){compareData=[];localStorage.setItem('harnessEvalCompare','[]');renderCompare();}
+
+// ====================== INIT ======================
+buildRadios();
+updateConfig();
+document.getElementById('queue-count').textContent=runQueue.length;
+</script>
+</body>
+</html>

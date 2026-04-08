@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+{% block title_extra %} — Config Builder{% endblock %}
+{% block content %}
+
+<!-- ═══ 1. Factor Selectors ═══ -->
+<div class="card">
+  <div class="card-title">Experiment Config Builder</div>
+  <div class="grid-3">
+    <div class="factor tool">
+      <div class="factor-label">Factor A</div>
+      <div class="factor-name" style="color:var(--blue)">Tool Configuration</div>
+      {% for key, info in tool_levels.items() %}
+      <a class="ri {% if sel_tool==key %}sel{% endif %}" href="/?tool={{key}}&ctx={{sel_ctx}}&be={{sel_be}}">
+        <div class="dot"></div>
+        <span class="rl">{{info.label}} ({{info.count}})</span>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="factor ctx">
+      <div class="factor-label">Factor B</div>
+      <div class="factor-name" style="color:var(--green)">Context Strategy</div>
+      {% for key, info in ctx_strategies.items() %}
+      <a class="ri {% if sel_ctx==key %}sel{% endif %}" href="/?tool={{sel_tool}}&ctx={{key}}&be={{sel_be}}">
+        <div class="dot"></div>
+        <span class="rl">{{info.label}}</span>
+        <span class="rd">{{info.detail}}</span>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="factor be">
+      <div class="factor-label">Factor C — Bien doc lap</div>
+      <div class="factor-name" style="color:var(--purple)">LLM Backend (trong thiet ke)</div>
+      <div style="font-size:.7em;color:var(--tx3);margin-bottom:6px;line-height:1.4">
+        Dung de tao 27 conditions trong ANOVA.<br>
+        Khi test voi Ollama, factor nay chi anh huong condition ID, khong doi model thuc te.
+      </div>
+      {% for key, info in backends.items() %}
+      <a class="ri {% if sel_be==key %}sel{% endif %}" href="/?tool={{sel_tool}}&ctx={{sel_ctx}}&be={{key}}">
+        <div class="dot"></div>
+        <span class="rl">{{key|title}}</span>
+        <span class="rd">${{info.cost}}/eval (khi chay that)</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 2. Tools + Condition Summary ═══ -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Tools Included / Removed</div>
+    <div class="chips">
+      {% for t in all_tools %}
+      <span class="chip {% if t in tools_active %}chip-on{% else %}chip-off{% endif %}">{{t}}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Selected Condition</div>
+    <div class="rbox">
+      <div class="rrow"><span class="rk">Condition ID</span><span class="rv" style="font-family:Consolas,monospace;color:var(--cyan)">{{cond.id}}</span></div>
+      <div class="rrow"><span class="rk">Type</span><span class="badge {% if cond.is_critical %}badge-crit{% else %}badge-norm{% endif %}">{% if cond.is_critical %}CRITICAL (3 runs){% else %}Normal (1 run){% endif %}</span></div>
+      <div class="rrow"><span class="rk">Evals</span><span class="rv">{{cond.runs}} &times; 150 = {{cond.evals}}</span></div>
+      <div class="rrow"><span class="rk">Cost</span><span class="rv" style="color:var(--green)">~${{cond.cost}}</span></div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn" onclick="generateYaml()">YAML</button>
+    </div>
+    <div id="yaml-out" style="display:none"></div>
+
+    <!-- Pipeline steps (always visible) -->
+    <div id="pipelineSection" style="margin-top:14px;border-top:1px solid var(--bd);padding-top:14px">
+      <div style="font-weight:700;font-size:.88em;margin-bottom:10px">Pipeline Steps — {{cond.id}}</div>
+      {% set steps = [
+        ("Task Selection", "150 tasks from SWE-Bench Verified (Python)", "var(--blue)", "1"),
+        ("Load Config", sel_tool ~ " tools, " ~ sel_ctx ~ " context, " ~ sel_be ~ " backend", "var(--cyan)", "2"),
+        ("Run SWE-Agent", cond.runs ~ " run(s) x 150 tasks = " ~ cond.evals ~ " evaluations", "var(--green)", "3"),
+        ("Collect Trajectories", "JSON file per task in trajectories/" ~ cond.id ~ "/", "var(--orange)", "4"),
+        ("Compute 7 Metrics", "M1.1-M1.3 (Tool) + M2.1-M2.2 (Context) + M3.1-M3.2 (Backend)", "var(--purple)", "5"),
+        ("ANOVA Analysis", "Three-way ANOVA + Cohen's d + Tukey HSD", "var(--red)", "6")
+      ] %}
+      {% for name, detail, color, num in steps %}
+      <div class="step">
+        <div class="step-dot" style="border-color:{{color}};background:var(--s3)">{{num}}</div>
+        <div>
+          <div class="step-title">{{name}}</div>
+          <div class="step-detail">{{detail}}</div>
+        </div>
+      </div>
+      {% if not loop.last %}<div class="step-line"></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 3. Run Panel (ONE section, ONE button) ═══ -->
+<div class="card">
+  <div class="card-title">Run Experiment</div>
+
+  <!-- Run settings: inline compact -->
+  <div style="font-size:.78em;color:var(--tx3);margin-bottom:10px;padding:8px 12px;background:var(--s2);border-radius:var(--rs);border-left:3px solid var(--cyan)">
+    <strong style="color:var(--cyan)">Model thuc te:</strong> Model duoi day se duoc dung de chay TAT CA conditions da chon.
+    Neu chon Ollama, tat ca 27 conditions deu chay bang Ollama (mien phi, de test pipeline).
+    Khi co API key, chon dung model tuong ung voi Factor C de co ket qua chinh xac.
+  </div>
+  <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+    <div style="flex:1;min-width:160px">
+      <label style="font-size:.72em;color:var(--cyan);display:block;margin-bottom:3px;font-weight:700">Model thuc te de chay</label>
+      <select id="modelSelect" class="run-input" style="padding:8px 10px;border-color:var(--cyan)">
+        {% for key, m in models.items() %}
+        <option value="{{key}}">{{m.label}} — {{m.detail}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex:1;min-width:200px">
+      <label style="font-size:.72em;color:var(--tx3);display:block;margin-bottom:3px">Repo URL</label>
+      <input type="text" id="repoUrl" value="{{repo_url}}" class="run-input">
+    </div>
+    <div style="flex:1;min-width:200px">
+      <label style="font-size:.72em;color:var(--tx3);display:block;margin-bottom:3px">Issue URL</label>
+      <input type="text" id="issueUrl" value="{{issue_url}}" class="run-input">
+    </div>
+  </div>
+
+  <!-- 27 Condition table -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:.88em;font-weight:700">27 Conditions</span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn" onclick="selectCritical()" style="font-size:.72em;padding:3px 8px">Critical (10)</button>
+      <button class="btn" onclick="selectAll()" style="font-size:.72em;padding:3px 8px">All</button>
+      <button class="btn" onclick="selectNone()" style="font-size:.72em;padding:3px 8px">None</button>
+    </div>
+  </div>
+
+  <table class="ctable">
+    <thead><tr>
+      <th style="width:28px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)" checked></th>
+      <th style="text-align:left">Condition ID</th>
+      <th>Tool</th><th>Context</th><th>Backend</th>
+      <th>Runs</th><th>Status</th>
+    </tr></thead>
+    <tbody>
+      {% for c in all_conditions %}
+      <tr class="{% if c.is_critical %}cond-critical{% endif %}{% if c.id == cond.id %} cond-active{% endif %}" id="row-{{c.id}}" onclick="goCondition('{{c.tool}}','{{c.ctx}}','{{c.backend}}')" style="cursor:pointer">
+        <td onclick="event.stopPropagation()"><input type="checkbox" class="cond-cb" value="{{c.id}}" data-critical="{{c.is_critical}}" {% if c.is_critical %}checked{% endif %}></td>
+        <td style="text-align:left;font-family:Consolas,monospace;font-size:.82em;color:var(--cyan)">{{c.id}}</td>
+        <td><span class="chip chip-on" style="font-size:.7em">{{c.tool}}</span></td>
+        <td><span class="chip chip-on" style="font-size:.7em;background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.25)">{{c.ctx}}</span></td>
+        <td><span class="chip chip-on" style="font-size:.7em;background:rgba(167,139,250,.12);color:var(--purple);border-color:rgba(167,139,250,.25)">{{c.backend}}</span></td>
+        <td style="font-size:.82em">{{c.runs}}{% if c.is_critical %} <span class="badge badge-crit" style="font-size:.8em">C</span>{% endif %}</td>
+        <td><span class="badge {% if c.id in completed %}badge-pass{% else %}badge-norm{% endif %}" id="status-{{c.id}}">{% if c.id in completed %}Done{% else %}Pending{% endif %}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Run button + progress (ONE button) -->
+  <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+    <button class="btn btn-primary" onclick="startRun()" id="btnRun">Run Selected</button>
+    <button class="btn" onclick="stopRun()" id="btnStop" style="display:none;border-color:var(--red);color:var(--red)">Stop</button>
+    <button class="btn" onclick="clearStatus()" id="btnClear" style="font-size:.78em">Clear Status</button>
+    <span style="font-size:.82em;color:var(--tx3)" id="selCount">10 selected</span>
+  </div>
+  <div id="runProgress" style="display:none;margin-top:8px">
+    <div style="font-size:.82em;color:var(--tx2)" id="runStatusText">Idle</div>
+    <div class="m-bar" style="margin-top:4px"><div class="m-fill" id="runBar" style="width:0%;background:var(--blue)"></div></div>
+  </div>
+</div>
+
+<!-- ═══ 4. Run Log ═══ -->
+<div class="card" id="logCard" style="display:none">
+  <div class="card-title">Run Log</div>
+  <div id="runLog" class="run-log"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let pollTimer = null;
+let logOffset = 0;
+
+// ── Restore state on page load ─────────────
+(function restoreState(){
+  fetch('/api/run/status?since=0').then(r=>r.json()).then(data=>{
+    if(data.state==='idle') return;
+
+    // Show log card + progress
+    document.getElementById('logCard').style.display='block';
+    document.getElementById('runProgress').style.display='block';
+
+    // Restore logs
+    (data.logs||[]).forEach(l=>addLog(l.msg,l.type));
+    logOffset=data.log_offset||0;
+
+    // Restore condition statuses
+    (data.results||[]).forEach(r=>setStatus(r.condition_id,r.status));
+    if(data.current) setStatus(data.current,'running');
+
+    // Restore progress bar
+    const pct=data.total>0?(data.completed/data.total*100):0;
+    document.getElementById('runBar').style.width=pct+'%';
+    document.getElementById('runStatusText').textContent=
+      data.state+' — '+data.completed+'/'+data.total+(data.current?' ['+data.current+']':'');
+
+    if(data.state==='running'){
+      // Still running — disable button, show stop, start polling
+      document.getElementById('btnRun').disabled=true;
+      document.getElementById('btnStop').style.display='inline-block';
+      pollStatus(data.run_id);
+    } else {
+      // Done/stopped — show final state
+      document.getElementById('runBar').style.background=data.state==='done'?'var(--green)':'var(--red)';
+    }
+  }).catch(()=>{});
+})();
+
+// ── Click row → navigate to that condition ─
+function goCondition(tool, ctx, be) {
+  // Save checkbox state before navigating
+  const checked = getSelected();
+  sessionStorage.setItem('checkedConditions', JSON.stringify(checked));
+  window.location.href = '/?tool='+tool+'&ctx='+ctx+'&be='+be;
+}
+
+// ── YAML ───────────────────────────────────
+function generateYaml(){
+  fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({tool:'{{sel_tool}}',ctx:'{{sel_ctx}}',be:'{{sel_be}}'})
+  }).then(r=>r.json()).then(d=>{
+    const el=document.getElementById('yaml-out');
+    el.style.display='block';
+    el.innerHTML='<div class="yaml">'+d.yaml+'</div>';
+  });
+}
+
+// ── Condition table ────────────────────────
+function toggleAll(el){document.querySelectorAll('.cond-cb').forEach(cb=>cb.checked=el.checked);updateSel();}
+function selectAll(){document.querySelectorAll('.cond-cb').forEach(cb=>cb.checked=true);document.getElementById('checkAll').checked=true;updateSel();}
+function selectCritical(){document.querySelectorAll('.cond-cb').forEach(cb=>cb.checked=cb.dataset.critical==='True');updateSel();}
+function selectNone(){document.querySelectorAll('.cond-cb').forEach(cb=>cb.checked=false);document.getElementById('checkAll').checked=false;updateSel();}
+function getSelected(){return[...document.querySelectorAll('.cond-cb:checked')].map(cb=>cb.value);}
+function updateSel(){document.getElementById('selCount').textContent=getSelected().length+' selected';}
+document.querySelectorAll('.cond-cb').forEach(cb=>cb.addEventListener('change',updateSel));
+
+// Sync checkboxes with current Factor selection
+const currentCondition = '{{cond.id}}';
+(function syncCheckboxes(){
+  // If user navigated from clicking a row or factor, restore saved checks
+  const saved = sessionStorage.getItem('checkedConditions');
+  if (saved) {
+    const checked = JSON.parse(saved);
+    document.querySelectorAll('.cond-cb').forEach(cb => {
+      cb.checked = checked.includes(cb.value);
+    });
+    sessionStorage.removeItem('checkedConditions');
+  }
+  // Always ensure current condition is checked
+  const cur = document.querySelector('.cond-cb[value="'+currentCondition+'"]');
+  if (cur) cur.checked = true;
+})();
+
+// Scroll active row into view
+(function scrollToActive(){
+  const active = document.querySelector('.cond-active');
+  if (active) active.scrollIntoView({block:'center',behavior:'smooth'});
+})();
+
+updateSel();
+
+// ── Log + Status ───────────────────────────
+function addLog(msg,type){
+  document.getElementById('logCard').style.display='block';
+  const log=document.getElementById('runLog');
+  const cls=type==='error'?'log-error':type==='done'?'log-done':'log-info';
+  log.innerHTML+='<div class="'+cls+'">'+new Date().toLocaleTimeString()+' — '+msg+'</div>';
+  log.scrollTop=log.scrollHeight;
+}
+function setStatus(id,status){
+  const el=document.getElementById('status-'+id);
+  if(!el)return;
+  const m={pending:['badge-norm','Pending'],running:['badge-crit','Running...'],done:['badge-pass','Done'],failed:['badge-fail','Failed']};
+  const[cls,txt]=m[status]||m.pending;
+  el.className='badge '+cls;el.textContent=txt;
+  el.style.animation=status==='running'?'pulse 1s infinite':'';
+}
+
+// ── Run ────────────────────────────────────
+function startRun(){
+  const conditions=getSelected();
+  if(!conditions.length){alert('Select at least 1 condition');return;}
+  const model=document.getElementById('modelSelect').value;
+  const repoUrl=document.getElementById('repoUrl').value;
+  const issueUrl=document.getElementById('issueUrl').value;
+  if(!repoUrl||!issueUrl){alert('Fill in Repo URL and Issue URL');return;}
+
+  document.getElementById('btnRun').disabled=true;
+  document.getElementById('btnStop').style.display='inline-block';
+  document.getElementById('runProgress').style.display='block';
+  document.getElementById('runBar').style.width='0%';
+  document.getElementById('runBar').style.background='var(--blue)';
+  document.getElementById('runLog').innerHTML='';
+  logOffset=0;
+  conditions.forEach(c=>setStatus(c,'pending'));
+
+  fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({conditions,model,repo_url:repoUrl,issue_url:issueUrl})
+  }).then(r=>r.json()).then(data=>{
+    if(data.error){addLog('Error: '+data.error,'error');document.getElementById('btnRun').disabled=false;return;}
+    addLog('Started '+data.total+' conditions (model='+model+')','info');
+    pollStatus(data.run_id);
+  }).catch(err=>{addLog('Error: '+err,'error');document.getElementById('btnRun').disabled=false;});
+}
+
+function pollStatus(runId){
+  pollTimer=setInterval(()=>{
+    fetch('/api/run/status?run_id='+runId+'&since='+logOffset).then(r=>r.json()).then(data=>{
+      const pct=data.total>0?(data.completed/data.total*100):0;
+      document.getElementById('runBar').style.width=pct+'%';
+      document.getElementById('runStatusText').textContent=
+        data.state+' — '+data.completed+'/'+data.total+(data.current?' ['+data.current+']':'');
+      (data.logs||[]).forEach(l=>addLog(l.msg,l.type));
+      if(data.log_offset)logOffset=data.log_offset;
+      (data.results||[]).forEach(r=>setStatus(r.condition_id,r.status));
+      if(data.current)setStatus(data.current,'running');
+      if(data.state==='done'||data.state==='stopped'){
+        clearInterval(pollTimer);
+        document.getElementById('btnRun').disabled=false;
+        document.getElementById('btnStop').style.display='none';
+        document.getElementById('runBar').style.background=data.state==='done'?'var(--green)':'var(--red)';
+      }
+    }).catch(()=>{});
+  },1500);
+}
+
+function stopRun(){fetch('/api/run/stop',{method:'POST'}).then(()=>addLog('Stop requested','error'));}
+
+function clearStatus(){
+  // Reset all condition badges to Pending
+  document.querySelectorAll('.cond-cb').forEach(cb=>{
+    setStatus(cb.value,'pending');
+  });
+  // Clear log + progress
+  document.getElementById('runLog').innerHTML='';
+  document.getElementById('logCard').style.display='none';
+  document.getElementById('runProgress').style.display='none';
+  document.getElementById('runBar').style.width='0%';
+  document.getElementById('runBar').style.background='var(--blue)';
+  document.getElementById('btnRun').disabled=false;
+  document.getElementById('btnStop').style.display='none';
+  logOffset=0;
+  // Reset server state
+  fetch('/api/run/clear',{method:'POST'});
+}
+</script>
+{% endblock %}

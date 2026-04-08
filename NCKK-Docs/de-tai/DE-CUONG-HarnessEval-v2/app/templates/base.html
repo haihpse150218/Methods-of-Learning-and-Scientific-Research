@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval{% block title_extra %}{% endblock %}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>HarnessEval Interactive</h1>
+    <p>Config + Run &bull; Logs &bull; Compare &bull; ANOVA</p>
+  </div>
+  <div class="tabs">
+    <a class="tab {% if active_tab=='config' %}active{% endif %}" href="/"><span class="num">1</span>Config + Run</a>
+    <a class="tab {% if active_tab=='logs' %}active{% endif %}" href="/logs"><span class="num">2</span>Logs</a>
+    <a class="tab {% if active_tab=='compare' %}active{% endif %}" href="/compare"><span class="num">3</span>Compare</a>
+    <a class="tab {% if active_tab=='anova' %}active{% endif %}" href="/anova"><span class="num">4</span>ANOVA</a>
+  </div>
+  {% block content %}{% endblock %}
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

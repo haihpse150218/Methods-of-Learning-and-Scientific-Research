@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+{% block title_extra %} — Run Experiments{% endblock %}
+{% block content %}
+
+<!-- ═══ Section 1: Experiment Config Builder (from Tab 1) ═══ -->
+<div class="card">
+  <div class="card-title">Experiment Config Builder</div>
+  <div class="grid-3">
+    <!-- Factor A: Tool -->
+    <div class="factor tool">
+      <div class="factor-label">Factor A</div>
+      <div class="factor-name" style="color:var(--blue)">Tool Configuration</div>
+      <label class="ri sel" onclick="toggleFactor(this,'tool','full')">
+        <input type="checkbox" class="fcheck" data-factor="tool" value="full" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Full (12)</span>
+        <span class="rd">All bundles + filemap + review</span>
+      </label>
+      <label class="ri sel" onclick="toggleFactor(this,'tool','medium')">
+        <input type="checkbox" class="fcheck" data-factor="tool" value="medium" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Medium (8)</span>
+        <span class="rd">Core registry + edit</span>
+      </label>
+      <label class="ri sel" onclick="toggleFactor(this,'tool','minimal')">
+        <input type="checkbox" class="fcheck" data-factor="tool" value="minimal" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Minimal (5)</span>
+        <span class="rd">Bash only</span>
+      </label>
+    </div>
+
+    <!-- Factor B: Context -->
+    <div class="factor ctx">
+      <div class="factor-label">Factor B</div>
+      <div class="factor-name" style="color:var(--green)">Context Strategy</div>
+      <label class="ri sel" onclick="toggleFactor(this,'ctx','full')">
+        <input type="checkbox" class="fcheck" data-factor="ctx" value="full" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Full Context</span>
+        <span class="rd">No truncation</span>
+      </label>
+      <label class="ri sel" onclick="toggleFactor(this,'ctx','sliding_window')">
+        <input type="checkbox" class="fcheck" data-factor="ctx" value="sliding_window" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Sliding Window</span>
+        <span class="rd">50,000 tokens</span>
+      </label>
+      <label class="ri sel" onclick="toggleFactor(this,'ctx','summary')">
+        <input type="checkbox" class="fcheck" data-factor="ctx" value="summary" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Summary / ACC</span>
+        <span class="rd">Aggressive compression</span>
+      </label>
+    </div>
+
+    <!-- Factor C: LLM Backend -->
+    <div class="factor be">
+      <div class="factor-label">Factor C</div>
+      <div class="factor-name" style="color:var(--purple)">LLM Backend</div>
+      <label class="ri sel" onclick="toggleFactor(this,'be','claude')">
+        <input type="checkbox" class="fcheck" data-factor="be" value="claude" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">Claude Sonnet 4</span>
+        <span class="rd">$0.35/eval</span>
+      </label>
+      <label class="ri sel" onclick="toggleFactor(this,'be','gpt')">
+        <input type="checkbox" class="fcheck" data-factor="be" value="gpt" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">GPT-4o</span>
+        <span class="rd">$0.30/eval</span>
+      </label>
+      <label class="ri sel" onclick="toggleFactor(this,'be','deepseek')">
+        <input type="checkbox" class="fcheck" data-factor="be" value="deepseek" checked hidden>
+        <div class="dot"></div>
+        <span class="rl">DeepSeek-V3</span>
+        <span class="rd">$0.15/eval</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 2: Tools Included / Removed (from Tab 1) ═══ -->
+<div class="card">
+  <div class="card-title">Tools Included / Removed</div>
+  <div id="toolChips" class="chips"></div>
+</div>
+
+<!-- ═══ Section 3: Condition Summary + YAML (from Tab 1) ═══ -->
+<div class="card">
+  <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+    <span id="condTitle">27 Conditions (3 &times; 3 &times; 3)</span>
+    <div style="display:flex;gap:12px;align-items:center">
+      <span style="font-size:.82em;color:var(--tx3)" id="critCount">10 critical</span>
+      <span style="font-size:.82em;color:var(--tx3)">|</span>
+      <span style="font-size:.82em;color:var(--tx3)" id="costEst">Est: $0.00</span>
+      <span style="font-size:.82em;color:var(--tx3)">|</span>
+      <button class="btn" style="font-size:.72em;padding:4px 10px" onclick="toggleView()">
+        <span id="viewToggleText">Table View</span>
+      </button>
+      <button class="btn" style="font-size:.72em;padding:4px 10px" onclick="showYaml()">Show YAML</button>
+    </div>
+  </div>
+
+  <div class="rbox" id="condSummary">
+    <div class="rrow"><span class="rk">Total Conditions</span><span class="rv" id="sumTotal">27</span></div>
+    <div class="rrow"><span class="rk">Critical (3 runs)</span><span class="rv" id="sumCritical">10</span></div>
+    <div class="rrow"><span class="rk">Other (1 run)</span><span class="rv" id="sumOther">17</span></div>
+    <div class="rrow"><span class="rk">Total Evaluations</span><span class="rv" id="sumEvals">7,050</span></div>
+    <div class="rrow"><span class="rk">Estimated Cost</span><span class="rv" style="color:var(--green)" id="sumCost">$0.00</span></div>
+  </div>
+
+  <!-- Grid view -->
+  <div id="condGrid" class="cond-grid" style="margin-top:12px"></div>
+  <!-- Table view -->
+  <div id="condTableWrap" style="display:none;margin-top:12px">
+    <table class="ctable"><thead><tr>
+      <th style="width:30px">#</th>
+      <th style="text-align:left">Condition ID</th>
+      <th>Tool</th><th>Context</th><th>Backend</th>
+      <th>Runs</th><th>Est. Cost</th><th>Status</th>
+    </tr></thead><tbody id="condTableBody"></tbody></table>
+  </div>
+  <!-- YAML preview -->
+  <div id="yamlPreview" style="display:none;margin-top:12px"></div>
+</div>
+
+<!-- ═══ Section 4: Pipeline Steps (from Tab 2) ═══ -->
+<div class="card">
+  <div class="card-title">Pipeline Steps</div>
+  <div id="pipelineSteps">
+    {% set steps = [
+      ("Select Conditions", "Choose Tool x Context x Backend factors above", "var(--blue)", "1"),
+      ("Load Configs", "Compose base.yaml + tool_X.yaml + ctx_Y.yaml + be_Z.yaml", "var(--cyan)", "2"),
+      ("Run SWE-Agent", "Docker container per task, agent solves the issue", "var(--green)", "3"),
+      ("Collect Trajectories", "JSON trajectory file per task in trajectories/", "var(--orange)", "4"),
+      ("Compute 7 Metrics", "M1.1-M1.3 (Tool) + M2.1-M2.2 (Context) + M3.1-M3.2 (Backend)", "var(--purple)", "5"),
+      ("ANOVA Analysis", "Three-way ANOVA + Cohen's d + Tukey HSD", "var(--red)", "6")
+    ] %}
+    {% for name, detail, color, num in steps %}
+    <div class="step">
+      <div class="step-dot" style="border-color:{{color}};background:var(--s3)">{{num}}</div>
+      <div>
+        <div class="step-title">{{name}}</div>
+        <div class="step-detail">{{detail}}</div>
+      </div>
+    </div>
+    {% if not loop.last %}<div class="step-line"></div>{% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ═══ Section 5: Run Controls ═══ -->
+<div class="card">
+  <div class="card-title">Run</div>
+  <div class="grid-3">
+    <!-- Actual model -->
+    <div class="factor be" id="modelSelector">
+      <div class="factor-label">Actual Model</div>
+      <div class="factor-name" style="color:var(--cyan)">Run With</div>
+      {% for key, m in models.items() %}
+      <label class="ri {% if key == sel_model %}sel{% endif %}" onclick="selectModel('{{key}}',this)">
+        <div class="dot"></div>
+        <span class="rl">{{m.label}}</span>
+        <span class="rd">{{m.detail}}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <!-- Repo / Issue -->
+    <div class="factor ctx">
+      <div class="factor-label">Target</div>
+      <div class="factor-name" style="color:var(--green)">Repository + Issue</div>
+      <div style="margin:6px 0">
+        <label style="font-size:.75em;color:var(--tx3)">Repo URL</label>
+        <input type="text" id="repoUrl" value="{{repo_url}}" class="run-input">
+      </div>
+      <div style="margin:6px 0">
+        <label style="font-size:.75em;color:var(--tx3)">Issue URL</label>
+        <input type="text" id="issueUrl" value="{{issue_url}}" class="run-input">
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="factor tool">
+      <div class="factor-label">Controls</div>
+      <div class="factor-name" style="color:var(--blue)">Actions</div>
+      <div style="margin:8px 0;display:flex;flex-direction:column;gap:6px">
+        <button class="btn btn-primary" onclick="startRun()" id="btnRun">Run Selected Conditions</button>
+        <button class="btn" onclick="stopRun()" id="btnStop" style="display:none;border-color:var(--red);color:var(--red)">Stop Run</button>
+      </div>
+      <div id="runProgress" style="display:none;margin-top:10px">
+        <div style="font-size:.82em;color:var(--tx2)" id="runStatusText">Idle</div>
+        <div class="m-bar" style="margin-top:4px"><div class="m-fill" id="runBar" style="width:0%;background:var(--blue)"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 6: Run Log ═══ -->
+<div class="card" id="logCard" style="display:none">
+  <div class="card-title">Run Log</div>
+  <div id="runLog" class="run-log"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const MODELS = {{ models | tojson }};
+const CRITICAL = {{ critical_set | tojson }};
+const COMPLETED = {{ completed | tojson }};
+const ALL_TOOLS = {{ all_tools | tojson }};
+const TOOL_SETS = {{ tool_sets | tojson }};
+let selectedModel = '{{sel_model}}';
+let pollTimer = null;
+let logOffset = 0;
+
+// ── Factor toggle ──────────────────────────
+function toggleFactor(label, factor, value) {
+  const cb = label.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  label.classList.toggle('sel', cb.checked);
+  rebuildConditions();
+}
+
+function selectModel(key, el) {
+  document.getElementById('modelSelector').querySelectorAll('.ri').forEach(r => r.classList.remove('sel'));
+  if (el) el.classList.add('sel');
+  selectedModel = key;
+  rebuildConditions();
+}
+
+// ── Tool chips (from Tab 1) ────────────────
+function updateToolChips() {
+  const selectedTools = getChecked('tool');
+  // Merge all tools from selected levels
+  let included = new Set();
+  selectedTools.forEach(level => {
+    (TOOL_SETS[level] || []).forEach(t => included.add(t));
+  });
+
+  let html = '';
+  ALL_TOOLS.forEach(t => {
+    if (included.has(t)) {
+      html += '<span class="chip chip-on">' + t + '</span>';
+    } else {
+      html += '<span class="chip chip-off">' + t + '</span>';
+    }
+  });
+  document.getElementById('toolChips').innerHTML = html;
+}
+
+// ── Build conditions ───────────────────────
+function getChecked(factor) {
+  return [...document.querySelectorAll('.fcheck[data-factor="'+factor+'"]:checked')].map(cb => cb.value);
+}
+
+function rebuildConditions() {
+  const tools = getChecked('tool');
+  const ctxs = getChecked('ctx');
+  const bes = getChecked('be');
+
+  const conditions = [];
+  for (const t of tools)
+    for (const c of ctxs)
+      for (const b of bes) {
+        const id = t + '_' + c + '_' + b;
+        const isCrit = CRITICAL.includes(id);
+        conditions.push({id, tool:t, ctx:c, be:b, isCrit, runs: isCrit ? 3 : 1});
+      }
+
+  const modelCost = (MODELS[selectedModel] || {}).cost || 0;
+  const critCount = conditions.filter(c => c.isCrit).length;
+  const otherCount = conditions.length - critCount;
+  const totalEvals = conditions.reduce((s, c) => s + c.runs * 150, 0);
+  const totalCost = conditions.reduce((s, c) => s + c.runs * modelCost, 0);
+
+  // Update title + summary
+  document.getElementById('condTitle').innerHTML = conditions.length + ' Conditions (' + tools.length + ' &times; ' + ctxs.length + ' &times; ' + bes.length + ')';
+  document.getElementById('critCount').textContent = critCount + ' critical';
+  document.getElementById('costEst').textContent = 'Est: $' + totalCost.toFixed(2) + (modelCost === 0 ? ' (free)' : '');
+  document.getElementById('sumTotal').textContent = conditions.length;
+  document.getElementById('sumCritical').textContent = critCount;
+  document.getElementById('sumOther').textContent = otherCount;
+  document.getElementById('sumEvals').textContent = totalEvals.toLocaleString();
+  document.getElementById('sumCost').textContent = '$' + totalCost.toFixed(2) + (modelCost === 0 ? ' (free)' : '');
+
+  // Grid
+  const grid = document.getElementById('condGrid');
+  if (conditions.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--tx3)">Select at least 1 option per factor</div>';
+    document.getElementById('condTableBody').innerHTML = '';
+    updateToolChips();
+    return;
+  }
+
+  let html = '';
+  for (const c of conditions) {
+    const done = COMPLETED.includes(c.id);
+    const sid = 'status-' + c.id.replace(/[^a-z0-9_]/g,'_');
+    html += '<div class="cond-card' + (c.isCrit ? ' cond-critical' : '') + '" id="row-' + c.id + '">';
+    html += '<div class="cond-id">' + c.id + '</div>';
+    html += '<div class="cond-chips">';
+    html += '<span class="chip chip-on" style="color:var(--blue)">' + c.tool + '</span>';
+    html += '<span class="chip chip-on" style="background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.25)">' + c.ctx.replace('_',' ') + '</span>';
+    html += '<span class="chip chip-on" style="background:rgba(167,139,250,.12);color:var(--purple);border-color:rgba(167,139,250,.25)">' + c.be + '</span>';
+    html += '</div><div class="cond-meta">';
+    html += '<span>' + c.runs + ' run' + (c.runs>1?'s':'') + '</span>';
+    if (c.isCrit) html += '<span class="badge badge-crit">Critical</span>';
+    html += '<span class="badge ' + (done?'badge-pass':'badge-norm') + '" id="' + sid + '">' + (done?'Done':'Pending') + '</span>';
+    html += '</div></div>';
+  }
+  grid.innerHTML = html;
+
+  // Table
+  let thtml = '';
+  conditions.forEach((c,i) => {
+    const done = COMPLETED.includes(c.id);
+    const tsid = 'tstatus-' + c.id.replace(/[^a-z0-9_]/g,'_');
+    const cc = (c.runs * modelCost).toFixed(2);
+    thtml += '<tr class="' + (c.isCrit?'cond-critical':'') + '">';
+    thtml += '<td>' + (i+1) + '</td>';
+    thtml += '<td style="text-align:left;font-family:Consolas,monospace;font-size:.82em;color:var(--cyan)">' + c.id + '</td>';
+    thtml += '<td><span class="chip chip-on" style="font-size:.7em">' + c.tool + '</span></td>';
+    thtml += '<td><span class="chip chip-on" style="font-size:.7em;background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.25)">' + c.ctx.replace('_',' ') + '</span></td>';
+    thtml += '<td><span class="chip chip-on" style="font-size:.7em;background:rgba(167,139,250,.12);color:var(--purple);border-color:rgba(167,139,250,.25)">' + c.be + '</span></td>';
+    thtml += '<td style="font-size:.82em">' + c.runs + (c.isCrit?' <span class="badge badge-crit" style="font-size:.8em">C</span>':'') + '</td>';
+    thtml += '<td style="font-size:.82em;color:var(--orange)">$' + cc + '</td>';
+    thtml += '<td><span class="badge ' + (done?'badge-pass':'badge-norm') + '" id="' + tsid + '">' + (done?'Done':'Pending') + '</span></td>';
+    thtml += '</tr>';
+  });
+  document.getElementById('condTableBody').innerHTML = thtml;
+
+  updateToolChips();
+}
+
+// ── View toggle ────────────────────────────
+let viewMode = 'grid';
+function toggleView() {
+  viewMode = viewMode === 'grid' ? 'table' : 'grid';
+  document.getElementById('condGrid').style.display = viewMode === 'grid' ? '' : 'none';
+  document.getElementById('condTableWrap').style.display = viewMode === 'table' ? '' : 'none';
+  document.getElementById('viewToggleText').textContent = viewMode === 'grid' ? 'Table View' : 'Grid View';
+}
+
+// ── YAML preview ───────────────────────────
+function showYaml() {
+  const el = document.getElementById('yamlPreview');
+  if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+  const tools = getChecked('tool');
+  const ctxs = getChecked('ctx');
+  const bes = getChecked('be');
+  const model = MODELS[selectedModel] || {};
+
+  let yaml = '# HarnessEval — Composed Config\n';
+  yaml += '# Factors: ' + tools.join(',') + ' x ' + ctxs.join(',') + ' x ' + bes.join(',') + '\n';
+  yaml += '# Model: ' + (model.label || selectedModel) + '\n\n';
+  yaml += '# Each condition composes these YAML files:\n';
+  yaml += '#   sweagent run \\\n';
+  yaml += '#     --config config/harness_eval/base.yaml \\\n';
+  yaml += '#     --config config/harness_eval/tool_{LEVEL}.yaml \\\n';
+  yaml += '#     --config config/harness_eval/ctx_{STRATEGY}.yaml \\\n';
+  yaml += '#     --config config/harness_eval/' + (model.config || 'be_ollama.yaml') + '\n\n';
+  yaml += '# Example (first condition):\n';
+  if (tools.length && ctxs.length && bes.length) {
+    yaml += 'sweagent run \\\n';
+    yaml += '  --config config/harness_eval/base.yaml \\\n';
+    yaml += '  --config config/harness_eval/tool_' + tools[0] + '.yaml \\\n';
+    yaml += '  --config config/harness_eval/ctx_' + ctxs[0] + '.yaml \\\n';
+    yaml += '  --config config/harness_eval/' + (model.config || 'be_ollama.yaml') + '\n';
+  }
+
+  el.innerHTML = '<div class="yaml">' + yaml + '</div>';
+  el.style.display = 'block';
+}
+
+// ── Log helpers ────────────────────────────
+function addLog(msg, type) {
+  document.getElementById('logCard').style.display = 'block';
+  const log = document.getElementById('runLog');
+  const cls = type === 'error' ? 'log-error' : type === 'done' ? 'log-done' : 'log-info';
+  log.innerHTML += '<div class="' + cls + '">' + new Date().toLocaleTimeString() + ' — ' + msg + '</div>';
+  log.scrollTop = log.scrollHeight;
+}
+
+function setCondStatus(condId, status) {
+  const safe = condId.replace(/[^a-z0-9_]/g,'_');
+  ['status-','tstatus-'].forEach(prefix => {
+    const el = document.getElementById(prefix + safe);
+    if (!el) return;
+    const map = {pending:['badge-norm','Pending'], running:['badge-crit','Running...'], done:['badge-pass','Done'], failed:['badge-fail','Failed']};
+    const [cls, text] = map[status] || map.pending;
+    el.className = 'badge ' + cls;
+    el.textContent = text;
+    el.style.animation = status === 'running' ? 'pulse 1s infinite' : '';
+  });
+}
+
+// ── Run logic ──────────────────────────────
+function startRun() {
+  const tools = getChecked('tool');
+  const ctxs = getChecked('ctx');
+  const bes = getChecked('be');
+  const conditions = [];
+  for (const t of tools) for (const c of ctxs) for (const b of bes) conditions.push(t+'_'+c+'_'+b);
+
+  if (conditions.length === 0) { alert('Select at least 1 option per factor'); return; }
+  const repoUrl = document.getElementById('repoUrl').value;
+  const issueUrl = document.getElementById('issueUrl').value;
+  if (!repoUrl || !issueUrl) { alert('Fill in Repo URL and Issue URL'); return; }
+
+  document.getElementById('btnRun').disabled = true;
+  document.getElementById('btnStop').style.display = 'inline-block';
+  document.getElementById('runProgress').style.display = 'block';
+  document.getElementById('runBar').style.width = '0%';
+  document.getElementById('runBar').style.background = 'var(--blue)';
+  document.getElementById('runLog').innerHTML = '';
+  logOffset = 0;
+  conditions.forEach(c => setCondStatus(c, 'pending'));
+
+  fetch('/api/run', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({conditions, model: selectedModel, repo_url: repoUrl, issue_url: issueUrl})
+  }).then(r => r.json()).then(data => {
+    if (data.error) { addLog('Error: ' + data.error, 'error'); document.getElementById('btnRun').disabled = false; return; }
+    addLog('Run started (' + data.total + ' conditions)', 'info');
+    pollStatus(data.run_id);
+  }).catch(err => { addLog('Error: ' + err, 'error'); document.getElementById('btnRun').disabled = false; });
+}
+
+function pollStatus(runId) {
+  pollTimer = setInterval(() => {
+    fetch('/api/run/status?run_id=' + runId + '&since=' + logOffset).then(r => r.json()).then(data => {
+      const pct = data.total > 0 ? (data.completed / data.total * 100) : 0;
+      document.getElementById('runBar').style.width = pct + '%';
+      document.getElementById('runStatusText').textContent =
+        data.state + ' — ' + data.completed + '/' + data.total +
+        (data.current ? ' [' + data.current + ']' : '');
+
+      (data.logs || []).forEach(l => addLog(l.msg, l.type));
+      if (data.log_offset) logOffset = data.log_offset;
+
+      (data.results || []).forEach(r => setCondStatus(r.condition_id, r.status));
+      if (data.current) setCondStatus(data.current, 'running');
+
+      if (data.state === 'done' || data.state === 'stopped') {
+        clearInterval(pollTimer);
+        document.getElementById('btnRun').disabled = false;
+        document.getElementById('btnStop').style.display = 'none';
+        document.getElementById('runBar').style.background = data.state === 'done' ? 'var(--green)' : 'var(--red)';
+      }
+    }).catch(() => {});
+  }, 1500);
+}
+
+function stopRun() {
+  fetch('/api/run/stop', {method:'POST'}).then(() => addLog('Stop requested', 'error'));
+}
+
+// ── Init ───────────────────────────────────
+rebuildConditions();
+</script>
+{% endblock %}

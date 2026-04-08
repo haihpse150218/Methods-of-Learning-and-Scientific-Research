@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title_extra %} — {{log.task_id}}{% endblock %}
+{% block content %}
+
+<div class="info-bar">
+  <span><span class="ib-label">Task: </span><span class="ib-val">{{log.task_id}}</span></span>
+  <span><span class="ib-label">Status: </span><span class="ib-val" style="color:{% if log.resolved %}var(--green){% else %}var(--red){% endif %}">{% if log.resolved %}RESOLVED{% else %}FAILED{% endif %}</span></span>
+  <span><span class="ib-label">Model: </span><span class="ib-val">{{log.model or '—'}}</span></span>
+  <span><span class="ib-label">Turns: </span><span class="ib-val">{{log.trajectory|length}}</span></span>
+  <span><span class="ib-label">Cost: </span><span class="ib-val">${{log.total_cost or 0}}</span></span>
+  <span><span class="ib-label">Condition: </span><span class="ib-val" style="font-family:Consolas,monospace;color:var(--cyan)">{{log.condition_id or '—'}}</span></span>
+</div>
+
+<!-- Turns -->
+<div class="card">
+  <div class="card-title">Turns ({{log.trajectory|length}})</div>
+  {% set colors = {"read":"#22c55e","write":"#4c8dff","edit":"#a78bfa","bash":"#ef4444","grep":"#f472b6","glob":"#22d3ee","find":"#fb923c","python":"#f59e0b","git_diff":"#818cf8","git_log":"#34d399","git_show":"#fbbf24","test_runner":"#f87171"} %}
+
+  {% for t in log.trajectory %}
+  {% set color = colors.get(t.action, '#888') %}
+  {% set acceptable = t.get('acceptable_tools', []) %}
+  {% set is_correct = t.action in acceptable if acceptable else None %}
+  <div class="turn">
+    <div class="turn-hdr">
+      <div class="turn-num" style="background:{{color}}">{{t.turn or loop.index}}</div>
+      <span class="turn-action" style="color:{{color}}">{{t.action}}</span>
+      <span class="turn-args">
+        {% if t.args %}{% for k,v in t.args.items() %}{{k}}={{v if v is string and v|length <= 40 else (v|string)[:40]}}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+      </span>
+      {% if is_correct is not none %}
+      <span class="badge {% if is_correct %}badge-pass{% else %}badge-fail{% endif %}">{% if is_correct %}Correct{% else %}Wrong tool{% endif %}</span>
+      {% endif %}
+    </div>
+    <div class="turn-body">
+      {% if t.args %}<div style="font-size:.75em;color:var(--tx3);margin:6px 0">Args: <code>{{t.args}}</code></div>{% endif %}
+      <div style="font-size:.75em;color:var(--tx3)">Output:</div>
+      <div class="turn-output">{{t.output or '(no output)'}}</div>
+      <div class="turn-meta">
+        {% if acceptable %}<span>Acceptable: {% for a in acceptable %}<code style="color:{% if a==t.action %}var(--green){% else %}var(--tx3){% endif %}">{{a}}</code>{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+        {% if t.timestamp %}<span>{{t.timestamp}}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Metrics -->
+<div class="card">
+  <div class="card-title">Computed Metrics</div>
+  <div class="grid-2">
+    {% for key, m in metrics.items() %}
+    {% set has_val = m.value is not none %}
+    {% set pct = (m.value * 100)|round(1) if has_val else 0 %}
+    {% set dim_class = 'm-d1' if m.dim == 'D1' else ('m-d2' if m.dim == 'D2' else 'm-d3') %}
+    {% set bar_color = 'var(--blue)' if m.dim == 'D1' else ('var(--green)' if m.dim == 'D2' else 'var(--purple)') %}
+    <div class="m-card">
+      <div class="m-id {{dim_class}}">{{key.upper()}}</div>
+      <div class="m-info">
+        <div class="m-name">{{m.label}}</div>
+        <div class="m-bar"><div class="m-fill" style="width:{{pct if has_val else 0}}%;background:{{bar_color}}"></div></div>
+        <div class="m-detail">{{m.detail}}</div>
+      </div>
+      <div class="m-score" style="color:{% if not has_val %}var(--tx3){% elif pct >= 70 %}var(--green){% elif pct >= 40 %}var(--orange){% else %}var(--red){% endif %}">
+        {% if has_val %}{{pct}}%{% else %}N/A{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:15px">
+    <canvas id="metricsChart" height="180"></canvas>
+  </div>
+
+  <div style="margin-top:12px">
+    <a class="btn" href="/logs">&larr; Back to Logs</a>
+    <a class="btn" href="/compare?p={{log_path}}">Add to Compare</a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const metricsData = {{ metrics | tojson }};
+const labels = [], values = [], colors = [];
+const colorMap = {D1:'rgba(76,141,255,0.7)', D2:'rgba(34,197,94,0.7)', D3:'rgba(167,139,250,0.7)'};
+for (const [k,m] of Object.entries(metricsData)) {
+  if (m.value !== null) {
+    labels.push(k.toUpperCase() + ' ' + m.label);
+    values.push((m.value * 100).toFixed(1));
+    colors.push(colorMap[m.dim] || '#888');
+  }
+}
+new Chart(document.getElementById('metricsChart'), {
+  type:'bar', data:{labels, datasets:[{data:values, backgroundColor:colors, borderRadius:4}]},
+  options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},
+    scales:{x:{max:100,grid:{color:'#333a4a'},ticks:{color:'#9ca0ad',callback:v=>v+'%'}},y:{grid:{display:false},ticks:{color:'#e4e6ed',font:{size:11}}}}}
+});
+</script>
+{% endblock %}

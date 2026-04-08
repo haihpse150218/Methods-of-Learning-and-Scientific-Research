@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval: Evaluating Coding Agent Scaffolds Through Ablation-Driven Multi-Dimensional Analysis</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#1a1a2e;line-height:1.8}
+.container{max-width:960px;margin:0 auto;padding:20px 30px}
+
+/* Cover Page */
+.cover{text-align:center;padding:60px 40px;background:#fff;border-radius:16px;margin:30px 0;border:1px solid #ddd;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.cover .university{font-size:1.3em;font-weight:bold;letter-spacing:1px;margin-bottom:6px}
+.cover .school{font-size:1.05em;color:#555;margin-bottom:4px}
+.cover .program{font-size:.95em;color:#777;margin-bottom:50px}
+.cover .title-box{border-top:3px solid #1a1a2e;border-bottom:3px solid #1a1a2e;padding:30px 20px;margin:0 auto 50px;max-width:700px}
+.cover .title-box h1{font-size:1.7em;line-height:1.4;color:#1a1a2e}
+.cover .subtitle{font-size:1.15em;font-weight:bold;margin-bottom:8px;color:#333}
+.cover .course{color:#555;margin-bottom:40px}
+.cover .info-table{display:inline-block;text-align:left;margin-bottom:60px}
+.cover .info-table td{padding:4px 15px;font-size:1em}
+.cover .info-table td:first-child{font-weight:bold}
+.cover .city{color:#555;font-size:.95em}
+
+/* Table of Contents */
+.toc{background:#fff;border-radius:16px;padding:30px 40px;margin:30px 0;border:1px solid #ddd;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.toc h2{font-size:1.5em;margin-bottom:20px;color:#1a1a2e}
+.toc-list{list-style:none}
+.toc-list li{padding:4px 0;border-bottom:1px dotted #ddd;display:flex;justify-content:space-between}
+.toc-list li.toc-h1{font-weight:bold;font-size:1.05em;margin-top:12px;border-bottom:none;padding-top:10px}
+.toc-list li.toc-h2{padding-left:25px;font-size:.95em}
+.toc-list li.toc-h3{padding-left:50px;font-size:.9em;color:#555}
+.toc-list a{text-decoration:none;color:#0066cc;flex:1}
+.toc-list a:hover{text-decoration:underline}
+.toc-list .page{color:#777;font-size:.9em;min-width:30px;text-align:right}
+
+/* Sections */
+.section{background:#fff;border-radius:16px;padding:35px 40px;margin:30px 0;border:1px solid #ddd;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+h2.chapter{font-size:1.6em;margin:0 0 25px;color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:10px}
+h3{font-size:1.2em;margin:25px 0 12px;color:#333}
+h4{font-size:1.05em;margin:20px 0 10px;color:#555}
+p{margin:10px 0;text-align:justify}
+p+p{margin-top:8px}
+
+/* Bold highlights */
+.bold-label{font-weight:bold}
+
+/* Lists */
+ul,ol{margin:10px 0 10px 25px}
+li{margin:5px 0}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:15px 0;font-size:.92em}
+th,td{padding:10px 14px;border:1px solid #ccc;text-align:left}
+th{background:#f0f2f5;color:#333;font-weight:700;text-align:center}
+td{vertical-align:top}
+tr:nth-child(even){background:#f8f9fc}
+caption{font-weight:bold;margin-bottom:8px;font-size:.95em;color:#555}
+
+/* Special table for characteristics */
+.char-table th,.char-table td{text-align:center;padding:8px 10px}
+.char-table td:first-child{text-align:left;font-weight:500}
+
+/* Notes */
+.note{background:#f0f7ff;border-left:4px solid #0066cc;padding:12px 18px;border-radius:0 8px 8px 0;margin:15px 0;font-size:.93em}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.8em;font-weight:bold}
+.tag-new{background:#e3f2fd;color:#1565c0}
+
+/* Equation */
+.equation{background:#f8f9fc;border:1px solid #e0e0e0;border-radius:8px;padding:15px 20px;margin:15px 0;text-align:center;font-size:1em;overflow-x:auto}
+.eq-label{float:right;color:#777}
+
+/* Hypothesis */
+.hyp{background:#fafbfd;border-left:4px solid #6a1b9a;padding:10px 18px;margin:10px 0;border-radius:0 8px 8px 0}
+.hyp strong{color:#6a1b9a}
+
+/* RO */
+.ro{background:#f0f9f0;border-left:4px solid #2e7d32;padding:10px 18px;margin:10px 0;border-radius:0 8px 8px 0}
+.ro strong{color:#2e7d32}
+
+/* References */
+.ref-list{list-style:none;margin:0;padding:0}
+.ref-list li{margin:8px 0;padding-left:40px;text-indent:-40px;font-size:.92em;line-height:1.6}
+
+/* Header bar */
+.header-bar{display:flex;justify-content:space-between;align-items:center;font-size:.85em;color:#777;border-bottom:1px solid #ccc;padding-bottom:5px;margin-bottom:25px}
+
+/* Responsive */
+@media(max-width:768px){
+  .container{padding:10px 15px}
+  .section{padding:20px}
+  .cover{padding:30px 20px}
+  .cover .title-box h1{font-size:1.3em}
+  table{font-size:.82em}
+  th,td{padding:6px 8px}
+}
+
+/* Five-layer model */
+.layer-model{margin:15px 0;font-family:'Courier New',monospace;font-size:.9em;background:#f8f9fc;padding:15px;border-radius:8px;border:1px solid #e0e0e0}
+.layer-box{border:2px solid #333;padding:8px 15px;margin:3px 0;text-align:center;border-radius:4px;font-weight:bold}
+.layer-eval{background:#e8f5e9;border-color:#2e7d32;color:#2e7d32}
+.layer-future{background:#f5f5f5;border-color:#aaa;color:#999}
+
+/* Flow steps */
+.flow-step{display:flex;align-items:center;gap:15px;margin:10px 0;padding:12px 18px;background:#fafbfd;border-radius:10px;border:1px solid #ddd}
+.flow-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:.9em;flex-shrink:0}
+
+/* Print */
+@media print{
+  body{background:#fff}
+  .section,.cover,.toc{box-shadow:none;border:none;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover">
+  <div class="university">FPT UNIVERSITY</div>
+  <div class="school">Graduate School of Information Technology</div>
+  <div class="program">Master of Software Engineering &mdash; Artificial Intelligence</div>
+
+  <div class="title-box">
+    <h1>HarnessEval: Evaluating Coding Agent Scaffolds Through Ablation-Driven Multi-Dimensional Analysis</h1>
+  </div>
+
+  <div class="subtitle">Research Proposal</div>
+  <div class="course">Course: Methods of Learning and Scientific Research</div>
+
+  <table class="info-table">
+    <tr><td>Student:</td><td>[Student Name]</td></tr>
+    <tr><td>Student ID:</td><td>[Student ID]</td></tr>
+    <tr><td>Supervisor:</td><td>[Supervisor Name]</td></tr>
+    <tr><td>Date:</td><td>April 2026</td></tr>
+  </table>
+
+  <div class="city">Ho Chi Minh City, 2026</div>
+</div>
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="toc">
+  <h2>Contents</h2>
+  <ul class="toc-list">
+    <li class="toc-h1"><a href="#ch1">1&ensp;Introduction</a></li>
+    <li class="toc-h2"><a href="#s1.1">1.1&ensp;Problem Statement</a></li>
+    <li class="toc-h2"><a href="#s1.2">1.2&ensp;Research Purpose (Qualitative)</a></li>
+    <li class="toc-h2"><a href="#s1.3">1.3&ensp;Research Objectives (Quantitative)</a></li>
+    <li class="toc-h2"><a href="#s1.4">1.4&ensp;Research Hypotheses</a></li>
+    <li class="toc-h2"><a href="#s1.5">1.5&ensp;Scope and Delimitations</a></li>
+    <li class="toc-h2"><a href="#s1.6">1.6&ensp;Expected Thesis Structure</a></li>
+
+    <li class="toc-h1"><a href="#ch2">2&ensp;Literature Review and Theoretical Background</a></li>
+    <li class="toc-h2"><a href="#s2.1">2.1&ensp;Literature Review</a></li>
+    <li class="toc-h3"><a href="#s2.1.1">2.1.1&ensp;Bui et al. (OpenDev) [1]: Harness Design Without Evaluation</a></li>
+    <li class="toc-h3"><a href="#s2.1.2">2.1.2&ensp;Lou et al. (AutoHarness) [2]: Ablation on Games, Not Coding</a></li>
+    <li class="toc-h3"><a href="#s2.1.3">2.1.3&ensp;Qin et al. (ToolLLM) [12]: Tool Evaluation in Isolation</a></li>
+    <li class="toc-h3"><a href="#s2.1.4">2.1.4&ensp;Chhikara et al. (Mem0) [10]: Context Evaluation on Chatbots</a></li>
+    <li class="toc-h3"><a href="#s2.1.5">2.1.5&ensp;Ma et al. (AgentBoard) [15]: Multi-Metric for Output, Not Harness</a></li>
+    <li class="toc-h3"><a href="#s2.1.6">2.1.6&ensp;Summary on Characteristics Investigated</a></li>
+    <li class="toc-h2"><a href="#s2.2">2.2&ensp;Theoretical Background</a></li>
+    <li class="toc-h3"><a href="#s2.2.1">2.2.1&ensp;Harness Architecture: Five-Layer Model</a></li>
+    <li class="toc-h3"><a href="#s2.2.2">2.2.2&ensp;Ablation Studies in Software Engineering</a></li>
+    <li class="toc-h3"><a href="#s2.2.3">2.2.3&ensp;Defining "Independent of LLM" via Three-Way ANOVA</a></li>
+
+    <li class="toc-h1"><a href="#ch3">3&ensp;Research Methodology</a></li>
+    <li class="toc-h2"><a href="#s3.1">3.1&ensp;Overview</a></li>
+    <li class="toc-h2"><a href="#s3.2">3.2&ensp;Three-Dimensional Harness Evaluation Taxonomy (RO1)</a></li>
+    <li class="toc-h2"><a href="#s3.3">3.3&ensp;Modular Harness via SWE-Agent Fork (RO2)</a></li>
+    <li class="toc-h2"><a href="#s3.4">3.4&ensp;Pilot Study (RO3, Phase 1)</a></li>
+    <li class="toc-h2"><a href="#s3.5">3.5&ensp;Full Ablation Study (RO3, RO4, Phase 2)</a></li>
+    <li class="toc-h2"><a href="#s3.6">3.6&ensp;Threats to Validity</a></li>
+    <li class="toc-h3"><a href="#s3.6.1">3.6.1&ensp;Internal Validity</a></li>
+    <li class="toc-h3"><a href="#s3.6.2">3.6.2&ensp;External Validity</a></li>
+    <li class="toc-h3"><a href="#s3.6.3">3.6.3&ensp;Construct Validity</a></li>
+    <li class="toc-h2"><a href="#s3.7">3.7&ensp;Risk Analysis</a></li>
+
+    <li class="toc-h1"><a href="#ch4">4&ensp;Expected Results</a></li>
+    <li class="toc-h2"><a href="#s4.1">4.1&ensp;Expected Outcomes per Objective</a></li>
+    <li class="toc-h2"><a href="#s4.2">4.2&ensp;Scientific Significance</a></li>
+    <li class="toc-h2"><a href="#s4.3">4.3&ensp;Practical Significance</a></li>
+    <li class="toc-h2"><a href="#s4.4">4.4&ensp;Publication Targets</a></li>
+
+    <li class="toc-h1"><a href="#ch5">5&ensp;Timeline and Budget</a></li>
+    <li class="toc-h2"><a href="#s5.1">5.1&ensp;Timeline</a></li>
+    <li class="toc-h2"><a href="#s5.2">5.2&ensp;Budget</a></li>
+
+    <li class="toc-h1"><a href="#refs">References</a></li>
+  </ul>
+</div>
+
+<!-- ==================== CHAPTER 1: INTRODUCTION ==================== -->
+<div class="section" id="ch1">
+  <div class="header-bar">
+    <span>FPT University &mdash; MSE-AI Program</span>
+    <span>HarnessEval &mdash; Research Proposal</span>
+  </div>
+  <h2 class="chapter">1. Introduction</h2>
+
+  <h3 id="s1.1">1.1. Problem Statement</h3>
+
+  <p>Large Language Model (LLM)-based coding agents such as Claude Code, GitHub Copilot, Cursor, and SWE-Agent have become integral tools in modern software development. These agents autonomously read source code, fix bugs, generate features, and interact with file systems, terminals, and version control systems [1, 16].</p>
+
+  <p>However, the performance of a coding agent depends on two distinct factors: (1) the <strong>underlying LLM</strong> (e.g., Claude, GPT, DeepSeek) and (2) the <strong>harness</strong>&mdash;the infrastructure scaffold comprising the tool dispatch system, context management layer, and supporting components [1]. Lou et al. [2] demonstrated that the harness plays a critical role: a smaller model with a well-designed harness can outperform a larger model without one, eliminating 100% of illegal actions in constrained environments. Bui et al. [1] described the harness as an "operating system for the agent," featuring a multi-layer architecture including dual-agent design, Adaptive Context Compaction (ACC) that reduces token usage by 54%, and event-driven system reminders to combat instruction fade-out.</p>
+
+  <p><strong>The current paradox.</strong> The research community has developed numerous benchmarks for evaluating agent <em>output</em>&mdash;SWE-Bench Pro with 1,865 tasks [5], SWE-Compass with 2,000 instances across 10 languages [9], and PRDBench with agent-driven evaluation [8]. However, an analysis of 49 recent papers (2023&ndash;2026) reveals that <strong>no study systematically evaluates the harness itself</strong> [19]. When reporting "Agent A achieves 70% resolve rate," we do not know which harness component contributed to that result.</p>
+
+  <p><strong>Why this is a genuine research gap.</strong> A legitimate question is: why have the groups that develop harnesses (Princeton&mdash;SWE-Agent, Anthropic&mdash;Claude Code) not conducted this evaluation themselves? Three reasons explain this gap:</p>
+
+  <ol>
+    <li><strong>Different roles.</strong> They are <em>developers</em> with incentives to build new harnesses, not <em>evaluators</em> with incentives to compare systems&mdash;analogous to how automobile manufacturers build cars while independent organizations (Euro NCAP, IIHS) conduct safety evaluations.</li>
+    <li><strong>Rapid field growth.</strong> From 2023 to 2026, the number of coding agents grew from a handful to dozens. No group has paused to meta-evaluate because the field is in a construction race.</li>
+    <li><strong>Indirect evidence of need.</strong> Lou et al. [2] compared harnesses on game tasks; Robeyns et al. [4] self-improved a harness without measuring individual component contributions&mdash;demonstrating that the need exists but has not been formalized.</li>
+  </ol>
+
+  <p><strong>Research gap.</strong> There is no evaluation framework that enables: (a) measuring the quality of individual harness components, (b) decomposing the contributions of harness vs. LLM, and (c) comparing different harnesses across unified quality dimensions.</p>
+
+  <h3 id="s1.2">1.2. Research Purpose (Qualitative)</h3>
+
+  <p>This study aims to <strong>construct the first integrated evaluation framework</strong> for coding agent harness infrastructure, enabling the decomposition and quantification of individual harness component contributions to overall agent performance, independently of the underlying LLM capability.</p>
+
+  <h3 id="s1.3">1.3. Research Objectives (Quantitative)</h3>
+
+  <div class="ro">
+    <strong>RO1.</strong> Design a <strong>3-dimensional harness evaluation taxonomy</strong> (Tool Dispatch Efficiency, Context Utilization, Backend Portability) with 7 metrics total, validated by at least 5 domain experts (inter-rater agreement measured by Fleiss' &kappa; &ge; 0.6).
+  </div>
+  <div class="ro">
+    <strong>RO2.</strong> Fork and refactor SWE-Agent into a <strong>modular harness</strong> with swappable components (tool set, context strategy, model backend), ensuring resolve rate <strong>equivalent to baseline SWE-Agent</strong> (&plusmn;3% absolute) on 50 verification tasks.
+  </div>
+  <div class="ro">
+    <strong>RO3.</strong> Conduct a <strong>systematic ablation study</strong> on 150 tasks from SWE-Bench Verified with 27 conditions (3&times;3&times;3 full factorial: tool configurations &times; context strategies &times; LLM backends), including a pilot study (5 conditions &times; 20 tasks) prior to the full experiment. Report mean &plusmn; standard deviation from 3 runs for the 10 most critical conditions.
+  </div>
+  <div class="ro">
+    <strong>RO4.</strong> Decompose variance contributions of harness vs. LLM using <strong>three-way ANOVA</strong> (Tool &times; Context &times; Backend), with statistical significance at <em>p</em> &lt; 0.05 after Bonferroni correction. Include a <strong>Generalized Linear Mixed Model</strong> (GLMM) as a robustness check for binary outcomes.
+  </div>
+  <div class="ro">
+    <strong>RO5.</strong> Release an <strong>open-source evaluation toolkit</strong> on GitHub with documentation, examples, and CI/CD pipeline.
+  </div>
+
+  <h3 id="s1.4">1.4. Research Hypotheses</h3>
+
+  <div class="hyp"><strong>H1.</strong> The tool system has the <strong>largest effect size</strong> (Cohen's <em>d</em> &gt; 0.5) among the three harness components on resolve rate.</div>
+  <div class="hyp"><strong>H2.</strong> Context management has a <strong>medium effect size</strong> (Cohen's <em>d</em> = 0.3&ndash;0.5).</div>
+  <div class="hyp"><strong>H3.</strong> Harness configuration explains at least <strong>10% of resolve rate variance</strong> (&eta;&sup2; &ge; 0.10 in ANOVA), independent of LLM backend.</div>
+  <div class="hyp"><strong>H4.</strong> Resolve rate variance <strong>across LLM backends decreases</strong> when harness quality is higher (statistically significant interaction effect).</div>
+
+  <h3 id="s1.5">1.5. Scope and Delimitations</h3>
+
+  <p><strong>In scope:</strong></p>
+  <ul>
+    <li>Harness/scaffold infrastructure of LLM-based coding agents</li>
+    <li>Three harness components: tool system, context manager, model backend</li>
+    <li>150 tasks from SWE-Bench Verified (Python)</li>
+    <li>Three LLM backends: Claude Sonnet 4, GPT-4o, DeepSeek-V3</li>
+    <li>Base harness: SWE-Agent (forked and refactored)</li>
+  </ul>
+
+  <p><strong>Out of scope (future work):</strong></p>
+  <ul>
+    <li>Safety/security evaluation &rarr; separate study (SecureCodeBench)</li>
+    <li>Session continuity / long-horizon evaluation</li>
+    <li>Languages other than Python</li>
+    <li>Commercial harnesses (Claude Code, Cursor)</li>
+  </ul>
+
+  <h3 id="s1.6">1.6. Expected Thesis Structure</h3>
+
+  <ol>
+    <li><strong>Chapter 1:</strong> Introduction (problem, literature review, objectives, scope)</li>
+    <li><strong>Chapter 2:</strong> Theoretical Background (agent architecture, ablation methodology, ANOVA)</li>
+    <li><strong>Chapter 3:</strong> Research Methodology (taxonomy design, modular harness, ablation protocol)</li>
+    <li><strong>Chapter 4:</strong> Results and Discussion</li>
+    <li><strong>Chapter 5:</strong> Conclusion and Future Work</li>
+  </ol>
+</div>
+
+<!-- ==================== CHAPTER 2: LITERATURE REVIEW ==================== -->
+<div class="section" id="ch2">
+  <div class="header-bar">
+    <span>FPT University &mdash; MSE-AI Program</span>
+    <span>HarnessEval &mdash; Research Proposal</span>
+  </div>
+  <h2 class="chapter">2. Literature Review and Theoretical Background</h2>
+
+  <h3 id="s2.1">2.1. Literature Review</h3>
+
+  <p>This section reviews the five works most closely related to our study. Each addresses a subset of harness evaluation concerns but leaves critical gaps, which are summarized in Table 1.</p>
+
+  <h4 id="s2.1.1">2.1.1. Bui et al. (OpenDev) [1]: Harness Design Without Evaluation</h4>
+
+  <p>Bui et al. [1] provided the most detailed harness description to date: a terminal-native coding agent with dual-agent architecture (Planner-Executor), 5-stage Adaptive Context Compaction (ACC) reducing token usage by 54%, lazy tool discovery, and event-driven system reminders to combat instruction fade-out. The paper introduced the term "harness" as an analogy to an operating system for agents and described a four-layer architecture with safety sandboxing.</p>
+
+  <p><strong>What is present (&#9651; in C1, C2):</strong> The paper describes tool dispatch logic (which tools to expose, when to load them) and context management strategies (ACC stages, reminder injection). However, these descriptions are <em>qualitative design choices</em>, not quantitative evaluations&mdash;no metric measures how effective the tool dispatch is, nor how much information ACC retains after compaction.</p>
+
+  <p><strong>What is missing (_ in C3, C4, C5, C6):</strong> OpenDev was tested with a single LLM backend, so <em>cross-backend portability is unknown</em> (C3). No component was systematically removed to measure its individual contribution (C4). The paper reports overall resolve rate but does not decompose how much is attributable to the harness vs. the underlying LLM (C5). There is no multi-metric evaluation framework&mdash;only resolve rate (C6).</p>
+
+  <h4 id="s2.1.2">2.1.2. Lou et al. (AutoHarness) [2]: Ablation on Games, Not Coding</h4>
+
+  <p>Lou et al. [2] demonstrated that LLMs can automatically synthesize code harnesses through iterative refinement with environment feedback. Their key finding&mdash;that a smaller model with an auto-generated harness outperforms a larger model without one&mdash;provides strong evidence that harness quality matters independently of model size.</p>
+
+  <p><strong>What is present (&#9651; in C4):</strong> AutoHarness performs a form of ablation: comparing agent performance <em>with</em> vs. <em>without</em> a harness. This is the closest existing work to our ablation methodology. However, the evaluation is conducted on game environments (TextArena, 145 games), not on software engineering tasks, and the "ablation" is binary (harness present/absent) rather than systematic (varying individual components).</p>
+
+  <p><strong>What is missing (_ in C1, C2, C3, C5, C6):</strong> Tool dispatch and context management are not evaluated separately (C1, C2). Only one LLM backend is used per experiment (C3). There is no variance decomposition between harness and model (C5). No multi-metric framework is proposed (C6).</p>
+
+  <h4 id="s2.1.3">2.1.3. Qin et al. (ToolLLM) [12]: Tool Evaluation in Isolation</h4>
+
+  <p>Qin et al. [12] introduced ToolBench, a benchmark of 16,464 real-world REST APIs, and ToolLLaMA, a model fine-tuned to match ChatGPT-level tool-use performance. They proposed ToolEval with automatic metrics for tool selection and task completion.</p>
+
+  <p><strong>What is present (&#10003;<sup>&dagger;</sup> in C1):</strong> ToolLLM provides the most comprehensive tool evaluation to date, with metrics for API selection accuracy and multi-step tool planning via DFSDT (Depth-First Search-based Decision Tree). However, tools are evaluated <em>in isolation</em>&mdash;each API call is independent, with no interaction with context management, file systems, or coding-specific workflows. The benchmark tests whether an LLM can <em>call the right API</em>, not whether a <em>harness dispatches tools efficiently</em> within a multi-turn coding session.</p>
+
+  <p><strong>What is missing (_ in C2, C3, C4, C5, C6):</strong> Context management is not assessed (C2). The benchmark uses a fixed model, so portability is untested (C3). No ablation is performed on harness components (C4). Model vs. infrastructure contributions are not separated (C5). The evaluation is single-metric (pass rate) (C6).</p>
+
+  <h4 id="s2.1.4">2.1.4. Chhikara et al. (Mem0) [10]: Context Evaluation on Chatbots</h4>
+
+  <p>Chhikara et al. [10] introduced Mem0, a scalable memory architecture that dynamically extracts, consolidates, and retrieves information across conversations. It achieves 91% lower p95 latency and over 90% token cost savings compared to full-context approaches, with a graph-based variant (Mem0<sup>g</sup>) that captures entity relationships.</p>
+
+  <p><strong>What is present (&#10003;<sup>*</sup> in C2):</strong> Mem0 provides rigorous context/memory evaluation with metrics for retrieval accuracy, latency, and token efficiency. However, evaluation is conducted exclusively on the LoCoMo benchmark&mdash;a conversational QA dataset&mdash;not on coding tasks. In coding, "context" involves AST structures, file dependency graphs, test result histories, and multi-file relationships, which are structurally different from conversational memory.</p>
+
+  <p><strong>What is missing (_ in C1, C3, C4, C5, C6):</strong> Tool dispatch is not evaluated (C1). Only one backend is used (C3). No component ablation (C4). No harness vs. LLM decomposition (C5). Single-domain evaluation (chatbot), no multi-metric coding framework (C6).</p>
+
+  <h4 id="s2.1.5">2.1.5. Ma et al. (AgentBoard) [15]: Multi-Metric for Output, Not Harness</h4>
+
+  <p>Ma et al. [15] introduced AgentBoard, a benchmark with 9 diverse environments and 1,013 tasks. Its key contribution is the <em>progress rate</em> metric&mdash;a fine-grained measure of partial task completion that correlates with human judgment at Pearson &gt; 0.95. AgentBoard evaluates agents across multiple dimensions (web browsing, tool use, game playing, etc.).</p>
+
+  <p><strong>What is present (&#10003;<sup>&Dagger;</sup> in C6):</strong> AgentBoard is the most mature multi-metric evaluation framework. However, all metrics measure <em>agent output quality</em> (did the agent make progress toward the goal?), not <em>harness infrastructure quality</em> (did the harness dispatch tools efficiently? did it manage context well?). The framework evaluates what the agent <em>achieved</em>, not what the harness <em>provided</em>.</p>
+
+  <p><strong>What is missing (_ in C3, C4, C5):</strong> Agents are tested on a fixed scaffold, so cross-backend portability is not measured (C3). No scaffold component is varied (C4). There is no decomposition of scaffold vs. model contributions (C5).</p>
+
+  <h4 id="s2.1.6">2.1.6. Summary on Characteristics Investigated</h4>
+
+  <p>Table 1 consolidates the analysis above. Each "_" marks a characteristic that the corresponding paper does not address, representing a specific research gap. Every gap marked in the table has been discussed in Sections 2.1.1&ndash;2.1.5 above.</p>
+
+  <table class="char-table">
+    <caption>Table 1: Summary on Characteristics Investigated by Related Works. Each "_" denotes an unaddressed research gap discussed in the text.</caption>
+    <thead>
+      <tr>
+        <th style="text-align:left">Reference</th>
+        <th>C1<br><small>Tool Dispatch</small></th>
+        <th>C2<br><small>Context Eval</small></th>
+        <th>C3<br><small>Cross-Backend</small></th>
+        <th>C4<br><small>Comp. Ablation</small></th>
+        <th>C5<br><small>H/LLM Decomp.</small></th>
+        <th>C6<br><small>Multi-Metric</small></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="text-align:left">Bui [1] (OpenDev)</td><td>&#9651;</td><td>&#9651;</td><td>_</td><td>_</td><td>_</td><td>_</td></tr>
+      <tr><td style="text-align:left">Lou [2] (AutoHarness)</td><td>_</td><td>_</td><td>_</td><td>&#9651;</td><td>_</td><td>_</td></tr>
+      <tr><td style="text-align:left">Qin [12] (ToolLLM)</td><td>&#10003;<sup>&dagger;</sup></td><td>_</td><td>_</td><td>_</td><td>_</td><td>_</td></tr>
+      <tr><td style="text-align:left">Chhikara [10] (Mem0)</td><td>_</td><td>&#10003;<sup>*</sup></td><td>_</td><td>_</td><td>_</td><td>_</td></tr>
+      <tr><td style="text-align:left">Ma [15] (AgentBoard)</td><td>&#9651;</td><td>&#9651;</td><td>_</td><td>_</td><td>_</td><td>&#10003;<sup>&Dagger;</sup></td></tr>
+      <tr style="font-weight:bold;background:#e8f5e9"><td style="text-align:left"><strong>Ours (HarnessEval)</strong></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:.88em;color:#555;margin-top:5px">
+    &#10003; = Addressed &emsp; &#9651; = Partially &emsp; _ = Not addressed (research gap)<br>
+    <sup>&dagger;</sup> Evaluated in isolation on API benchmarks, not within a coding harness<br>
+    <sup>*</sup> Evaluated on chatbot benchmarks (LoCoMo), not on coding tasks<br>
+    <sup>&Dagger;</sup> Multi-metric for agent <em>output</em> quality, not for <em>harness infrastructure</em> quality
+  </p>
+
+  <p><strong>Reading the table.</strong> The table reveals two patterns that define our research gap:</p>
+
+  <ol>
+    <li><strong>Columns C3, C4, C5 are entirely "_" across all five papers.</strong> No prior work has (C3) compared the same harness across multiple LLM backends, (C4) systematically ablated harness components in coding tasks, or (C5) decomposed variance between harness and LLM contributions. These three unexplored characteristics form the <strong>primary contribution</strong> of HarnessEval.</li>
+    <li><strong>Columns C1 and C2 have partial coverage (&#9651; or qualified &#10003;) but never within a coding harness.</strong> ToolLLM evaluates tool accuracy on standalone APIs (&#10003;<sup>&dagger;</sup>), not tool dispatch within a multi-turn coding agent session. Mem0 evaluates context on chatbot conversations (&#10003;<sup>*</sup>), not on coding tasks involving AST structures and test histories. OpenDev and AgentBoard partially address these (&#9651;) but without formal metrics. HarnessEval <strong>bridges this gap</strong> by evaluating tool dispatch and context utilization <em>within</em> an integrated coding harness using formal, validated metrics (M1.1&ndash;M2.2).</li>
+  </ol>
+
+  <p><strong>In summary,</strong> existing works either (a) describe harness designs without evaluating them [1], (b) evaluate components in isolation outside the harness context [12, 10], (c) perform ablation on non-coding domains [2], or (d) provide multi-metric frameworks that measure output rather than infrastructure [15]. HarnessEval is the first to unify all six characteristics into a single evaluation framework for coding agent harnesses.</p>
+
+  <!-- ===== 2.2 Theoretical Background ===== -->
+  <h3 id="s2.2">2.2. Theoretical Background</h3>
+
+  <h4 id="s2.2.1">2.2.1. Harness Architecture: Five-Layer Model</h4>
+
+  <p>Based on [18] and [1], a coding agent harness comprises five layers:</p>
+
+  <div class="layer-model">
+    <div class="layer-box layer-future">Layer 5 &mdash; Orchestration: Agent loop (ReAct, Plan-Execute), multi-turn management <span style="float:right;font-size:.85em">(future work)</span></div>
+    <div class="layer-box layer-future">Layer 4 &mdash; Safety &amp; Permission: Sandboxing, permission model, input validation <span style="float:right;font-size:.85em">(future work)</span></div>
+    <div class="layer-box layer-eval">Layer 3 &mdash; Context &amp; Memory Management: Context window management, compaction, persistent memory <span style="float:right;font-size:.85em">EVALUATED (D2)</span></div>
+    <div class="layer-box layer-eval">Layer 2 &mdash; Tool System: Available tools (Read, Write, Edit, Bash, Grep, Glob, etc.) and dispatch logic <span style="float:right;font-size:.85em">EVALUATED (D1)</span></div>
+    <div class="layer-box layer-eval">Layer 1 &mdash; Model Backend: The underlying LLM (Claude, GPT, DeepSeek) <span style="float:right;font-size:.85em">EVALUATED (D3)</span></div>
+  </div>
+
+  <p>This study evaluates <strong>Layers 1&ndash;3</strong>. Layers 4&ndash;5 are designated as future work.</p>
+
+  <h4 id="s2.2.2">2.2.2. Ablation Studies in Software Engineering</h4>
+
+  <p>Ablation study is a standard methodology in machine learning: systematically removing or modifying components to measure their individual contributions. Applied to harness evaluation:</p>
+
+  <ul>
+    <li>Modify tool set (12 &rarr; 8 &rarr; 5 tools) &rarr; measure resolve rate change</li>
+    <li>Change context strategy (full &rarr; sliding window &rarr; summary) &rarr; measure resolve rate change</li>
+    <li>Switch LLM backend (Claude &rarr; GPT &rarr; DeepSeek) &rarr; measure portability</li>
+  </ul>
+
+  <p><strong>Confounding variables.</strong> When removing a tool, performance may decrease because (a) the agent lacks the capability, or (b) the harness dispatches poorly. To address this: we <em>reduce</em> tools gradually rather than removing entirely, and record which tasks <em>require</em> the removed tool to distinguish the two causes.</p>
+
+  <h4 id="s2.2.3">2.2.3. Defining "Independent of LLM" via Three-Way ANOVA</h4>
+
+  <p>"Independent of LLM" does <strong>not</strong> mean the harness and LLM do not interact. It means their contributions can be <strong>statistically decomposed</strong>.</p>
+
+  <p><strong>Method:</strong> Three-way ANOVA (following reviewer feedback to use 3-way rather than 2-way):</p>
+
+  <ul>
+    <li>Factor A: Tool Configuration (3 levels)</li>
+    <li>Factor B: Context Strategy (3 levels)</li>
+    <li>Factor C: LLM Backend (3 levels)</li>
+    <li>Dependent variable: Resolve rate</li>
+  </ul>
+
+  <div class="equation">
+    Total Variance = <em>V</em><sub>Tool</sub> + <em>V</em><sub>Context</sub> + <em>V</em><sub>Backend</sub> + <em>V</em><sub>T&times;B</sub> + <em>V</em><sub>C&times;B</sub> + <em>V</em><sub>T&times;C</sub> + <em>V</em><sub>T&times;C&times;B</sub> + <em>V</em><sub>Error</sub>
+    <span class="eq-label">(1)</span>
+    <br>
+    <small style="color:#555">
+      <span style="border-bottom:2px solid #2e7d32">&emsp;<em>V</em><sub>Tool</sub> + <em>V</em><sub>Context</sub>&emsp;</span> = Harness &emsp;&emsp;
+      <span style="border-bottom:2px solid #e65100">&emsp;<em>V</em><sub>T&times;B</sub> + <em>V</em><sub>C&times;B</sub>&emsp;</span> = Interactions
+    </small>
+  </div>
+
+  <p>If <em>V</em><sub>Tool</sub> and <em>V</em><sub>Context</sub> are statistically significant, the harness has an independent effect. The effect size &eta;&sup2; indicates the percentage of variance explained by each factor. This formalization is the <strong>primary theoretical contribution</strong> of this study.</p>
+
+  <p><strong>Robustness check:</strong> Since resolve rate per task is binary (0/1), ANOVA assumptions may be violated. A Generalized Linear Mixed Model (GLMM) with binary outcome and random effects for tasks will be used as a robustness check. Both ANOVA (for interpretability) and GLMM (for statistical correctness) will be reported.</p>
+</div>
+
+<!-- ==================== CHAPTER 3: METHODOLOGY ==================== -->
+<div class="section" id="ch3">
+  <div class="header-bar">
+    <span>FPT University &mdash; MSE-AI Program</span>
+    <span>HarnessEval &mdash; Research Proposal</span>
+  </div>
+  <h2 class="chapter">3. Research Methodology</h2>
+
+  <h3 id="s3.1">3.1. Overview</h3>
+
+  <p>This study employs an <strong>experimental methodology</strong> with four phases:</p>
+
+  <ol>
+    <li>Taxonomy design and expert validation</li>
+    <li>SWE-Agent fork and modular refactoring</li>
+    <li>Pilot study (5 conditions &times; 20 tasks)</li>
+    <li>Full ablation study (27 conditions &times; 150 tasks)</li>
+  </ol>
+
+  <h3 id="s3.2">3.2. Three-Dimensional Harness Evaluation Taxonomy (RO1)</h3>
+
+  <table>
+    <caption>Table 2: HarnessEval Taxonomy: 3 Dimensions, 7 Metrics</caption>
+    <thead>
+      <tr><th>Dim.</th><th>ID</th><th>Metric</th><th style="text-align:left">Formal Definition</th><th>Auto?</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="3"><strong>D1. Tool Dispatch</strong></td>
+        <td>M1.1</td><td>Correct Selection</td>
+        <td style="text-align:left">% calls selecting an acceptable tool (from set of valid options, not single ground-truth)</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>M1.2</td><td>Redundant Call Rate</td>
+        <td style="text-align:left">% calls whose output is unused within 3 subsequent turns</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>M1.3</td><td>Utilization Breadth</td>
+        <td style="text-align:left">Unique tool types used / total tools available</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>D2. Context Utilization</strong></td>
+        <td>M2.1</td><td>Info Retention</td>
+        <td style="text-align:left">BERTScore between full-context and compacted-context responses on same task</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>M2.2</td><td>Effective Token Ratio</td>
+        <td style="text-align:left">% tokens classified as task-relevant by LLM classifier (validated on 200 segments with human labels, acceptance threshold: accuracy &gt; 90%)</td>
+        <td>Semi</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>D3. Backend Portability</strong></td>
+        <td>M3.1</td><td>Cross-Backend StdDev</td>
+        <td style="text-align:left">&sigma;(resolve rates across 3 backends)</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>M3.2</td><td>Min/Max Ratio</td>
+        <td style="text-align:left">min(RR) / max(RR) across backends</td>
+        <td>Yes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Validation procedure:</strong> The taxonomy will be presented to 5 domain experts (at least 2 from industry, at least 2 from academia). Each expert independently rates 20 sample evaluations. Inter-rater agreement will be measured using Fleiss' &kappa;, with a target of &kappa; &ge; 0.6.</p>
+
+  <h3 id="s3.3">3.3. Modular Harness via SWE-Agent Fork (RO2)</h3>
+
+  <p>SWE-Agent is an open-source (MIT license) coding agent with approximately 15,000 LOC. We fork and refactor three modules:</p>
+
+  <ul>
+    <li><code>tool_config</code>: Swappable tool sets (12/8/5 tools) via configuration file</li>
+    <li><code>context_strategy</code>: Swappable strategies (full/sliding-window/summary) via configuration file</li>
+    <li><code>model_backend</code>: Swappable LLM backends (Claude/GPT/DeepSeek) via configuration file</li>
+  </ul>
+
+  <p><strong>Acceptance criteria:</strong> The modular harness must achieve resolve rate within &plusmn;3% absolute of baseline SWE-Agent on 50 verification tasks. The orchestration logic remains unchanged to ensure baseline quality.</p>
+
+  <p><strong>Estimated effort:</strong> 2&ndash;3 weeks (vs. 1&ndash;3 months if built from scratch).</p>
+
+  <h3 id="s3.4">3.4. Pilot Study (RO3, Phase 1)</h3>
+
+  <p>Prior to committing to the full experiment:</p>
+
+  <table>
+    <caption>Table 3: Pilot Study Design</caption>
+    <thead><tr><th>Parameter</th><th style="text-align:left">Value</th></tr></thead>
+    <tbody>
+      <tr><td>Conditions</td><td style="text-align:left">5 (Full, Reduced tools, No context mgmt, GPT backend, DeepSeek backend)</td></tr>
+      <tr><td>Tasks</td><td style="text-align:left">20 (randomly sampled from 150)</td></tr>
+      <tr><td>Runs per condition</td><td style="text-align:left">2 (for reproducibility estimate)</td></tr>
+      <tr><td>Total evaluations</td><td style="text-align:left">5 &times; 20 &times; 2 = 200</td></tr>
+      <tr><td>Estimated cost</td><td style="text-align:left">$50&ndash;80</td></tr>
+      <tr><td>Duration</td><td style="text-align:left">1&ndash;2 weeks</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Pilot objectives:</strong></p>
+  <ol>
+    <li>Validate that metrics discriminate between conditions</li>
+    <li>Estimate accurate cost for the full experiment</li>
+    <li>Debug the evaluation pipeline (Docker, API, logging)</li>
+    <li>Compute preliminary effect sizes to confirm power analysis</li>
+  </ol>
+
+  <h3 id="s3.5">3.5. Full Ablation Study (RO3, RO4, Phase 2)</h3>
+
+  <table>
+    <caption>Table 4: Full Factorial Experimental Design</caption>
+    <thead><tr><th>Factor</th><th>Levels</th><th style="text-align:left">Details</th></tr></thead>
+    <tbody>
+      <tr><td>Tool Configuration</td><td>3</td><td style="text-align:left">Full (12 tools) / Medium (8) / Minimal (5)</td></tr>
+      <tr><td>Context Strategy</td><td>3</td><td style="text-align:left">Full context / Sliding window (50K tokens) / Summary-based</td></tr>
+      <tr><td>LLM Backend</td><td>3</td><td style="text-align:left">Claude Sonnet 4 / GPT-4o / DeepSeek-V3</td></tr>
+      <tr style="font-weight:bold;background:#e8f5e9"><td>Total conditions</td><td>27</td><td style="text-align:left">3 &times; 3 &times; 3 full factorial</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Dataset:</strong> 150 tasks from SWE-Bench Verified, selected via stratified random sampling by difficulty (easy/medium/hard based on number of models that solved each task). Tasks with unstable Docker environments are excluded via pre-filtering.</p>
+
+  <p><strong>Runs:</strong></p>
+  <ul>
+    <li>10 most important conditions: 3 runs each (report mean &plusmn; std)</li>
+    <li>17 remaining conditions: 1 run each</li>
+    <li>Total: (10 &times; 3 + 17 &times; 1) &times; 150 = <strong>7,050 evaluations</strong></li>
+  </ul>
+
+  <p><strong>Statistical analysis (RO4):</strong></p>
+  <ul>
+    <li><strong>Three-way ANOVA:</strong> Tool (3) &times; Context (3) &times; Backend (3)</li>
+    <li>Report: <em>F</em>-statistic, <em>p</em>-value (Bonferroni-corrected), &eta;&sup2; (eta-squared)</li>
+    <li>Post-hoc: Tukey HSD for pairwise comparisons</li>
+    <li>Effect size: Cohen's <em>d</em> for each pairwise comparison</li>
+    <li><strong>Robustness check:</strong> GLMM with binary outcome (solved/not solved), random effects for tasks, fixed effects for Tool, Context, and Backend</li>
+    <li>Power analysis: with 150 tasks, 27 conditions, &alpha; = 0.05, power &ge; 0.80</li>
+  </ul>
+
+  <h3 id="s3.6">3.6. Threats to Validity</h3>
+
+  <h4 id="s3.6.1">3.6.1. Internal Validity</h4>
+  <ul>
+    <li><strong>Confounding:</strong> Reducing tools may change the problem, not just harness quality. <em>Mitigation:</em> Reduce tools gradually (12&rarr;8&rarr;5); record which tasks require removed tools; exclude those from component analysis.</li>
+    <li><strong>LLM non-determinism:</strong> Stochastic outputs introduce variance. <em>Mitigation:</em> Set temperature = 0; run 3 times for critical conditions; report confidence intervals.</li>
+    <li><strong>Docker instability:</strong> Some SWE-Bench environments are unstable. <em>Mitigation:</em> Pre-filter tasks; retry twice on failure.</li>
+    <li><strong>LLM versioning:</strong> Models may be updated during the study. <em>Mitigation:</em> Record exact model version/snapshot; run all experiments within a short time window.</li>
+  </ul>
+
+  <h4 id="s3.6.2">3.6.2. External Validity</h4>
+  <ul>
+    <li><strong>Python only:</strong> Tool systems for Python (pytest, pip) differ from Java (Maven, JUnit) or Rust (Cargo). Results require caution when generalizing.</li>
+    <li><strong>Open-source only:</strong> Commercial harnesses (Claude Code, Cursor) may exhibit different behavior.</li>
+    <li><strong>Survivor bias:</strong> Excluded tasks (Docker failures) may be harder tasks where harness matters more.</li>
+  </ul>
+
+  <h4 id="s3.6.3">3.6.3. Construct Validity</h4>
+  <ul>
+    <li><strong>M1.1</strong> depends on annotator judgment. <em>Mitigation:</em> 2 annotators, Fleiss' &kappa;.</li>
+    <li><strong>M2.2</strong> uses an LLM classifier. <em>Mitigation:</em> Validate on 200 segments with human labels; acceptance threshold: accuracy &gt; 90%.</li>
+    <li><strong>Statistical conclusion validity:</strong> Multiple testing across 7 metrics requires Bonferroni or Benjamini-Hochberg FDR correction.</li>
+  </ul>
+
+  <h3 id="s3.7">3.7. Risk Analysis</h3>
+
+  <table>
+    <caption>Table 5: Risk Assessment and Mitigation</caption>
+    <thead><tr><th style="text-align:left">Risk</th><th>Prob.</th><th>Impact</th><th style="text-align:left">Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left">Docker failures on many tasks</td><td>Medium</td><td>Reduced sample</td><td style="text-align:left">Pre-filter; backup tasks</td></tr>
+      <tr><td style="text-align:left">API costs exceed budget</td><td>High</td><td>Cannot complete</td><td style="text-align:left">Pilot estimates first; use DeepSeek (cheapest)</td></tr>
+      <tr><td style="text-align:left">Modular harness &gt;3% below SWE-Agent</td><td>Low</td><td>RO2 failure</td><td style="text-align:left">Minimal refactoring; keep original code</td></tr>
+      <tr><td style="text-align:left">Metrics do not discriminate</td><td>Medium</td><td>Taxonomy invalid</td><td style="text-align:left">Pilot detects early; revise metrics</td></tr>
+      <tr><td style="text-align:left">Experts unavailable for validation</td><td>Medium</td><td>RO1 delayed</td><td style="text-align:left">Online survey; increase expert pool</td></tr>
+      <tr><td style="text-align:left">DeepSeek API instability</td><td>Low</td><td>Lose 1 backend</td><td style="text-align:left">Backup: Qwen-2.5-72B or Llama-3.1-70B</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== CHAPTER 4: EXPECTED RESULTS ==================== -->
+<div class="section" id="ch4">
+  <div class="header-bar">
+    <span>FPT University &mdash; MSE-AI Program</span>
+    <span>HarnessEval &mdash; Research Proposal</span>
+  </div>
+  <h2 class="chapter">4. Expected Results</h2>
+
+  <h3 id="s4.1">4.1. Expected Outcomes per Objective</h3>
+
+  <p><strong>RO1 &mdash; Taxonomy:</strong> A validated 3-dimensional, 7-metric taxonomy with Fleiss' &kappa; &ge; 0.6.</p>
+
+  <p><strong>RO2 &mdash; Modular Harness:</strong> A fork of SWE-Agent with modular components, resolve rate within &plusmn;3% of baseline.</p>
+
+  <p><strong>RO3 &mdash; Ablation Study:</strong> Empirical results answering:</p>
+  <ul>
+    <li>Which component contributes most to resolve rate? (<strong>H1</strong>: Tool system has largest effect)</li>
+    <li>How does context management affect performance? (<strong>H2</strong>: Medium effect size)</li>
+    <li>What percentage of variance does harness explain? (<strong>H3</strong>: &eta;&sup2; &ge; 0.10)</li>
+    <li>Does a better harness reduce cross-backend variance? (<strong>H4</strong>: Significant interaction)</li>
+  </ul>
+
+  <p>Whether hypotheses are supported or rejected, both outcomes constitute scientific contributions.</p>
+
+  <p><strong>RO4 &mdash; ANOVA Decomposition:</strong> Variance decomposition table showing harness vs. LLM contributions.</p>
+
+  <p><strong>RO5 &mdash; Toolkit:</strong> Open-source Python package on GitHub with documentation and CI/CD.</p>
+
+  <h3 id="s4.2">4.2. Scientific Significance</h3>
+  <ul>
+    <li><strong>Theoretical:</strong> Formalization of harness quality decomposition via ANOVA (first in this domain)</li>
+    <li><strong>Empirical:</strong> First quantification of individual harness component contributions</li>
+    <li><strong>Methodological:</strong> Reusable evaluation framework and toolkit</li>
+  </ul>
+
+  <h3 id="s4.3">4.3. Practical Significance</h3>
+  <ul>
+    <li><strong>Developers:</strong> Know which harness component to prioritize for improvement</li>
+    <li><strong>Researchers:</strong> Standardized framework for comparing new harnesses</li>
+    <li><strong>Industry:</strong> Evidence-based guidelines for harness design</li>
+  </ul>
+
+  <h3 id="s4.4">4.4. Publication Targets</h3>
+
+  <table>
+    <caption>Table 6: Target Publication Venues</caption>
+    <thead><tr><th style="text-align:left">Venue</th><th>Type</th><th style="text-align:left">Fit</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left">ICSE 2027 NIER</td><td>Conference (New Ideas)</td><td style="text-align:left">Strong &mdash; coding agent + evaluation</td></tr>
+      <tr><td style="text-align:left">MSR 2027</td><td>Conference</td><td style="text-align:left">Good &mdash; mining SE data</td></tr>
+      <tr><td style="text-align:left">LLM Agents Workshop</td><td>Workshop (NeurIPS/ICML)</td><td style="text-align:left">Good &mdash; agent evaluation</td></tr>
+      <tr><td style="text-align:left">EMNLP Demo Track</td><td>Conference</td><td style="text-align:left">Good &mdash; toolkit demonstration</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== CHAPTER 5: TIMELINE & BUDGET ==================== -->
+<div class="section" id="ch5">
+  <div class="header-bar">
+    <span>FPT University &mdash; MSE-AI Program</span>
+    <span>HarnessEval &mdash; Research Proposal</span>
+  </div>
+  <h2 class="chapter">5. Timeline and Budget</h2>
+
+  <h3 id="s5.1">5.1. Timeline</h3>
+
+  <table>
+    <caption>Table 7: Research Timeline (24 Weeks)</caption>
+    <thead><tr><th>Phase</th><th>Weeks</th><th style="text-align:left">Activities</th><th style="text-align:left">Deliverable</th></tr></thead>
+    <tbody>
+      <tr><td>GD1</td><td>1&ndash;6</td><td style="text-align:left">Taxonomy design + expert validation (5 experts, Fleiss' &kappa;)</td><td style="text-align:left">Taxonomy v1.0</td></tr>
+      <tr><td>GD2</td><td>7&ndash;9</td><td style="text-align:left">Fork SWE-Agent + modular refactoring + verify &plusmn;3%</td><td style="text-align:left">Modular harness v1.0</td></tr>
+      <tr><td>Pilot</td><td>10&ndash;11</td><td style="text-align:left">Pilot study (200 evaluations)</td><td style="text-align:left">Pilot report</td></tr>
+      <tr><td>GD3</td><td>12&ndash;18</td><td style="text-align:left">Full ablation (7,050 evaluations)</td><td style="text-align:left">Raw data, ANOVA</td></tr>
+      <tr><td>GD4</td><td>19&ndash;22</td><td style="text-align:left">Analysis + guidelines + thesis writing</td><td style="text-align:left">Thesis draft</td></tr>
+      <tr><td>GD5</td><td>23&ndash;24</td><td style="text-align:left">Review, revision, toolkit release</td><td style="text-align:left">Final thesis, GitHub</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Visual Timeline Bar -->
+  <div style="display:flex;gap:3px;margin:20px 0;flex-wrap:wrap">
+    <div style="flex:6;min-width:80px;padding:10px 8px;text-align:center;border-radius:8px;font-size:.8em;font-weight:bold;color:#fff;background:#1565c0">GD1<br>W1&ndash;6</div>
+    <div style="flex:3;min-width:80px;padding:10px 8px;text-align:center;border-radius:8px;font-size:.8em;font-weight:bold;color:#fff;background:#2e7d32">GD2<br>W7&ndash;9</div>
+    <div style="flex:2;min-width:80px;padding:10px 8px;text-align:center;border-radius:8px;font-size:.8em;font-weight:bold;color:#fff;background:#e65100">Pilot<br>W10&ndash;11</div>
+    <div style="flex:7;min-width:80px;padding:10px 8px;text-align:center;border-radius:8px;font-size:.8em;font-weight:bold;color:#fff;background:#c62828">GD3<br>W12&ndash;18</div>
+    <div style="flex:4;min-width:80px;padding:10px 8px;text-align:center;border-radius:8px;font-size:.8em;font-weight:bold;color:#fff;background:#6a1b9a">GD4<br>W19&ndash;22</div>
+    <div style="flex:2;min-width:80px;padding:10px 8px;text-align:center;border-radius:8px;font-size:.8em;font-weight:bold;color:#fff;background:#333">GD5<br>W23&ndash;24</div>
+  </div>
+
+  <h3 id="s5.2">5.2. Budget</h3>
+
+  <table>
+    <caption>Table 8: Budget Estimate</caption>
+    <thead><tr><th style="text-align:left">Item</th><th style="text-align:left">Calculation</th><th>Cost (USD)</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left">Pilot study</td><td style="text-align:left">200 evals &times; $0.27 + retries</td><td>$80</td></tr>
+      <tr><td style="text-align:left">Full experiment</td><td style="text-align:left">7,050 evals &times; $0.27 + 30% retries</td><td>$2,500</td></tr>
+      <tr><td style="text-align:left">Contingency (20%)</td><td style="text-align:left">&mdash;</td><td>$500</td></tr>
+      <tr style="font-weight:bold;background:#e8f5e9"><td style="text-align:left"><strong>Total</strong></td><td style="text-align:left">&mdash;</td><td><strong>$2,500&ndash;3,100</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== REFERENCES ==================== -->
+<div class="section" id="refs">
+  <div class="header-bar">
+    <span>FPT University &mdash; MSE-AI Program</span>
+    <span>HarnessEval &mdash; Research Proposal</span>
+  </div>
+  <h2 class="chapter">References</h2>
+
+  <ol class="ref-list" style="list-style:none;counter-reset:ref">
+    <li>[1] N. D. Q. Bui et al., "Building Effective AI Coding Agents for the Terminal: Scaffolding, Harness, Context Engineering, and Lessons Learned," <em>arXiv:2603.05344</em>, 2026.</li>
+    <li>[2] X. Lou et al., "AutoHarness: Improving LLM Agents by Automatically Synthesizing a Code Harness," <em>arXiv:2603.03329</em>, 2026.</li>
+    <li>[3] W. Cao et al., "Coding Agents are Effective Long-Context Processors," <em>arXiv:2603.20432</em>, 2026.</li>
+    <li>[4] M. Robeyns et al., "A Self-Improving Coding Agent," <em>arXiv:2504.15228</em>, 2025.</li>
+    <li>[5] X. Deng et al., "SWE-Bench Pro: Can AI Agents Solve Long-Horizon Software Engineering Tasks?" <em>arXiv:2509.16941</em>, 2025.</li>
+    <li>[6] M. V. T. Thai et al., "SWE-EVO: Benchmarking Coding Agents in Long-Horizon Software Evolution Scenarios," <em>arXiv:2512.18470</em>, 2025.</li>
+    <li>[7] T. Prathifkumar et al., "Does SWE-Bench-Verified Test Agent Ability or Model Memory?" <em>arXiv:2512.10218</em>, 2025.</li>
+    <li>[8] L. Fu et al., "Automatically Benchmarking LLM Code Agents through Agent-Driven Annotation and Evaluation," <em>arXiv:2510.24358</em>, 2025.</li>
+    <li>[9] J. Xu et al., "SWE-Compass: Towards Unified Evaluation of Agentic Coding Abilities for Large Language Models," <em>arXiv:2511.05459</em>, 2025.</li>
+    <li>[10] P. Chhikara et al., "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory," <em>arXiv:2504.19413</em>, 2025.</li>
+    <li>[11] W. Xu et al., "A-MEM: Agentic Memory for LLM Agents," <em>arXiv:2502.12110</em>, 2025.</li>
+    <li>[12] Y. Qin et al., "ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs," <em>arXiv:2307.16789</em>, ICLR 2024.</li>
+    <li>[13] Y. Du et al., "AnyTool: Self-Reflective, Hierarchical Agents for Large-Scale API Use," <em>arXiv:2402.04253</em>, ACL 2024.</li>
+    <li>[14] S. Yuan et al., "EASYTOOL: Enhancing LLM-based Agents with Concise Tool Instruction," <em>arXiv:2401.06201</em>, ACL Findings 2024.</li>
+    <li>[15] C. Ma et al., "AgentBoard: An Analytical Evaluation Board of Multi-Turn LLM Agents," <em>arXiv:2401.13178</em>, NeurIPS 2024.</li>
+    <li>[16] "AI Agentic Programming Survey," <em>arXiv:2508.11126</em>, 2025.</li>
+    <li>[17] J. Wang et al., "Illuminating LLM Coding Agents: Visual Analytics for Deeper Understanding and Enhancement," <em>arXiv:2508.12555</em>, IEEE TVCG 2025.</li>
+    <li>[18] L. Wang et al., "A Survey on Large Language Model based Autonomous Agents," <em>arXiv:2308.11432</em>, Frontiers of Computer Science 2025.</li>
+    <li>[19] "Survey on Evaluation of LLM-based Agents," <em>arXiv:2503.16416</em>, 2025.</li>
+  </ol>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center;padding:30px 0;color:#aaa;font-size:.85em">
+  HarnessEval Research Proposal &mdash; FPT University MSE-AI Program &mdash; April 2026
+</div>
+
+</div>
+</body>
+</html>

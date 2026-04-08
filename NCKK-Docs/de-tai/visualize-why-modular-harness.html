@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tai sao can Modular Harness? — Architecture Visualization</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --surface3: #2e3345;
+    --border: #363c4e;
+    --text: #e4e8f1;
+    --text-dim: #8891a8;
+    --red: #ff6b6b;
+    --red-dim: #5c2a2a;
+    --green: #51cf66;
+    --green-dim: #1e3a24;
+    --blue: #74b9ff;
+    --blue-dim: #1a2d4a;
+    --orange: #ffa94d;
+    --orange-dim: #3d2e1a;
+    --purple: #cc5de8;
+    --purple-dim: #2d1a3a;
+    --cyan: #22b8cf;
+    --cyan-dim: #0d2f36;
+    --yellow: #ffd43b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── Header ── */
+  .hero {
+    background: linear-gradient(135deg, #141825 0%, #1a1028 50%, #141825 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  .hero p { color: var(--text-dim); font-size: 1rem; max-width: 700px; margin: 0 auto; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+  /* ── Section headers ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0 1.5rem;
+  }
+  .section-num {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.3rem; color: white;
+    flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.5rem; color: var(--text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 1rem 0;
+  }
+  .card-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.8rem;
+  }
+  .card-label.red { color: var(--red); }
+  .card-label.green { color: var(--green); }
+  .card-label.blue { color: var(--blue); }
+  .card-label.orange { color: var(--orange); }
+  .card-label.purple { color: var(--purple); }
+
+  /* ── Comparison grid ── */
+  .vs-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    margin: 1.5rem 0;
+    align-items: stretch;
+  }
+  .vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--yellow);
+  }
+  .vs-left {
+    background: linear-gradient(135deg, var(--red-dim), var(--surface));
+    border: 2px solid var(--red);
+    border-radius: 16px 0 0 16px;
+    padding: 1.5rem;
+  }
+  .vs-right {
+    background: linear-gradient(135deg, var(--surface), var(--green-dim));
+    border: 2px solid var(--green);
+    border-radius: 0 16px 16px 0;
+    padding: 1.5rem;
+  }
+  .vs-left h3 { color: var(--red); margin-bottom: 0.8rem; font-size: 1rem; }
+  .vs-right h3 { color: var(--green); margin-bottom: 0.8rem; font-size: 1rem; }
+
+  @media (max-width: 800px) {
+    .vs-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+    .vs-left { border-radius: 16px; }
+    .vs-right { border-radius: 16px; }
+    .vs-divider { padding: 0.5rem; }
+  }
+
+  /* ── Pre/Code ── */
+  pre {
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  code {
+    background: var(--surface2);
+    color: var(--cyan);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', monospace;
+    font-size: 0.85rem;
+  }
+
+  /* ── Diagram blocks ── */
+  .diagram {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+
+  /* ── Analogy banner ── */
+  .analogy {
+    background: linear-gradient(135deg, var(--orange-dim), var(--surface));
+    border: 2px solid var(--orange);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+  }
+  .analogy .label {
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Insight banner ── */
+  .insight {
+    background: linear-gradient(135deg, var(--green-dim), var(--surface));
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+  }
+  .insight .label {
+    color: var(--green);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Danger banner ── */
+  .danger {
+    background: linear-gradient(135deg, var(--red-dim), var(--surface));
+    border: 2px solid var(--red);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+  }
+  .danger .label {
+    color: var(--red);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  th { background: var(--surface2); color: var(--blue); font-weight: 600; }
+
+  /* ── Numbered steps ── */
+  .steps { counter-reset: step; }
+  .step {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+    counter-increment: step;
+  }
+  .step::before {
+    content: counter(step);
+    width: 42px; height: 42px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem;
+    color: var(--blue);
+  }
+
+  ul { padding-left: 1.5rem; }
+  li { margin: 0.3rem 0; }
+  strong { color: var(--text); }
+
+  /* ── Flow arrow connector ── */
+  .flow-down {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--text-dim);
+    line-height: 1;
+    margin: 0.5rem 0;
+  }
+
+  /* ── 3-col grid ── */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  @media (max-width: 800px) {
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+  .grid-3 .card { margin: 0; }
+
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .tag.green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+  .tag.orange { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange); }
+  .tag.purple { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+  .tag.red { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+  .tag.blue { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="hero">
+  <h1>Tai sao can Modular Harness?</h1>
+  <p>Tu van de cua SWE-Agent goc → Ky thuat tach module → Tai sao day la DIEU KIEN TIEN QUYET cho nghien cuu</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 1 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">1</div>
+  <h2>Van de: SWE-Agent goc la "khoi bet-tong"</h2>
+</div>
+
+<div class="analogy">
+  <div class="label">Phep an du</div>
+  <strong>SWE-Agent goc giong nhu 1 chiec xe hoi nguyen khoi.</strong><br>
+  Ban muon biet: "Dong co dong gop bao nhieu % vao toc do? Lop dong gop bao nhieu %?"<br>
+  Nhung dong co, hop so, lop deu HAN CUNG — khong the thao ra doi rieng tung mon.
+</div>
+
+<div class="card">
+<pre style="color: var(--text);">
+<span style="color: var(--red); font-weight: bold;">SWE-AGENT GOC — MONOLITHIC</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │   config.yaml  (MOT FILE DUY NHAT)                                      │
+  │   ┌────────────────────────────────────────────────────────────────┐     │
+  │   │                                                                │     │
+  │   │   model: "gpt-4o"                    ← Backend dinh cung      │     │
+  │   │   tools: [bash, edit, read, ...]     ← Tools dinh cung        │     │
+  │   │   max_context: 100000               ← Context dinh cung       │     │
+  │   │   prompt_template: "..."            ← Tat ca trong 1 file     │     │
+  │   │   safety_settings: ...                                         │     │
+  │   │   orchestration: ...                                           │     │
+  │   │                                                                │     │
+  │   └────────────────────────────────────────────────────────────────┘     │
+  │                                                                          │
+  │   swe_agent/                                                             │
+  │   ├── agent.py         ← Tool logic + Context logic + LLM call          │
+  │   │                       <span style="color: var(--red);">TRON LAN trong cung 1 class</span>                │
+  │   ├── tools.py         ← Hardcode danh sach tools                       │
+  │   ├── environment.py   ← Docker + execution                             │
+  │   └── models.py        ← API calls (nhung PHU THUOC vao agent.py)      │
+  │                                                                          │
+  │   <span style="color: var(--red); font-weight: bold;">VAN DE:</span>                                                              │
+  │   • Muon doi tools? → Phai sua agent.py (co the hong context logic)     │
+  │   • Muon doi context? → Phai sua agent.py (co the hong tool logic)      │
+  │   • Muon doi LLM? → Phai sua models.py + agent.py + config.yaml         │
+  │   • Moi thay doi → KHONG BIET co anh huong gi khac khong                │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<div class="danger">
+  <div class="label">Hau qua khi dung monolithic cho nghien cuu</div>
+  Khi ban sua code de "doi tool set tu 12 → 8", ban co the <strong>vo tinh</strong>:
+  <ul>
+    <li>Thay doi cach prompt duoc tao (vi prompt liet ke tools)</li>
+    <li>Lam hong error handling (vi 1 tool bi tat nhung code van reference no)</li>
+    <li>Doi thu tu xu ly (vi if/else chain thay doi)</li>
+  </ul>
+  → Performance thay doi, nhung <strong>khong biet vi tool hay vi code bi hong</strong><br>
+  → Ket qua thuc nghiem <strong>vo gia tri</strong>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 2 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">2</div>
+  <h2>Giai phap: Tach thanh 3 module hoan doi</h2>
+</div>
+
+<div class="analogy">
+  <div class="label">Phep an du</div>
+  <strong>Modular harness giong nhu dan am thanh voi 3 o cam doc lap.</strong><br>
+  O cam 1: Micro (tool set) — cam bat ky micro nao vao<br>
+  O cam 2: Mixer (context strategy) — cam bat ky mixer nao vao<br>
+  O cam 3: Loa (LLM backend) — cam bat ky loa nao vao<br>
+  Doi micro KHONG anh huong gi den loa. Do am thanh → biet micro dong gop bao nhieu.
+</div>
+
+<div class="card">
+<pre style="color: var(--text);">
+<span style="color: var(--green); font-weight: bold;">MODULAR HARNESS — SAU KHI FORK</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │   <span style="color: var(--yellow); font-weight: bold;">3 FILE YAML RIENG BIET — hoan doi doc lap</span>                              │
+  │                                                                          │
+  │   ┌─────────────────────┐  ┌─────────────────────┐  ┌────────────────┐  │
+  │   │<span style="color: var(--green);"> tool_full.yaml</span>       │  │<span style="color: var(--orange);"> ctx_sliding.yaml</span>    │  │<span style="color: var(--purple);"> be_claude.yaml</span>│  │
+  │   │                     │  │                     │  │                │  │
+  │   │ tools:              │  │ strategy: sliding   │  │ model: claude  │  │
+  │   │   - bash            │  │ window_size: 50000  │  │ temp: 0.0      │  │
+  │   │   - python          │  │                     │  │ provider:      │  │
+  │   │   - read            │  │  <span style="color: var(--orange);">↕ SWAP</span>              │  │  anthropic     │  │
+  │   │   - write           │  │                     │  │                │  │
+  │   │   - edit            │  │ ctx_full.yaml       │  │ <span style="color: var(--purple);">↕ SWAP</span>         │  │
+  │   │   - glob            │  │ ctx_summary.yaml    │  │                │  │
+  │   │   - grep            │  │                     │  │ be_gpt.yaml    │  │
+  │   │   - find            │  └─────────────────────┘  │ be_deepseek    │  │
+  │   │   - git_diff        │                           │  .yaml         │  │
+  │   │   - git_log         │                           └────────────────┘  │
+  │   │   - git_show        │                                               │
+  │   │   - test_runner     │                                               │
+  │   │                     │                                               │
+  │   │  <span style="color: var(--green);">↕ SWAP</span>              │                                               │
+  │   │                     │                                               │
+  │   │ tool_medium.yaml    │                                               │
+  │   │ tool_minimal.yaml   │                                               │
+  │   └─────────────────────┘                                               │
+  │                                                                          │
+  │   <span style="color: var(--cyan); font-weight: bold;">COMPOSE:</span> base.yaml + tool_*.yaml + ctx_*.yaml + be_*.yaml                │
+  │   → SWE-Agent doc config gop → hanh vi thay doi tuong ung                │
+  │   → <span style="color: var(--green);">CORE CODE KHONG BI SUA — chi config thay doi</span>                       │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 3 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">3</div>
+  <h2>Kien truc chi tiet: 3 tang + Interface + Factory</h2>
+</div>
+
+<div class="card">
+<pre style="color: var(--text);">
+<span style="color: var(--blue); font-weight: bold;">KIEN TRUC 3 TANG VOI STRATEGY PATTERN</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │   <span style="color: var(--yellow); font-weight: bold;">FACTORY</span>  (harness/factory.py)                                          │
+  │   ┌────────────────────────────────────────────────────────────────┐     │
+  │   │                                                                │     │
+  │   │  create_harness_config("full", "sliding_window", "claude")     │     │
+  │   │                                                                │     │
+  │   │  → Doc string "full"    → tra ve FullToolProvider              │     │
+  │   │  → Doc string "sliding" → tra ve SlidingWindowContextProvider  │     │
+  │   │  → Doc string "claude"  → tra ve ClaudeBackendProvider         │     │
+  │   │                                                                │     │
+  │   │  → Gop 3 providers thanh 1 HarnessConfig                      │     │
+  │   │                                                                │     │
+  │   └────────────────────────────────────────────────────────────────┘     │
+  │                          │                                               │
+  │                          │ tao ra                                         │
+  │                          ▼                                               │
+  │   <span style="color: var(--yellow); font-weight: bold;">HARNESS CONFIG</span>                                                        │
+  │   ┌────────────────────────────────────────────────────────────────┐     │
+  │   │  HarnessConfig {                                               │     │
+  │   │    tool:    ToolProvider           ← interface (o cam #1)      │     │
+  │   │    context: ContextStrategyProvider ← interface (o cam #2)     │     │
+  │   │    backend: LLMBackendProvider     ← interface (o cam #3)     │     │
+  │   │  }                                                             │     │
+  │   └──────┬────────────────────┬───────────────────┬────────────────┘     │
+  │          │                    │                   │                      │
+  │          ▼                    ▼                   ▼                      │
+  │  ┌───────────────┐  ┌─────────────────┐  ┌──────────────────┐          │
+  │  │<span style="color: var(--green);"> TANG 1: TOOL  </span>│  │<span style="color: var(--orange);"> TANG 2: CONTEXT </span>│  │<span style="color: var(--purple);"> TANG 3: BACKEND </span>│          │
+  │  │               │  │                 │  │                  │          │
+  │  │ Interface:    │  │ Interface:      │  │ Interface:       │          │
+  │  │<span style="color: var(--cyan);"> ToolProvider</span>  │  │<span style="color: var(--cyan);"> ContextStrategy</span>│  │<span style="color: var(--cyan);"> LLMBackend</span>      │          │
+  │  │  .get_tools() │  │  Provider       │  │  Provider        │          │
+  │  │  .get_level() │  │  .get_strategy()│  │  .get_backend()  │          │
+  │  │  .get_config()│  │  .get_tokens()  │  │  .get_model_id() │          │
+  │  │               │  │  .get_config()  │  │  .get_config()   │          │
+  │  ├───────────────┤  ├─────────────────┤  ├──────────────────┤          │
+  │  │ Cac "phich":  │  │ Cac "phich":    │  │ Cac "phich":     │          │
+  │  │               │  │                 │  │                  │          │
+  │  │ <span style="color: var(--green);">●</span> Full (12)   │  │ <span style="color: var(--orange);">●</span> Full          │  │ <span style="color: var(--purple);">●</span> Claude        │          │
+  │  │ <span style="color: var(--green);">●</span> Medium (8)  │  │ <span style="color: var(--orange);">●</span> Sliding (50K) │  │ <span style="color: var(--purple);">●</span> GPT-4o        │          │
+  │  │ <span style="color: var(--green);">●</span> Minimal (5) │  │ <span style="color: var(--orange);">●</span> Summary (2K)  │  │ <span style="color: var(--purple);">●</span> DeepSeek      │          │
+  │  └───────────────┘  └─────────────────┘  └──────────────────┘          │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+
+  <span style="color: var(--cyan); font-weight: bold;">DESIGN PATTERNS SU DUNG:</span>
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │                                                                        │
+  │  <span style="color: var(--green);">1. STRATEGY PATTERN</span>                                                   │
+  │     Moi tang co 1 Interface (ABC) va nhieu Implementation              │
+  │     Giong: o cam + nhieu phich khac nhau                               │
+  │     → Doi "phich" (implementation) ma KHONG sua "o cam" (interface)    │
+  │                                                                        │
+  │  <span style="color: var(--orange);">2. DEPENDENCY INJECTION</span>                                               │
+  │     HarnessConfig KHONG tu tao providers                               │
+  │     Factory TAO providers roi TIEM (inject) vao HarnessConfig          │
+  │     → HarnessConfig khong biet cung khong CAN biet                     │
+  │       dang dung Full hay Minimal tools                                 │
+  │                                                                        │
+  │  <span style="color: var(--purple);">3. FACTORY PATTERN</span>                                                    │
+  │     create_harness_config("full", "sliding_window", "claude")          │
+  │     → Doc string, tra ve dung class — nguoi dung chi can biet TEN     │
+  │     → Generate tat ca 27 to hop: generate_all_configs()                │
+  │                                                                        │
+  └────────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 4 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">4</div>
+  <h2>So sanh truc tiep: Doi 1 bien voi Monolithic vs. Modular</h2>
+</div>
+
+<p style="color: var(--text-dim); margin-bottom: 1rem;">
+  Gia su ban muon doi tool set tu Full(12) → Minimal(5), giu nguyen context va backend.
+  Day la qua trinh voi tung loai kien truc:
+</p>
+
+<div class="vs-grid">
+  <div class="vs-left">
+    <h3>MONOLITHIC (SWE-Agent goc)</h3>
+<pre style="color: var(--text); font-size: 0.78rem;">
+<span style="color: var(--red);">Buoc 1:</span> Mo config.yaml
+  Sua tools: [bash, ..., test_runner]
+  → Xoa 7 tools thu cong
+
+<span style="color: var(--red);">Buoc 2:</span> Mo agent.py
+  Tim tat ca cho tham chieu tools da xoa
+  Vi du: if "git_log" in tools: ...
+  → Comment out? Xoa? Doi logic?
+  <span style="color: var(--red);">→ CO THE HONG LOGIC KHAC</span>
+
+<span style="color: var(--red);">Buoc 3:</span> Mo prompt_template
+  Prompt liet ke 12 tools cho LLM
+  → Phai sua prompt (xoa 7 tools)
+  <span style="color: var(--red);">→ PROMPT THAY DOI = BIEN KHAC
+     THAY DOI (khong chi tool set)</span>
+
+<span style="color: var(--red);">Buoc 4:</span> Chay test → co the FAIL
+  Vi code van reference tools da xoa
+  → Phai sua them code
+  <span style="color: var(--red);">→ SUA THEM = THEM BIEN THAY DOI</span>
+
+<span style="color: var(--red);">Buoc 5:</span> Lam lai buoc 1-4
+  cho MOI to hop khac
+  → 27 lan × 4 buoc = 108 lan sua code
+  <span style="color: var(--red);">→ 108 co hoi gay bug</span>
+
+<span style="color: var(--yellow); font-weight: bold;">TONG:</span>
+  Thay doi: tool set + code logic
+           + prompt + error handling
+  So bien thay doi: <span style="color: var(--red);">4+ (khong kiem soat)</span>
+  Ket qua: KHONG TIN DUOC
+</pre>
+  </div>
+
+  <div class="vs-divider">VS</div>
+
+  <div class="vs-right">
+    <h3>MODULAR (Harness fork)</h3>
+<pre style="color: var(--text); font-size: 0.78rem;">
+<span style="color: var(--green);">Buoc 1:</span> Doi 1 dong trong YAML:
+
+  <span style="color: var(--text-dim);"># truoc:</span>
+  tool_provider: "full"
+
+  <span style="color: var(--text-dim);"># sau:</span>
+  tool_provider: <span style="color: var(--green);">"minimal"</span>
+
+  <span style="color: var(--green);">→ XONG. Chi 1 dong.</span>
+
+
+
+
+<span style="color: var(--green);">He thong tu dong:</span>
+  Factory doc "minimal"
+  → Tao MinimalToolProvider
+  → Provider tra ve 5 tools
+  → SWE-Agent chi thay 5 tools
+  → Prompt TU DONG chi liet ke 5 tools
+  → <span style="color: var(--green);">CODE KHONG BI SUA</span>
+
+
+
+
+<span style="color: var(--green);">27 to hop?</span>
+  generate_all_configs()
+  → 27 HarnessConfig objects
+  → 27 YAML files tu dong
+  <span style="color: var(--green);">→ 0 lan sua code</span>
+
+
+
+<span style="color: var(--yellow); font-weight: bold;">TONG:</span>
+  Thay doi: CHI tool set
+  Moi thu khac: GIONG HET
+  So bien thay doi: <span style="color: var(--green);">DUNG 1</span>
+  Ket qua: TIN DUOC
+</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 5 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">5</div>
+  <h2>Nguyen ly khoa hoc: "Controlled Experiment"</h2>
+</div>
+
+<div class="card">
+<pre style="color: var(--text);">
+<span style="color: var(--blue); font-weight: bold;">NGUYEN LY: THAY DOI 1 BIEN, GIU NGUYEN TAT CA BIEN KHAC</span>
+
+  Day la nguyen tac CO BAN nhat cua thuc nghiem khoa hoc (controlled experiment).
+  Modular harness la CACH DUY NHAT de dam bao nguyen tac nay.
+
+
+  <span style="color: var(--yellow); font-weight: bold;">VI DU: Do anh huong cua TOOL SET</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │   Condition 1:  <span style="color: var(--green);">Full (12)</span>  + Full context + Claude   → Resolve = 30%     │
+  │   Condition 2:  <span style="color: var(--green);">Medium (8)</span> + Full context + Claude   → Resolve = 25%     │
+  │   Condition 3:  <span style="color: var(--green);">Minimal(5)</span> + Full context + Claude   → Resolve = 18%     │
+  │                  <span style="color: var(--green);">↑ CHI THAY DOI</span>  <span style="color: var(--text-dim);">↑ GIU NGUYEN    ↑ GIU NGUYEN</span>            │
+  │                                                                          │
+  │   → Chenh lech 30% vs 18% CHAC CHAN vi tool set (khong co bien khac)     │
+  │   → Effect of tool: Cohen's d = ...                                      │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+
+  <span style="color: var(--yellow); font-weight: bold;">VI DU: Do anh huong cua CONTEXT STRATEGY</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │   Condition 1:  Full tools + <span style="color: var(--orange);">Full ctx</span>     + Claude   → Resolve = 30%     │
+  │   Condition 4:  Full tools + <span style="color: var(--orange);">Sliding 50K</span>  + Claude   → Resolve = 28%     │
+  │   Condition 7:  Full tools + <span style="color: var(--orange);">Summary 2K</span>   + Claude   → Resolve = 15%     │
+  │                 <span style="color: var(--text-dim);">↑ GIU NGUYEN</span>  <span style="color: var(--orange);">↑ CHI THAY DOI</span>   <span style="color: var(--text-dim);">↑ GIU NGUYEN</span>            │
+  │                                                                          │
+  │   → Chenh lech 30% vs 15% CHAC CHAN vi context strategy                  │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+
+  <span style="color: var(--yellow); font-weight: bold;">VI DU: Do anh huong cua LLM BACKEND</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │   Condition 1:  Full tools + Full ctx + <span style="color: var(--purple);">Claude</span>    → Resolve = 30%       │
+  │   Condition 2:  Full tools + Full ctx + <span style="color: var(--purple);">GPT-4o</span>    → Resolve = 27%       │
+  │   Condition 3:  Full tools + Full ctx + <span style="color: var(--purple);">DeepSeek</span>  → Resolve = 17%       │
+  │                 <span style="color: var(--text-dim);">↑ GIU NGUYEN  ↑ GIU NGUYEN</span>  <span style="color: var(--purple);">↑ CHI THAY DOI</span>              │
+  │                                                                          │
+  │   → Chenh lech CHAC CHAN vi LLM kha nang khac nhau                       │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+
+  <span style="color: var(--yellow); font-weight: bold;">FULL FACTORIAL: 27 TO HOP</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │               │        Full ctx      Sliding ctx     Summary ctx         │
+  │   ────────────┼──────────────────────────────────────────────────        │
+  │               │  Cla  GPT  DSk   Cla  GPT  DSk   Cla  GPT  DSk         │
+  │   ────────────┼──────────────────────────────────────────────────        │
+  │   Full (12)   │  <span style="color: var(--green);">C01</span>  <span style="color: var(--green);">C02</span>  <span style="color: var(--green);">C03</span>   <span style="color: var(--green);">C04</span>  C05  C06   <span style="color: var(--green);">C07</span>  C08  C09         │
+  │   Medium (8)  │  <span style="color: var(--green);">C10</span>  C11  C12   C13  C14  C15   C16  C17  C18         │
+  │   Minimal (5) │  <span style="color: var(--green);">C19</span>  <span style="color: var(--green);">C20</span>  <span style="color: var(--green);">C21</span>   C22  C23  C24   <span style="color: var(--green);">C25</span>  <span style="color: var(--green);">C26</span>  <span style="color: var(--green);">C27</span>         │
+  │   ────────────┼──────────────────────────────────────────────────        │
+  │                                                                          │
+  │   <span style="color: var(--green);">C## = 10 CRITICAL conditions (3 runs)</span>   C## = 17 khac (1 run)          │
+  │                                                                          │
+  │   So sanh HANG  → effect cua Tool (giu context + backend)               │
+  │   So sanh COT   → effect cua Context (giu tool + backend)               │
+  │   So sanh NHOM 3 → effect cua Backend (giu tool + context)              │
+  │   ANOVA phan tach TAT CA cung luc                                        │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 6 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">6</div>
+  <h2>Code thuc te: Tu interface → config → SWE-Agent command</h2>
+</div>
+
+<div class="card">
+  <div class="card-label blue">LUONG DU LIEU QUA CODE</div>
+<pre style="color: var(--text);">
+<span style="color: var(--text-dim);">── Buoc 1: Chon config ──</span>
+
+  config = create_harness_config(<span style="color: var(--green);">"minimal"</span>, <span style="color: var(--orange);">"summary"</span>, <span style="color: var(--purple);">"claude"</span>)
+                                    │              │            │
+                                    ▼              ▼            ▼
+                         MinimalToolProvider  SummaryCtx   ClaudeBackend
+                         (5 tools)           (2K tokens)  (sonnet-4)
+
+
+<span style="color: var(--text-dim);">── Buoc 2: Config tu mo ta minh ──</span>
+
+  config.condition_id  →  "minimal_summary_claude"
+  config.is_critical   →  True  (trong 10 conditions quan trong)
+  config.describe()    →  "Condition: minimal_summary_claude
+                             Tool: minimal (5 tools)
+                             Context: summary (max_tokens=2000)
+                             Backend: claude-sonnet-4-20250514
+                             Critical: True"
+
+
+<span style="color: var(--text-dim);">── Buoc 3: Sinh YAML config cho SWE-Agent ──</span>
+
+  config.sweagent_config_paths →
+    [
+      "config/harness_eval/<span style="color: var(--blue);">base.yaml</span>",              ← Agent loop, chung cho tat ca
+      "config/harness_eval/<span style="color: var(--green);">tool_minimal.yaml</span>",      ← Chi 5 tools
+      "config/harness_eval/<span style="color: var(--orange);">ctx_summary.yaml</span>",       ← Nen context xuong 2K
+      "config/harness_eval/<span style="color: var(--purple);">be_claude.yaml</span>",         ← Dung Claude API
+    ]
+
+
+<span style="color: var(--text-dim);">── Buoc 4: Sinh CLI command ──</span>
+
+  generate_sweagent_command(config) →
+
+    python -m sweagent run-batch \
+      --config config/harness_eval/<span style="color: var(--blue);">base.yaml</span> \
+      --config config/harness_eval/<span style="color: var(--green);">tool_minimal.yaml</span> \
+      --config config/harness_eval/<span style="color: var(--orange);">ctx_summary.yaml</span> \
+      --config config/harness_eval/<span style="color: var(--purple);">be_claude.yaml</span> \
+      --output_dir trajectories/harness_eval/minimal_summary_claude
+
+
+<span style="color: var(--text-dim);">── Buoc 5: SWE-Agent chay 150 tasks → ghi log ──</span>
+
+  trajectories/harness_eval/minimal_summary_claude/
+  ├── django__django-16379.json      ← Moi task = 1 file JSON
+  ├── django__django-16400.json         chua tat ca tool calls,
+  ├── ...                               context, results
+  └── sympy__sympy-24066.json
+
+
+<span style="color: var(--text-dim);">── Buoc 6: Tinh metrics tu log ──</span>
+
+  parser = parse_trajectory_file("django__django-16379.json")
+  M1.1 = correct_selection_rate(parser.tool_calls, acceptable_tools)
+  M1.2 = redundant_call_rate(parser.tool_calls)
+  M2.2 = effective_token_ratio(parser.total_tokens, parser.relevant_tokens)
+  ...
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 7 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">7</div>
+  <h2>Dam bao an toan: Equivalence Test (+-3%)</h2>
+</div>
+
+<div class="danger">
+  <div class="label">Rui ro lon nhat cua fork</div>
+  Khi tach module, co the <strong>vo tinh lam hong</strong> SWE-Agent.<br>
+  Neu fork bi hong → 7,050 evaluations chay tren harness hong → <strong>toan bo data vo nghia</strong>.
+</div>
+
+<div class="card">
+<pre style="color: var(--text);">
+<span style="color: var(--blue); font-weight: bold;">KIEM CHUNG TRUOC KHI CHAY ABLATION</span>
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  │  <span style="color: var(--red);">SWE-Agent GOC</span>                      <span style="color: var(--green);">Modular FORK</span>                       │
+  │  config: Full + Full + GPT-4o        config: Full + Full + GPT-4o       │
+  │  (config goc, khong sua gi)          (config tuong duong, qua Factory)  │
+  │                                                                          │
+  │          │                                      │                        │
+  │          ▼                                      ▼                        │
+  │   Chay 50 tasks                          Chay 50 tasks                  │
+  │   (cung 50 tasks)                        (cung 50 tasks)                │
+  │          │                                      │                        │
+  │          ▼                                      ▼                        │
+  │   Resolve rate = X%                      Resolve rate = Y%              │
+  │                                                                          │
+  │                        │X - Y│ <= 3% ?                                   │
+  │                                                                          │
+  │                     ┌─────┴─────┐                                        │
+  │                     │           │                                        │
+  │                  <span style="color: var(--green);">CO ✓</span>        <span style="color: var(--red);">KHONG ✗</span>                                   │
+  │                     │           │                                        │
+  │              Tiep tuc chay    DUNG LAI                                   │
+  │              27 conditions    Debug fork                                 │
+  │              (7,050 evals)    Tim cho bi hong                            │
+  │                               Sua → test lai                            │
+  │                                                                          │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+  <span style="color: var(--cyan); font-weight: bold;">TAI SAO 3% (khong phai 0%)?</span>
+
+  LLM co tinh NGAU NHIEN (du temperature=0 van co variance nho).
+  Cung config, chay 2 lan co the chenh lech 1-2%.
+  Nen 3% la nguong chap nhan duoc — chenh lech do nhieu, khong do fork hong.
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 8 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-num">8</div>
+  <h2>Toan canh: Modular la CAN THIET, khong phai "nice to have"</h2>
+</div>
+
+<div class="card">
+<pre style="color: var(--text);">
+<span style="color: var(--yellow); font-weight: bold;">CHUOI LOGIC TAI SAO CAN MODULAR:</span>
+
+
+  De tai muon gi?
+  ─────────────────
+  "Do dong gop cua tung thanh phan harness"    ← <span style="color: var(--blue);">MUC TIEU</span>
+           │
+           ▼
+  Phuong phap nao?
+  ─────────────────
+  Ablation study: doi 1 bien, giu nguyen cac bien khac   ← <span style="color: var(--blue);">PHUONG PHAP</span>
+           │
+           ▼
+  Ablation yeu cau gi?
+  ─────────────────────
+  Co the thay doi CHINH XAC 1 component                  ← <span style="color: var(--blue);">YEU CAU</span>
+  ma KHONG anh huong cac component khac
+           │
+           ▼
+  Yeu cau do dam bao bang gi?
+  ────────────────────────────
+  <span style="color: var(--green); font-weight: bold;">MODULAR ARCHITECTURE</span>                                    ← <span style="color: var(--green);">GIAI PHAP</span>
+  3 module doc lap + interface + factory
+  Doi 1 dong YAML = doi dung 1 bien
+           │
+           ▼
+  Modular dam bao bang gi?
+  ────────────────────────
+  Equivalence test (+- 3%)                                ← <span style="color: var(--orange);">KIEM CHUNG</span>
+  Fork khong lam hong SWE-Agent goc
+
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │                                                                    │
+  │  <span style="color: var(--red);">NEU KHONG MODULAR:</span>                                                │
+  │                                                                    │
+  │  Khong modular → Khong the doi 1 bien ma giu nguyen bien khac     │
+  │               → Khong the lam ablation study dung cach             │
+  │               → Khong co co so de noi "tool system dong gop X%"   │
+  │               → Khong co ANOVA (vi data khong cong bang)           │
+  │               → <span style="color: var(--red); font-weight: bold;">KHONG CO DE TAI</span>                                    │
+  │                                                                    │
+  │  <span style="color: var(--green);">CO MODULAR:</span>                                                        │
+  │                                                                    │
+  │  Modular → Doi 1 dong YAML = doi dung 1 bien                      │
+  │         → 27 to hop tu dong sinh ra                                │
+  │         → So sanh cong bang                                        │
+  │         → ANOVA chinh xac                                          │
+  │         → <span style="color: var(--green); font-weight: bold;">DE TAI CO CO SO KHOA HOC</span>                                │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<div class="insight">
+  <div class="label">Tom tat 1 cau</div>
+  <strong>Modular harness khong phai "thiet ke dep" — no la PHUONG PHAP NGHIEN CUU.</strong>
+  Khong co no thi khong the lam ablation study, khong co ANOVA, khong co de tai.
+  No giong nhu ong nghiem trong phong thi nghiem — khong co thi khong lam thi nghiem duoc.
+</div>
+
+</div><!-- /container -->
+</body>
+</html>

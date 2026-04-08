@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title_extra %} — Pipeline{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Pipeline Viewer</div>
+  <div class="info-bar">
+    <span><span class="ib-label">Condition: </span><span class="ib-val" style="font-family:Consolas,monospace;color:var(--cyan)">{{cond.id}}</span></span>
+    <span><span class="ib-label">Runs: </span><span class="ib-val">{{cond.runs}}</span></span>
+    <span><span class="ib-label">Evals: </span><span class="ib-val">{{cond.evals}}</span></span>
+    <span><span class="ib-label">Cost: </span><span class="ib-val" style="color:var(--green)">~${{cond.cost}}</span></span>
+  </div>
+
+  {% set steps = [
+    ("Task Selection", "150 tasks from SWE-Bench Verified (Python)", "var(--blue)", "1"),
+    ("Load Config", sel_tool ~ " tools, " ~ sel_ctx ~ " context, " ~ sel_be ~ " backend", "var(--cyan)", "2"),
+    ("Run SWE-Agent", cond.runs ~ " run(s) x 150 tasks = " ~ cond.evals ~ " evaluations", "var(--green)", "3"),
+    ("Collect Trajectory Logs", "JSON file per task in trajectories/" ~ cond.id ~ "/", "var(--orange)", "4"),
+    ("Compute 7 Metrics", "M1.1-M1.3 (Tool) + M2.1-M2.2 (Context) + M3.1-M3.2 (Backend)", "var(--purple)", "5"),
+    ("ANOVA Analysis", "Three-way ANOVA + Cohen's d + Tukey HSD", "var(--red)", "6")
+  ] %}
+
+  <div style="margin:20px 0">
+    {% for name, detail, color, num in steps %}
+    <div class="step">
+      <div class="step-dot" style="border-color:{{color}};background:var(--s3)">{{num}}</div>
+      <div>
+        <div class="step-title">{{name}}</div>
+        <div class="step-detail">{{detail}}</div>
+      </div>
+    </div>
+    {% if not loop.last %}<div class="step-line"></div>{% endif %}
+    {% endfor %}
+  </div>
+
+  <div style="display:flex;gap:8px">
+    <a class="btn" href="/?tool={{sel_tool}}&ctx={{sel_ctx}}&be={{sel_be}}">&larr; Config + Run</a>
+    <a class="btn" href="/logs">View Logs</a>
+    <a class="btn" href="/anova">ANOVA</a>
+  </div>
+</div>
+{% endblock %}

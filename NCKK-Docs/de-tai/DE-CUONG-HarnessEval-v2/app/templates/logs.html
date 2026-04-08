@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title_extra %} — Logs{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Trajectory Logs ({{total}} files)</div>
+
+  {% if not conditions %}
+  <div class="ph">
+    <div class="ph-icon">&#128194;</div>
+    <p>No trajectory files found</p>
+    <p style="font-size:.82em;margin-top:8px">Place JSON files in <code>app/trajectories/&lt;condition_id&gt;/</code></p>
+  </div>
+  {% else %}
+    <div style="margin-bottom:12px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary" onclick="compareSelected()">Compare Selected</button>
+      <span style="font-size:.78em;color:var(--tx3)" id="selCount">0 selected</span>
+      <a class="btn" href="/anova?run=trajectories" style="margin-left:auto">Run ANOVA on These</a>
+    </div>
+
+    {% for cond_id, entries in conditions.items() %}
+    <div class="cond-group">
+      <div class="cond-header">
+        <label style="cursor:pointer">
+          <input type="checkbox" class="cond-check" data-cond="{{cond_id}}" onchange="toggleCond(this)">
+          {{cond_id}} ({{entries|length}} tasks)
+        </label>
+        {% set resolved = entries|selectattr('resolved')|list|length %}
+        <span style="float:right;font-size:.78em;color:var(--tx3)">{{resolved}}/{{entries|length}} resolved ({{(resolved/entries|length*100)|round(0)}}%)</span>
+      </div>
+      {% for e in entries %}
+      <div class="log-entry">
+        <input type="checkbox" class="log-check" data-cond="{{cond_id}}" value="{{e.path}}">
+        <a href="/logs/{{e.path}}" style="display:flex;align-items:center;gap:12px;flex:1;text-decoration:none;color:var(--tx)">
+          <span class="badge {% if e.resolved %}badge-pass{% else %}badge-fail{% endif %}">{% if e.resolved %}PASS{% else %}FAIL{% endif %}</span>
+          <span style="flex:1;font-size:.88em;font-weight:600">{{e.task_id}}</span>
+          <span style="font-size:.78em;color:var(--tx3)">{{e.turns}} turns</span>
+          <span style="font-size:.78em;color:var(--tx3)">${{e.cost}}</span>
+          <span style="font-size:.78em;color:var(--tx3)">{{e.model}}</span>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleCond(el) {
+  const cond = el.dataset.cond;
+  document.querySelectorAll('.log-check[data-cond="'+cond+'"]').forEach(cb => cb.checked = el.checked);
+  updateCount();
+}
+
+function updateCount() {
+  const n = document.querySelectorAll('.log-check:checked').length;
+  document.getElementById('selCount').textContent = n + ' selected';
+}
+
+document.querySelectorAll('.log-check').forEach(cb => cb.addEventListener('change', updateCount));
+
+function compareSelected() {
+  const paths = [...document.querySelectorAll('.log-check:checked')].map(cb => cb.value);
+  if (paths.length < 2) { alert('Select at least 2 logs to compare'); return; }
+  window.location.href = '/compare?' + paths.map(p => 'p=' + encodeURIComponent(p)).join('&');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval — Experiment Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#232733;--surface3:#2c3040;
+  --border:#333a4a;--text:#e4e6ed;--text2:#9ca0ad;--text3:#636879;
+  --blue:#4c8dff;--blue2:#2563eb;--green:#22c55e;--green2:#16a34a;
+  --orange:#f59e0b;--orange2:#d97706;--red:#ef4444;--red2:#dc2626;
+  --purple:#a78bfa;--purple2:#7c3aed;--cyan:#22d3ee;
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+
+/* Header */
+.header{text-align:center;padding:30px 0 20px}
+.header h1{font-size:1.8em;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.header p{color:var(--text2);font-size:.95em}
+.badge-row{display:flex;gap:10px;justify-content:center;margin-top:15px;flex-wrap:wrap}
+.badge{padding:5px 14px;border-radius:20px;font-size:.8em;font-weight:600}
+.badge-blue{background:rgba(76,141,255,.15);color:var(--blue);border:1px solid rgba(76,141,255,.3)}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.badge-orange{background:rgba(245,158,11,.15);color:var(--orange);border:1px solid rgba(245,158,11,.3)}
+.badge-purple{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
+
+/* Stats Row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin:25px 0}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.stat-card .value{font-size:2em;font-weight:700;margin-bottom:2px}
+.stat-card .label{font-size:.82em;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.stat-card .sub{font-size:.78em;color:var(--text3);margin-top:4px}
+
+/* Section */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:25px;margin:20px 0}
+.section-title{font-size:1.15em;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.section-title .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1em}
+
+/* 3x3x3 Grid */
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:15px 0}
+.factor-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;position:relative;overflow:hidden}
+.factor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.factor-card.tool::before{background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.factor-card.context::before{background:linear-gradient(90deg,var(--green),#86efac)}
+.factor-card.backend::before{background:linear-gradient(90deg,var(--purple),#e879f9)}
+.factor-label{font-size:.75em;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px}
+.factor-title{font-size:1.1em;font-weight:700;margin-bottom:4px}
+.factor-sub{font-size:.85em;color:var(--text2)}
+
+/* Level cards inside factor */
+.level-list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.level-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface3);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;border:1px solid transparent}
+.level-item:hover{border-color:var(--blue);transform:translateX(4px)}
+.level-item.active{border-color:var(--blue);background:rgba(76,141,255,.1)}
+.level-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.level-name{font-weight:600;font-size:.9em;flex:1}
+.level-detail{font-size:.78em;color:var(--text3)}
+
+/* Tool chips */
+.tool-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tool-chip{padding:3px 10px;border-radius:6px;font-size:.75em;font-weight:600;font-family:'Consolas','Courier New',monospace}
+.tool-chip.active{background:rgba(76,141,255,.2);color:var(--blue);border:1px solid rgba(76,141,255,.3)}
+.tool-chip.removed{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);text-decoration:line-through;opacity:.5}
+
+/* Condition matrix */
+.matrix-wrapper{overflow-x:auto;margin:15px 0}
+.matrix{border-collapse:separate;border-spacing:3px;width:100%}
+.matrix th{padding:8px 10px;font-size:.75em;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:600}
+.matrix td{padding:10px;text-align:center;border-radius:var(--radius-sm);font-size:.82em;cursor:pointer;transition:all .2s;position:relative}
+.matrix td:hover{transform:scale(1.05);z-index:1}
+.cell-critical{background:rgba(76,141,255,.15);border:1px solid rgba(76,141,255,.3);color:var(--blue);font-weight:700}
+.cell-normal{background:var(--surface3);border:1px solid var(--border);color:var(--text2)}
+.cell-label{display:block;font-size:.7em;color:var(--text3);margin-top:2px}
+.matrix .header-tool{background:rgba(76,141,255,.08);color:var(--blue)}
+.matrix .header-ctx{background:rgba(34,197,94,.08);color:var(--green)}
+.matrix .header-be{background:rgba(167,139,250,.08);color:var(--purple)}
+
+/* Pipeline flow */
+.pipeline{display:flex;align-items:center;gap:0;margin:20px 0;overflow-x:auto;padding:10px 0}
+.pipe-step{flex-shrink:0;text-align:center;padding:15px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:160px;position:relative}
+.pipe-step .step-num{font-size:.7em;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.pipe-step .step-title{font-weight:700;font-size:.95em;margin:4px 0}
+.pipe-step .step-detail{font-size:.78em;color:var(--text2)}
+.pipe-arrow{flex-shrink:0;color:var(--text3);font-size:1.5em;padding:0 5px}
+
+/* Cost breakdown */
+.cost-bar{display:flex;height:40px;border-radius:var(--radius-sm);overflow:hidden;margin:15px 0}
+.cost-segment{display:flex;align-items:center;justify-content:center;font-size:.78em;font-weight:600;color:#fff;transition:all .3s}
+.cost-legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.82em;color:var(--text2)}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+/* Timeline */
+.timeline{display:flex;gap:4px;margin:15px 0;height:50px;align-items:stretch}
+.tl-block{border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.75em;font-weight:600;color:#fff;min-width:60px;transition:all .3s}
+.tl-block:hover{opacity:.85;transform:scaleY(1.1)}
+.tl-block .tl-label{font-size:.7em;opacity:.8;margin-top:2px}
+
+/* Metrics panel */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:15px;display:flex;gap:12px;align-items:flex-start}
+.metric-id{font-size:.75em;font-weight:700;padding:4px 8px;border-radius:6px;flex-shrink:0;text-align:center;min-width:42px}
+.metric-id.d1{background:rgba(76,141,255,.15);color:var(--blue)}
+.metric-id.d2{background:rgba(34,197,94,.15);color:var(--green)}
+.metric-id.d3{background:rgba(167,139,250,.15);color:var(--purple)}
+.metric-info .metric-name{font-weight:600;font-size:.9em;margin-bottom:3px}
+.metric-info .metric-desc{font-size:.78em;color:var(--text2);line-height:1.5}
+.metric-info .metric-auto{font-size:.72em;margin-top:5px;padding:2px 8px;border-radius:4px;display:inline-block}
+.auto-yes{background:rgba(34,197,94,.12);color:var(--green)}
+.auto-no{background:rgba(239,68,68,.12);color:var(--red)}
+.auto-semi{background:rgba(245,158,11,.12);color:var(--orange)}
+
+/* Hypothesis */
+.hyp-list{display:flex;flex-direction:column;gap:10px}
+.hyp-card{display:flex;gap:15px;align-items:flex-start;padding:14px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid}
+.hyp-card.h1{border-color:var(--blue)}
+.hyp-card.h2{border-color:var(--green)}
+.hyp-card.h3{border-color:var(--orange)}
+.hyp-card.h4{border-color:var(--purple)}
+.hyp-tag{font-weight:700;font-size:.9em;flex-shrink:0;width:28px}
+.hyp-text{font-size:.88em;color:var(--text2)}
+.hyp-text strong{color:var(--text)}
+
+/* SWE-Agent section */
+.swe-structure{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:15px 0}
+.swe-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px}
+.swe-card h4{font-size:.9em;margin-bottom:10px;color:var(--text2)}
+.swe-card pre{font-size:.78em;color:var(--cyan);background:var(--surface3);padding:10px;border-radius:6px;overflow-x:auto;line-height:1.7;font-family:'Consolas','Courier New',monospace}
+
+/* Responsive */
+@media(max-width:900px){
+  .factor-grid{grid-template-columns:1fr}
+  .swe-structure{grid-template-columns:1fr}
+  .pipeline{flex-direction:column;align-items:stretch}
+  .pipe-arrow{transform:rotate(90deg);text-align:center}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr}
+  .container{padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>HarnessEval — Experiment Dashboard</h1>
+  <p>Evaluating Coding Agent Scaffolds Through Ablation-Driven Multi-Dimensional Analysis</p>
+  <div class="badge-row">
+    <span class="badge badge-blue">3 x 3 x 3 = 27 Conditions</span>
+    <span class="badge badge-green">7 Metrics</span>
+    <span class="badge badge-orange">7,050 Evaluations</span>
+    <span class="badge badge-purple">4 Hypotheses</span>
+  </div>
+</div>
+
+<!-- ===== STATS ROW ===== -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="value" style="color:var(--blue)">27</div>
+    <div class="label">Conditions</div>
+    <div class="sub">3 Tool x 3 Context x 3 Backend</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" style="color:var(--green)">150</div>
+    <div class="label">Tasks</div>
+    <div class="sub">SWE-Bench Verified (Python)</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" style="color:var(--orange)">7,050</div>
+    <div class="label">Total Evaluations</div>
+    <div class="sub">(10x3 + 17x1) x 150</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" style="color:var(--purple)">$2,500</div>
+    <div class="label">Est. Budget</div>
+    <div class="sub">$2,500 - $3,100 total</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" style="color:var(--cyan)">24</div>
+    <div class="label">Weeks</div>
+    <div class="sub">6 phases (GD1-GD5 + Pilot)</div>
+  </div>
+</div>
+
+<!-- ===== 3 FACTORS ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(76,141,255,.15);color:var(--blue)">&#9881;</div>
+    3 Factors — Full Factorial Design
+  </div>
+
+  <div class="factor-grid">
+    <!-- TOOL -->
+    <div class="factor-card tool">
+      <div class="factor-label">Factor A</div>
+      <div class="factor-title" style="color:var(--blue)">Tool Configuration</div>
+      <div class="factor-sub">So luong tools agent duoc su dung</div>
+      <div class="level-list">
+        <div class="level-item active" onclick="showTools('full')">
+          <div class="level-dot" style="background:var(--green)"></div>
+          <span class="level-name">Full</span>
+          <span class="level-detail">12 tools</span>
+        </div>
+        <div class="level-item" onclick="showTools('medium')">
+          <div class="level-dot" style="background:var(--orange)"></div>
+          <span class="level-name">Medium</span>
+          <span class="level-detail">8 tools</span>
+        </div>
+        <div class="level-item" onclick="showTools('minimal')">
+          <div class="level-dot" style="background:var(--red)"></div>
+          <span class="level-name">Minimal</span>
+          <span class="level-detail">5 tools</span>
+        </div>
+      </div>
+      <div id="tool-chips" class="tool-chips"></div>
+    </div>
+
+    <!-- CONTEXT -->
+    <div class="factor-card context">
+      <div class="factor-label">Factor B</div>
+      <div class="factor-title" style="color:var(--green)">Context Strategy</div>
+      <div class="factor-sub">Cach quan ly conversation history</div>
+      <div class="level-list">
+        <div class="level-item active">
+          <div class="level-dot" style="background:var(--green)"></div>
+          <span class="level-name">Full Context</span>
+          <span class="level-detail">No truncation</span>
+        </div>
+        <div class="level-item">
+          <div class="level-dot" style="background:var(--orange)"></div>
+          <span class="level-name">Sliding Window</span>
+          <span class="level-detail">50K tokens</span>
+        </div>
+        <div class="level-item">
+          <div class="level-dot" style="background:var(--red)"></div>
+          <span class="level-name">Summary</span>
+          <span class="level-detail">Compress old context</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKEND -->
+    <div class="factor-card backend">
+      <div class="factor-label">Factor C</div>
+      <div class="factor-title" style="color:var(--purple)">LLM Backend</div>
+      <div class="factor-sub">Mo hinh ngon ngu co so</div>
+      <div class="level-list">
+        <div class="level-item active">
+          <div class="level-dot" style="background:#f97316"></div>
+          <span class="level-name">Claude Sonnet 4</span>
+          <span class="level-detail">$0.35/eval</span>
+        </div>
+        <div class="level-item">
+          <div class="level-dot" style="background:var(--green)"></div>
+          <span class="level-name">GPT-4o</span>
+          <span class="level-detail">$0.30/eval</span>
+        </div>
+        <div class="level-item">
+          <div class="level-dot" style="background:var(--blue)"></div>
+          <span class="level-name">DeepSeek-V3</span>
+          <span class="level-detail">$0.15/eval</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOOL DETAIL PANEL ===== -->
+<div class="section" id="tool-detail-section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(34,211,238,.15);color:var(--cyan)">&#128295;</div>
+    Tool Levels — Click level phia tren de xem chi tiet
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px">
+    <div>
+      <div style="font-weight:700;color:var(--green);margin-bottom:8px">Full (12 tools)</div>
+      <div id="tools-full" class="tool-chips"></div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:var(--orange);margin-bottom:8px">Medium (8 tools)</div>
+      <div id="tools-medium" class="tool-chips"></div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:var(--red);margin-bottom:8px">Minimal (5 tools)</div>
+      <div id="tools-minimal" class="tool-chips"></div>
+    </div>
+  </div>
+  <div style="margin-top:15px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--cyan)">
+    <div style="font-size:.85em;color:var(--text2)">
+      <strong style="color:var(--cyan)">Ablation logic:</strong> Minimal &#8834; Medium &#8834; Full — giam dan tools de do dong gop. Neu resolve rate giam khi bot tools &#8594; tool system co anh huong.
+    </div>
+  </div>
+</div>
+
+<!-- ===== 27 CONDITIONS MATRIX ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(245,158,11,.15);color:var(--orange)">&#9638;</div>
+    27 Conditions Matrix
+    <span style="font-size:.75em;color:var(--text3);font-weight:400;margin-left:auto">
+      <span style="color:var(--blue)">&#9632;</span> Critical (3 runs) &nbsp;
+      <span style="color:var(--text3)">&#9632;</span> Normal (1 run)
+    </span>
+  </div>
+
+  <div class="matrix-wrapper">
+    <table class="matrix" id="condition-matrix"></table>
+  </div>
+</div>
+
+<!-- ===== PIPELINE ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(34,197,94,.15);color:var(--green)">&#9654;</div>
+    Evaluation Pipeline
+  </div>
+  <div class="pipeline">
+    <div class="pipe-step" style="border-color:var(--blue)">
+      <div class="step-num">Step 1</div>
+      <div class="step-title">SWE-Bench Task</div>
+      <div class="step-detail">150 tasks (Python)</div>
+    </div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-step" style="border-color:var(--cyan)">
+      <div class="step-num">Step 2</div>
+      <div class="step-title">Load Config</div>
+      <div class="step-detail">Tool + Context + Backend</div>
+    </div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-step" style="border-color:var(--green)">
+      <div class="step-num">Step 3</div>
+      <div class="step-title">SWE-Agent Run</div>
+      <div class="step-detail">Fork + YAML config</div>
+    </div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-step" style="border-color:var(--orange)">
+      <div class="step-num">Step 4</div>
+      <div class="step-title">Trajectory Log</div>
+      <div class="step-detail">JSON (tool calls, outputs)</div>
+    </div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-step" style="border-color:var(--purple)">
+      <div class="step-num">Step 5</div>
+      <div class="step-title">Compute Metrics</div>
+      <div class="step-detail">7 metrics (M1.1-M3.2)</div>
+    </div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-step" style="border-color:var(--red)">
+      <div class="step-num">Step 6</div>
+      <div class="step-title">ANOVA Analysis</div>
+      <div class="step-detail">3-way + Cohen's d</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SWE-AGENT FORK ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(34,211,238,.15);color:var(--cyan)">&#128193;</div>
+    SWE-Agent Fork — Chi doi CONFIG, khong doi CODE
+  </div>
+
+  <div style="margin-bottom:15px;padding:12px 16px;background:var(--surface2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:12px">
+    <span style="font-size:1.3em">&#128279;</span>
+    <div>
+      <div style="font-weight:600">github.com/SWE-agent/SWE-agent</div>
+      <div style="font-size:.82em;color:var(--text3)">MIT License &bull; ~15,000 LOC &bull; Python &bull; litellm backend</div>
+    </div>
+  </div>
+
+  <div class="swe-structure">
+    <div class="swe-card">
+      <h4 style="color:var(--blue)">&#9881; Tool Config (YAML)</h4>
+      <pre># config/tools_full.yaml
+tools:
+  bundles:
+    - path: tools/defaults   # read, write, edit, bash
+    - path: tools/search     # grep, glob, find
+    - path: tools/git        # git_diff, git_log, git_show
+    - path: tools/testing    # test_runner
+    - path: tools/python     # python interpreter
+  enable_bash_tool: true
+
+# config/tools_minimal.yaml (CHUNG TA TAO)
+tools:
+  bundles:
+    - path: tools/defaults   # read, write, edit, bash
+    - path: tools/search_lite # chi grep
+  enable_bash_tool: true</pre>
+    </div>
+    <div class="swe-card">
+      <h4 style="color:var(--green)">&#128196; Context Config (YAML)</h4>
+      <pre># config/context_full.yaml
+agent:
+  history_processors: []    # giu het
+
+# config/context_sliding.yaml (CHUNG TA TAO)
+agent:
+  history_processors:
+    - type: LastNObservations
+      n: 15                  # giu 15 turns gan nhat
+
+# config/context_summary.yaml (CHUNG TA TAO)
+agent:
+  history_processors:
+    - type: LastNObservations
+      n: 5
+    - type: RemoveRegex
+      pattern: "(.{500}).*"
+      replacement: "\\1... [truncated]"</pre>
+    </div>
+    <div class="swe-card">
+      <h4 style="color:var(--purple)">&#129302; Backend Config (CLI argument)</h4>
+      <pre># Doi backend = doi 1 dong lenh
+# SWE-Agent dung litellm → ho tro tat ca
+
+# Claude Sonnet 4
+python run.py \
+  --agent.model.name claude-sonnet-4-20250514
+
+# GPT-4o
+python run.py \
+  --agent.model.name gpt-4o
+
+# DeepSeek-V3
+python run.py \
+  --agent.model.name deepseek/deepseek-chat</pre>
+    </div>
+    <div class="swe-card">
+      <h4 style="color:var(--orange)">&#128203; Trajectory Output (JSON)</h4>
+      <pre>// trajectories/full_full_claude/task_123.json
+{
+  "task_id": "django__django-12345",
+  "model": "claude-sonnet-4-20250514",
+  "resolved": true,
+  "trajectory": [
+    {
+      "action": "read",        // &larr; tool name
+      "args": {"path": "models.py"},
+      "output": "class Model..."
+    },
+    {
+      "action": "edit",
+      "args": {"old":"...","new":"..."},
+      "output": "File edited"
+    }
+  ]
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7 METRICS ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(167,139,250,.15);color:var(--purple)">&#128200;</div>
+    7 Metrics — 3 Dimensions
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-id d1">M1.1</div>
+      <div class="metric-info">
+        <div class="metric-name">Correct Selection Rate</div>
+        <div class="metric-desc">% tool calls chon dung tool tu tap acceptable tools</div>
+        <span class="metric-auto auto-no">Manual (2 annotators)</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-id d1">M1.2</div>
+      <div class="metric-info">
+        <div class="metric-name">Redundant Call Rate</div>
+        <div class="metric-desc">% tool calls ma output khong duoc dung trong 3 turns sau</div>
+        <span class="metric-auto auto-yes">Auto (log analysis)</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-id d1">M1.3</div>
+      <div class="metric-info">
+        <div class="metric-name">Utilization Breadth</div>
+        <div class="metric-desc">Unique tools used / total tools available</div>
+        <span class="metric-auto auto-yes">Auto (log analysis)</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-id d2">M2.1</div>
+      <div class="metric-info">
+        <div class="metric-name">Info Retention Score</div>
+        <div class="metric-desc">BERTScore giua full-context vs compacted-context response</div>
+        <span class="metric-auto auto-yes">Auto (BERTScore)</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-id d2">M2.2</div>
+      <div class="metric-info">
+        <div class="metric-name">Effective Token Ratio</div>
+        <div class="metric-desc">% tokens duoc classify la task-relevant boi LLM classifier</div>
+        <span class="metric-auto auto-semi">Semi (LLM + human validation)</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-id d3">M3.1</div>
+      <div class="metric-info">
+        <div class="metric-name">Cross-Backend StdDev</div>
+        <div class="metric-desc">&sigma;(resolve rates) qua 3 backends — thap = portable</div>
+        <span class="metric-auto auto-yes">Auto</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-id d3">M3.2</div>
+      <div class="metric-info">
+        <div class="metric-name">Min/Max Ratio</div>
+        <div class="metric-desc">min(RR) / max(RR) qua backends — cao = portable</div>
+        <span class="metric-auto auto-yes">Auto</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HYPOTHESES ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(239,68,68,.15);color:var(--red)">&#10068;</div>
+    4 Hypotheses
+  </div>
+  <div class="hyp-list">
+    <div class="hyp-card h1">
+      <div class="hyp-tag" style="color:var(--blue)">H1</div>
+      <div class="hyp-text">Tool system co <strong>effect size lon nhat</strong> (Cohen's d &gt; 0.5) trong 3 thanh phan harness doi voi resolve rate</div>
+    </div>
+    <div class="hyp-card h2">
+      <div class="hyp-tag" style="color:var(--green)">H2</div>
+      <div class="hyp-text">Context management co <strong>medium effect size</strong> (Cohen's d = 0.3&ndash;0.5)</div>
+    </div>
+    <div class="hyp-card h3">
+      <div class="hyp-tag" style="color:var(--orange)">H3</div>
+      <div class="hyp-text">Harness configuration giai thich <strong>it nhat 10% resolve rate variance</strong> (&eta;&sup2; &ge; 0.10 trong ANOVA), doc lap voi LLM backend</div>
+    </div>
+    <div class="hyp-card h4">
+      <div class="hyp-tag" style="color:var(--purple)">H4</div>
+      <div class="hyp-text">Resolve rate variance <strong>giua cac LLM backends GIAM</strong> khi harness chat luong cao hon (interaction effect co y nghia thong ke)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COST BREAKDOWN ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(245,158,11,.15);color:var(--orange)">&#128176;</div>
+    Budget Breakdown — $2,500 - $3,100
+  </div>
+
+  <div class="cost-bar">
+    <div class="cost-segment" style="flex:80;background:var(--blue)">Pilot $80</div>
+    <div class="cost-segment" style="flex:2500;background:var(--green2)">Full Experiment $2,500</div>
+    <div class="cost-segment" style="flex:500;background:var(--orange2)">Contingency $500</div>
+  </div>
+  <div class="cost-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Pilot (200 evals x $0.27 + retries)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green2)"></div>Full (7,050 evals x $0.27 + 30% retries)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange2)"></div>Contingency 20%</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px">
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center">
+      <div style="font-size:.75em;color:var(--text3);text-transform:uppercase">Claude Sonnet 4</div>
+      <div style="font-size:1.4em;font-weight:700;color:#f97316">$0.35</div>
+      <div style="font-size:.8em;color:var(--text3)">per evaluation</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center">
+      <div style="font-size:.75em;color:var(--text3);text-transform:uppercase">GPT-4o</div>
+      <div style="font-size:1.4em;font-weight:700;color:var(--green)">$0.30</div>
+      <div style="font-size:.8em;color:var(--text3)">per evaluation</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center">
+      <div style="font-size:.75em;color:var(--text3);text-transform:uppercase">DeepSeek-V3</div>
+      <div style="font-size:1.4em;font-weight:700;color:var(--blue)">$0.15</div>
+      <div style="font-size:.8em;color:var(--text3)">per evaluation (cheapest)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TIMELINE ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(34,197,94,.15);color:var(--green)">&#128197;</div>
+    Timeline — 24 Weeks
+  </div>
+  <div class="timeline">
+    <div class="tl-block" style="flex:6;background:linear-gradient(135deg,var(--blue2),var(--blue))">GD1<div class="tl-label">W1-6 Taxonomy</div></div>
+    <div class="tl-block" style="flex:3;background:linear-gradient(135deg,var(--green2),var(--green))">GD2<div class="tl-label">W7-9 Fork</div></div>
+    <div class="tl-block" style="flex:2;background:linear-gradient(135deg,var(--orange2),var(--orange))">Pilot<div class="tl-label">W10-11</div></div>
+    <div class="tl-block" style="flex:7;background:linear-gradient(135deg,var(--red2),var(--red))">GD3<div class="tl-label">W12-18 Ablation</div></div>
+    <div class="tl-block" style="flex:4;background:linear-gradient(135deg,var(--purple2),var(--purple))">GD4<div class="tl-label">W19-22 Analysis</div></div>
+    <div class="tl-block" style="flex:2;background:linear-gradient(135deg,#374151,#6b7280)">GD5<div class="tl-label">W23-24</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:15px">
+    <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--blue)">
+      <div style="font-weight:600;font-size:.88em">GD1: Taxonomy</div>
+      <div style="font-size:.78em;color:var(--text3)">5 experts, Fleiss' kappa, 7 metrics validation</div>
+    </div>
+    <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--green)">
+      <div style="font-weight:600;font-size:.88em">GD2: Fork SWE-Agent</div>
+      <div style="font-size:.78em;color:var(--text3)">Modular refactor, verify &plusmn;3% baseline</div>
+    </div>
+    <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--orange)">
+      <div style="font-weight:600;font-size:.88em">Pilot Study</div>
+      <div style="font-size:.78em;color:var(--text3)">200 evals, validate metrics + cost</div>
+    </div>
+    <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--red)">
+      <div style="font-weight:600;font-size:.88em">GD3: Full Ablation</div>
+      <div style="font-size:.78em;color:var(--text3)">7,050 evals, 27 conditions x 150 tasks</div>
+    </div>
+    <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--purple)">
+      <div style="font-weight:600;font-size:.88em">GD4: Analysis</div>
+      <div style="font-size:.78em;color:var(--text3)">ANOVA 3-way, thesis writing</div>
+    </div>
+    <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid #6b7280">
+      <div style="font-weight:600;font-size:.88em">GD5: Release</div>
+      <div style="font-size:.78em;color:var(--text3)">Review, toolkit on GitHub</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ANOVA ===== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(239,68,68,.15);color:var(--red)">&#931;</div>
+    Statistical Analysis — Three-Way ANOVA
+  </div>
+
+  <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:18px;font-family:'Consolas','Courier New',monospace;font-size:.88em;overflow-x:auto;line-height:2">
+    <div style="color:var(--text2)">Total Variance =</div>
+    <div style="padding-left:20px">
+      <span style="color:var(--blue);font-weight:700">V<sub>Tool</sub></span> +
+      <span style="color:var(--green);font-weight:700">V<sub>Context</sub></span> +
+      <span style="color:var(--purple);font-weight:700">V<sub>Backend</sub></span> +
+      <span style="color:var(--orange)">V<sub>T&times;C</sub></span> +
+      <span style="color:var(--orange)">V<sub>T&times;B</sub></span> +
+      <span style="color:var(--orange)">V<sub>C&times;B</sub></span> +
+      <span style="color:var(--text3)">V<sub>T&times;C&times;B</sub></span> +
+      <span style="color:var(--text3)">V<sub>Error</sub></span>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:20px;flex-wrap:wrap">
+      <span style="font-size:.78em"><span style="color:var(--blue)">&#9632;</span><span style="color:var(--green)">&#9632;</span> Harness effects</span>
+      <span style="font-size:.78em"><span style="color:var(--purple)">&#9632;</span> LLM effect</span>
+      <span style="font-size:.78em"><span style="color:var(--orange)">&#9632;</span> Interactions</span>
+      <span style="font-size:.78em"><span style="color:var(--text3)">&#9632;</span> Residual</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:15px">
+    <div style="padding:14px;background:var(--surface2);border-radius:var(--radius-sm);text-align:center">
+      <div style="font-size:.75em;color:var(--text3)">Test</div>
+      <div style="font-weight:700;color:var(--text)">Three-way ANOVA</div>
+      <div style="font-size:.78em;color:var(--text3)">+ GLMM robustness check</div>
+    </div>
+    <div style="padding:14px;background:var(--surface2);border-radius:var(--radius-sm);text-align:center">
+      <div style="font-size:.75em;color:var(--text3)">Correction</div>
+      <div style="font-weight:700;color:var(--text)">Bonferroni</div>
+      <div style="font-size:.78em;color:var(--text3)">&alpha; = 0.05 / 7 = 0.007</div>
+    </div>
+    <div style="padding:14px;background:var(--surface2);border-radius:var(--radius-sm);text-align:center">
+      <div style="font-size:.75em;color:var(--text3)">Post-hoc</div>
+      <div style="font-weight:700;color:var(--text)">Tukey HSD</div>
+      <div style="font-size:.78em;color:var(--text3)">Pairwise comparisons</div>
+    </div>
+    <div style="padding:14px;background:var(--surface2);border-radius:var(--radius-sm);text-align:center">
+      <div style="font-size:.75em;color:var(--text3)">Effect Size</div>
+      <div style="font-weight:700;color:var(--text)">Cohen's d + &eta;&sup2;</div>
+      <div style="font-size:.78em;color:var(--text3)">Per factor + pairwise</div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:.8em">
+  HarnessEval Experiment Dashboard &bull; FPT University MSE-AI &bull; April 2026
+</div>
+
+</div>
+
+<script>
+// Tool data
+const ALL_TOOLS = ['bash','python','read','write','edit','glob','grep','find','git_diff','git_log','git_show','test_runner'];
+const MEDIUM_TOOLS = ['bash','python','read','write','edit','grep','git_diff','test_runner'];
+const MINIMAL_TOOLS = ['bash','read','write','edit','grep'];
+
+function renderToolChips(containerId, activeTools) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = ALL_TOOLS.map(t => {
+    const isActive = activeTools.includes(t);
+    return `<span class="tool-chip ${isActive ? 'active' : 'removed'}">${t}</span>`;
+  }).join('');
+}
+
+// Init tool displays
+renderToolChips('tools-full', ALL_TOOLS);
+renderToolChips('tools-medium', MEDIUM_TOOLS);
+renderToolChips('tools-minimal', MINIMAL_TOOLS);
+
+// Condition matrix
+const tools = ['Full (12)', 'Medium (8)', 'Minimal (5)'];
+const contexts = ['Full ctx', 'Sliding', 'Summary'];
+const backends = ['Claude', 'GPT-4o', 'DeepSeek'];
+
+const critical = new Set([
+  '0_0_0','0_0_1','0_0_2',  // full_full_*
+  '2_0_0','2_0_1',          // minimal_full_claude/gpt
+  '0_2_0','0_2_1',          // full_summary_claude/gpt
+  '2_2_0','2_2_1','2_2_2',  // minimal_summary_*
+]);
+
+function buildMatrix() {
+  const table = document.getElementById('condition-matrix');
+  let html = '<thead><tr><th></th><th></th>';
+  backends.forEach(b => html += `<th class="header-be">${b}</th>`);
+  html += '</tr></thead><tbody>';
+
+  tools.forEach((t, ti) => {
+    contexts.forEach((c, ci) => {
+      html += '<tr>';
+      if (ci === 0) html += `<td rowspan="3" class="header-tool" style="font-weight:700;writing-mode:vertical-lr;text-orientation:mixed;padding:8px 4px">${t}</td>`;
+      html += `<td class="header-ctx" style="text-align:right;font-size:.8em">${c}</td>`;
+      backends.forEach((b, bi) => {
+        const key = `${ti}_${ci}_${bi}`;
+        const isCrit = critical.has(key);
+        html += `<td class="${isCrit ? 'cell-critical' : 'cell-normal'}">
+          ${isCrit ? '3 runs' : '1 run'}
+          <span class="cell-label">${isCrit ? '450 evals' : '150 evals'}</span>
+        </td>`;
+      });
+      html += '</tr>';
+    });
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+buildMatrix();
+</script>
+</body>
+</html>

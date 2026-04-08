@@ -353,8 +353,17 @@ def mpl_effect_forest(pairwise_results: list[dict]):
             return DARK_COLORS["orange"]
         return "#888888"
 
-    comparisons = [r["comparison"] for r in pairwise_results]
-    ds = [float(r["cohens_d"]) for r in pairwise_results]
+    # Filter out NaN values
+    valid = [r for r in pairwise_results if not (r["cohens_d"] != r["cohens_d"])]  # NaN != NaN
+    if not valid:
+        fig, ax = plt.subplots(figsize=(9, 4))
+        ax.text(0.5, 0.5, "No valid effect sizes to display", ha="center", va="center", fontsize=12)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        return fig
+
+    comparisons = [r["comparison"] for r in valid]
+    ds = [float(r["cohens_d"]) for r in valid]
     colors = [_color(d) for d in ds]
 
     n = len(comparisons)

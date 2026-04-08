@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title_extra %} — ANOVA{% endblock %}
+{% block content %}
+
+{% if not results %}
+<div class="card">
+  <div class="card-title">Three-Way ANOVA Analysis</div>
+  <div class="ph">
+    <div class="ph-icon">&#128202;</div>
+    <p>No ANOVA results yet</p>
+    <p style="font-size:.82em;margin-top:8px;color:var(--tx3)">Need trajectory data from multiple conditions to run ANOVA</p>
+    <p style="font-size:.82em;margin-top:4px;color:var(--tx3)">Tool(3) &times; Context(3) &times; Backend(3) = 27 conditions</p>
+  </div>
+  <div style="text-align:center;margin-top:12px">
+    <a class="btn btn-primary" href="/anova?run=sample">Run ANOVA on Sample Data</a>
+    <a class="btn" href="/logs">View Trajectory Logs</a>
+  </div>
+</div>
+
+{% else %}
+
+<!-- Info bar -->
+<div class="info-bar">
+  <span><span class="ib-label">Source: </span><span class="ib-val">{{source}}</span></span>
+  <span><span class="ib-label">Conditions: </span><span class="ib-val">{{n_conditions}}</span></span>
+  <span><span class="ib-label">Total Obs: </span><span class="ib-val">{{n_observations}}</span></span>
+  <span><span class="ib-label">DV: </span><span class="ib-val">resolve_rate</span></span>
+</div>
+
+<!-- ANOVA Table -->
+<div class="card">
+  <div class="card-title">ANOVA Table &mdash; Three-Way Factorial</div>
+  <table class="ctable">
+    <thead>
+      <tr>
+        <th style="text-align:left">Source</th>
+        <th>SS</th>
+        <th>df</th>
+        <th>MS</th>
+        <th>F</th>
+        <th>p-value</th>
+        <th>&eta;&sup2;</th>
+        <th>Sig?</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr{% if r.source == 'Error' %} style="color:var(--tx3)"{% endif %}>
+        <td style="text-align:left;font-weight:700">{{r.source}}</td>
+        <td>{{r.sum_sq|round(4)}}</td>
+        <td>{{r.df}}</td>
+        <td>{{r.mean_sq|round(4)}}</td>
+        <td>{% if r.source != 'Error' %}{{r.f_statistic|round(2)}}{% else %}&mdash;{% endif %}</td>
+        <td style="color:{% if r.p_value < 0.001 %}var(--green){% elif r.p_value < 0.05 %}var(--orange){% else %}var(--tx3){% endif %}">
+          {% if r.source != 'Error' %}{% if r.p_value < 0.001 %}&lt;0.001{% else %}{{r.p_value|round(4)}}{% endif %}{% else %}&mdash;{% endif %}
+        </td>
+        <td style="font-weight:700;color:{% if r.eta_squared > 0.06 %}var(--blue){% elif r.eta_squared > 0.01 %}var(--cyan){% else %}var(--tx3){% endif %}">
+          {{(r.eta_squared * 100)|round(1)}}%
+        </td>
+        <td>
+          {% if r.source != 'Error' %}
+            {% if r.is_significant %}<span style="color:var(--green);font-weight:700">***</span>
+            {% elif r.p_value < 0.05 %}<span style="color:var(--orange);font-weight:700">*</span>
+            {% else %}<span style="color:var(--tx3)">ns</span>{% endif %}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div style="font-size:.72em;color:var(--tx3);margin-top:8px">
+    *** p &lt; 0.05/7 (Bonferroni) &nbsp;|&nbsp; * p &lt; 0.05 &nbsp;|&nbsp; ns = not significant
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="grid-2">
+  <!-- Variance decomposition pie -->
+  <div class="card">
+    <div class="card-title">Variance Decomposition (&eta;&sup2;)</div>
+    <canvas id="pieChart" height="260"></canvas>
+  </div>
+
+  <!-- Effect size bar chart -->
+  <div class="card">
+    <div class="card-title">Effect Sizes (&eta;&sup2; %)</div>
+    <canvas id="barChart" height="260"></canvas>
+  </div>
+</div>
+
+<!-- Hypothesis check -->
+<div class="card">
+  <div class="card-title">Hypothesis Evaluation</div>
+  {% for h in hypotheses %}
+  <div class="hyp-row">
+    <div class="hyp-id">{{h.id}}</div>
+    <div class="hyp-text">{{h.text}}</div>
+    <div class="hyp-evidence">{{h.evidence}}</div>
+    <span class="badge {% if h.supported %}badge-pass{% else %}badge-fail{% endif %}">
+      {% if h.supported %}Supported{% else %}Not Supported{% endif %}
+    </span>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pairwise comparisons -->
+{% if pairwise %}
+<div class="card">
+  <div class="card-title">Pairwise Comparisons (Cohen's d)</div>
+  <table class="ctable">
+    <thead>
+      <tr><th style="text-align:left">Comparison</th><th>d</th><th>Interpretation</th></tr>
+    </thead>
+    <tbody>
+      {% for pw in pairwise %}
+      <tr>
+        <td style="text-align:left">{{pw.label}}</td>
+        <td style="font-weight:700;color:{% if pw.abs_d > 0.8 %}var(--red){% elif pw.abs_d > 0.5 %}var(--orange){% elif pw.abs_d > 0.2 %}var(--blue){% else %}var(--tx3){% endif %}">
+          {{pw.d|round(3)}}
+        </td>
+        <td>{{pw.interpretation}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a class="btn" href="/anova">Reset</a>
+  <a class="btn" href="/compare">Compare Conditions</a>
+  <a class="btn" href="/logs">View Logs</a>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if results %}
+<script>
+const results = {{ results_json | safe }};
+
+// Filter out Error for charts
+const sources = results.filter(r => r.source !== 'Error');
+const errorEta = results.find(r => r.source === 'Error')?.eta_squared || 0;
+
+// Pie chart
+const pieLabels = sources.map(r => r.source).concat(['Error']);
+const pieData = sources.map(r => (r.eta_squared * 100).toFixed(1)).concat([(errorEta * 100).toFixed(1)]);
+const pieColors = [
+  'rgba(76,141,255,0.8)',   // Tool
+  'rgba(34,197,94,0.8)',    // Context
+  'rgba(167,139,250,0.8)',  // Backend
+  'rgba(245,158,11,0.6)',   // TxC
+  'rgba(239,68,68,0.6)',    // TxB
+  'rgba(34,211,238,0.6)',   // CxB
+  'rgba(244,114,182,0.6)',  // TxCxB
+  'rgba(100,116,139,0.4)',  // Error
+];
+
+new Chart(document.getElementById('pieChart'), {
+  type: 'doughnut',
+  data: { labels: pieLabels, datasets: [{ data: pieData, backgroundColor: pieColors, borderWidth: 0 }] },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'right', labels: { color: '#e4e6ed', font: { size: 11 }, padding: 8 } },
+      tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + '%' } }
+    }
+  }
+});
+
+// Bar chart — effect sizes
+const barLabels = sources.map(r => r.source);
+const barData = sources.map(r => (r.eta_squared * 100).toFixed(2));
+const barColors = sources.map(r =>
+  r.eta_squared > 0.06 ? 'rgba(76,141,255,0.8)' :
+  r.eta_squared > 0.01 ? 'rgba(34,197,94,0.7)' : 'rgba(100,116,139,0.5)'
+);
+
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: { labels: barLabels, datasets: [{ data: barData, backgroundColor: barColors, borderRadius: 4 }] },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#333a4a' }, ticks: { color: '#9ca0ad', callback: v => v + '%' } },
+      y: { grid: { display: false }, ticks: { color: '#e4e6ed', font: { size: 11 } } }
+    }
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

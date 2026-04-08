@@ -1,0 +1,13 @@
+# HarnessEval - Core dependencies
+# Python 3.12.3
+# Generated from pyproject.toml [project.dependencies]
+numpy==2.2.6
+pandas==2.2.3
+scipy==1.15.3
+scikit-learn==1.6.1
+statsmodels==0.14.6
+pyyaml==6.0.3
+click==8.1.8
+rich==14.3.1
+streamlit==1.56.0
+plotly==6.5.2
