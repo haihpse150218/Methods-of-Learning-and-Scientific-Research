@@ -89,10 +89,31 @@ def _interpret_d(d: float) -> str:
 # Main render function
 # ---------------------------------------------------------------------------
 
+def _render_pipeline_banner():
+    """Show pipeline context at top of tab."""
+    active = st.session_state.get("active_condition", "—")
+    step = st.session_state.get("pipeline_step", 0)
+    step_names = ["Task Selection", "Config Load", "Run Agent", "Collect Logs", "Compute Metrics", "ANOVA"]
+    step_label = step_names[min(step, 5)] if step < 6 else "Complete"
+    n_conds = len(st.session_state.get("selected_conditions", []))
+
+    rm = st.session_state.get("run_manager")
+    run_status = rm.get_status()["status"] if rm else "idle"
+
+    parts = [f"Condition: `{active}`", f"Step {step+1}/6: {step_label}"]
+    if n_conds > 1:
+        parts.append(f"{n_conds} conditions selected")
+    if run_status == "running":
+        parts.append("Running...")
+
+    st.caption(" | ".join(parts))
+
+
 def render_anova() -> None:
     theme = st.session_state.get("theme", "dark")
 
     st.subheader("ANOVA — Three-way Factorial Analysis")
+    _render_pipeline_banner()
     st.caption(
         "Decomposes resolve-rate variance across Tool Config x Context Strategy x Backend. "
         "Bonferroni-corrected significance threshold: p < 0.05/7 ≈ 0.0071."
@@ -475,3 +496,6 @@ def render_anova() -> None:
                     st.success("Figures ready for download.")
                 except Exception as exc:
                     st.error(f"Figure generation failed: {exc}")
+
+    st.markdown("---")
+    st.caption("Pipeline complete! Review results above, export paper figures, or return to **Config Builder** to run more conditions.")

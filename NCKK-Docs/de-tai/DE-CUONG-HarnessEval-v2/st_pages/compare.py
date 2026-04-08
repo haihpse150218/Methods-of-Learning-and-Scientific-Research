@@ -69,10 +69,31 @@ def _build_comparison_row(label: str, item: dict, log: dict, metrics: dict) -> d
 # ---------------------------------------------------------------------------
 
 
+def _render_pipeline_banner():
+    """Show pipeline context at top of tab."""
+    active = st.session_state.get("active_condition", "—")
+    step = st.session_state.get("pipeline_step", 0)
+    step_names = ["Task Selection", "Config Load", "Run Agent", "Collect Logs", "Compute Metrics", "ANOVA"]
+    step_label = step_names[min(step, 5)] if step < 6 else "Complete"
+    n_conds = len(st.session_state.get("selected_conditions", []))
+
+    rm = st.session_state.get("run_manager")
+    run_status = rm.get_status()["status"] if rm else "idle"
+
+    parts = [f"Condition: `{active}`", f"Step {step+1}/6: {step_label}"]
+    if n_conds > 1:
+        parts.append(f"{n_conds} conditions selected")
+    if run_status == "running":
+        parts.append("Running...")
+
+    st.caption(" | ".join(parts))
+
+
 def render_compare() -> None:
     theme = st.session_state.get("theme", "dark")
 
     st.markdown("#### Compare Trajectories")
+    _render_pipeline_banner()
     st.caption(
         "Select 2 or more trajectory logs to compare side-by-side metrics, "
         "view a grouped bar chart, and inspect cross-backend portability."
@@ -262,3 +283,6 @@ def render_compare() -> None:
         file_name="harness_eval_comparison.csv",
         mime="text/csv",
     )
+
+    st.markdown("---")
+    st.caption("Next: go to **ANOVA** tab to run Three-Way ANOVA on all trajectory data.")

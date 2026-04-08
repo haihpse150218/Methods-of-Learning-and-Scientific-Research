@@ -91,7 +91,29 @@ def _cached_scan(base_dir: str) -> list[dict]:
     return results
 
 
+def _render_pipeline_banner():
+    """Show pipeline context at top of tab."""
+    active = st.session_state.get("active_condition", "—")
+    step = st.session_state.get("pipeline_step", 0)
+    step_names = ["Task Selection", "Config Load", "Run Agent", "Collect Logs", "Compute Metrics", "ANOVA"]
+    step_label = step_names[min(step, 5)] if step < 6 else "Complete"
+    n_conds = len(st.session_state.get("selected_conditions", []))
+
+    rm = st.session_state.get("run_manager")
+    run_status = rm.get_status()["status"] if rm else "idle"
+
+    parts = [f"Condition: `{active}`", f"Step {step+1}/6: {step_label}"]
+    if n_conds > 1:
+        parts.append(f"{n_conds} conditions selected")
+    if run_status == "running":
+        parts.append("Running...")
+
+    st.caption(" | ".join(parts))
+
+
 def render_log_viewer():
+    _render_pipeline_banner()
+
     # ── Guard: trajectories directory must exist ─────────────────────────────
     if not TRAJECTORIES_DIR.exists():
         st.warning(
@@ -274,3 +296,6 @@ def render_log_viewer():
             # Plotly horizontal bar chart
             fig = plotly_metrics_bar(metrics, theme=st.session_state.get("theme", "dark"))
             st.plotly_chart(fig, use_container_width=True, key=f"lv_chart_{selected_task_id}")
+
+        st.markdown("---")
+        st.caption("Next: go to **Compare** tab to compare multiple logs, or **ANOVA** tab for statistical analysis.")
