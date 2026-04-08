@@ -1,0 +1,44 @@
+{
+  "task_id": "mini__fix-list-average",
+  "model": "ollama/qwen2.5:1.5b",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "ollama"
+  },
+  "condition_id": "minimal_full_ollama_1.5b",
+  "total_cost": 0.0,
+  "context_tokens_used": 506,
+  "duration_seconds": 12.0,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "edit",
+      "args": {
+        "numbers": []
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-04-08T10:21:37"
+    },
+    {
+      "turn": 2,
+      "action": "submit",
+      "args": {
+        "status": "done"
+      },
+      "output": "Submitted.",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-04-08T10:21:41"
+    }
+  ]
+}

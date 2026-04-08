@@ -1,0 +1,45 @@
+{
+  "task_id": "mini__fix-divide-by-zero",
+  "model": "ollama/qwen2.5:1.5b",
+  "resolved": false,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "ollama"
+  },
+  "condition_id": "minimal_full_ollama_1.5b",
+  "total_cost": 0.0,
+  "context_tokens_used": 508,
+  "duration_seconds": 11.7,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "edit",
+      "args": {
+        "a": 1,
+        "b": 0
+      },
+      "output": "File edited successfully.",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-04-08T10:21:25"
+    },
+    {
+      "turn": 2,
+      "action": "submit",
+      "args": {
+        "status": "done"
+      },
+      "output": "Submitted.",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-04-08T10:21:29"
+    }
+  ]
+}

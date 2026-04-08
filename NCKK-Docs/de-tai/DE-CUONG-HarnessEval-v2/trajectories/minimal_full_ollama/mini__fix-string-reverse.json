@@ -1,0 +1,30 @@
+{
+  "task_id": "mini__fix-string-reverse",
+  "model": "ollama/qwen2.5:7b",
+  "resolved": true,
+  "config": {
+    "tool_level": "minimal",
+    "context_strategy": "full",
+    "backend": "ollama"
+  },
+  "condition_id": "minimal_full_ollama",
+  "total_cost": 0.0,
+  "context_tokens_used": 242,
+  "duration_seconds": 28.9,
+  "trajectory": [
+    {
+      "turn": 1,
+      "action": "submit",
+      "args": {
+        "status": "done"
+      },
+      "output": "Submitted.",
+      "acceptable_tools": [
+        "read",
+        "edit",
+        "bash"
+      ],
+      "timestamp": "2026-04-08T10:20:39"
+    }
+  ]
+}
