@@ -253,7 +253,7 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
     # Controls (disabled while running)
     col_a, col_b, col_c = st.columns([1, 1, 1])
     with col_a:
-        dry_run = st.toggle("Dry Run Mode", value=True, key="cb_dry_run", disabled=is_running)
+        dry_run = st.toggle("Dry Run Mode", value=False, key="cb_dry_run", disabled=is_running)
     with col_b:
         max_tasks = st.number_input(
             "Max tasks per condition",
@@ -275,10 +275,11 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
     sweagent_dir: str | None = None
     if not dry_run:
         sweagent_dir = st.text_input(
-            "SWE-Agent directory",
+            "SWE-Agent directory (required for real mode)",
             value="./SWE-agent",
             key="cb_sweagent_dir",
             disabled=is_running,
+            help="Path to SWE-Agent installation. Required when Dry Run is OFF.",
         )
 
     condition_id = f"{tool}_{context}_{backend}"
@@ -500,13 +501,21 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
         )
 
     def _start_run(condition_list: list[str]) -> None:
-        dry_run = st.session_state.get("cb_dry_run", True)
+        dry_run = st.session_state.get("cb_dry_run", False)
         max_tasks = int(st.session_state.get("cb_max_tasks", 5))
         sweagent_dir_str = st.session_state.get("cb_sweagent_dir")
         is_parallel = st.session_state.get("cb_parallel", False)
         n_workers = int(st.session_state.get("cb_workers", 4))
 
-        # Auto-enable parallel for "Run All 27"
+        # Validate real mode requirements
+        if not dry_run and not sweagent_dir_str:
+            st.error(
+                "**Real mode requires SWE-Agent directory.** "
+                "Set the path above, or enable **Dry Run Mode** for synthetic data."
+            )
+            return
+
+        # Auto-enable parallel for large runs
         if len(condition_list) >= 10 and not is_parallel:
             is_parallel = True
             n_workers = 4 if dry_run else 3  # 3 for real to avoid rate limits
