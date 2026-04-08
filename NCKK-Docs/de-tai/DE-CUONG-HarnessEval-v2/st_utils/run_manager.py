@@ -75,6 +75,7 @@ class RunManager:
                 "progress": (0, 0),
                 "logs": [],
                 "current_condition": "",
+                "condition_status": {},
             }
 
         target = self._run_thread_parallel if parallel else self._run_thread
@@ -111,6 +112,7 @@ class RunManager:
                 "progress": self._state["progress"],
                 "logs": list(self._state["logs"]),  # return a copy
                 "current_condition": self._state["current_condition"],
+                "condition_status": dict(self._state.get("condition_status", {})),
             }
 
     def clear(self) -> None:
@@ -130,6 +132,7 @@ class RunManager:
             "progress": (0, 0),
             "logs": [],
             "current_condition": "",
+            "condition_status": {},  # {cond_id: {"status", "completed", "total", "resolved", "failed"}}
         }
 
     def _log(self, message: str) -> None:
@@ -148,6 +151,38 @@ class RunManager:
     def _set_status(self, status: str) -> None:
         with self._lock:
             self._state["status"] = status
+
+    def _init_condition(self, cond_id: str, total: int) -> None:
+        """Initialize tracking for a condition."""
+        with self._lock:
+            self._state["condition_status"][cond_id] = {
+                "status": "pending",
+                "completed": 0,
+                "total": total,
+                "resolved": 0,
+                "failed": 0,
+            }
+
+    def _update_condition(self, cond_id: str, resolved: bool) -> None:
+        """Record one task completion for a condition."""
+        with self._lock:
+            cs = self._state["condition_status"].get(cond_id)
+            if cs is None:
+                return
+            cs["status"] = "running"
+            cs["completed"] += 1
+            if resolved:
+                cs["resolved"] += 1
+            else:
+                cs["failed"] += 1
+            if cs["completed"] >= cs["total"]:
+                cs["status"] = "done"
+
+    def _set_condition_status(self, cond_id: str, status: str) -> None:
+        with self._lock:
+            cs = self._state["condition_status"].get(cond_id)
+            if cs:
+                cs["status"] = status
 
     # ------------------------------------------------------------------
     # Background thread
@@ -200,6 +235,10 @@ class RunManager:
             completed = 0
             self._set_progress(completed, total_tasks)
 
+            # Initialize per-condition status
+            for cond in selected_conditions:
+                self._init_condition(cond.condition_id, len(tasks))
+
             for condition in selected_conditions:
                 # Check stop before starting a new condition
                 if self._stop_event.is_set():
@@ -208,6 +247,7 @@ class RunManager:
 
                 cond_id = condition.condition_id
                 self._set_condition(cond_id)
+                self._set_condition_status(cond_id, "running")
                 self._log(f"Condition: {cond_id}")
 
                 for task_id in tasks:
@@ -228,6 +268,7 @@ class RunManager:
                     # Update progress
                     completed += 1
                     self._set_progress(completed, total_tasks)
+                    self._update_condition(cond_id, result.resolved)
 
             # Mark done
             self._set_status("done")
@@ -281,9 +322,15 @@ class RunManager:
             self._set_progress(0, total_tasks)
             self._log(f"Starting PARALLEL run: {len(selected_conditions)} conditions x {len(tasks)} tasks ({max_workers} workers)")
 
+            # Initialize per-condition status
+            for cond in selected_conditions:
+                self._init_condition(cond.condition_id, len(tasks))
+
             def run_one_condition(condition):
                 """Worker function: run all tasks for one condition."""
                 cond_id = condition.condition_id
+                self._set_condition_status(cond_id, "running")
+
                 # Each worker gets its own runner to avoid shared state
                 worker_config = RunConfig(
                     output_dir=output_dir,
@@ -297,6 +344,7 @@ class RunManager:
 
                 for task_id in tasks:
                     if self._stop_event.is_set():
+                        self._set_condition_status(cond_id, "stopped")
                         return cond_id, "stopped"
 
                     result = worker_runner.run_single_task(condition, task_id)
@@ -304,7 +352,8 @@ class RunManager:
                     self._log(f"[{cond_id}] {task_id}: {pass_fail} (${result.total_cost:.4f})")
                     worker_runner.save_trajectory(result, condition)
 
-                    # Atomic counter update
+                    # Update per-condition + overall progress
+                    self._update_condition(cond_id, result.resolved)
                     with self._lock:
                         self._completed_counter += 1
                         self._state["progress"] = (self._completed_counter, self._total_tasks)

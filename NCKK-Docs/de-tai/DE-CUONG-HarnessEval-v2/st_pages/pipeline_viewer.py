@@ -213,23 +213,69 @@ def render_pipeline_viewer():
                 st.caption("The run panel in Config Builder controls pipeline execution.")
 
             elif status_val == "running":
+                import pandas as pd
+
                 cur, total = run_status["progress"]
-                st.progress(cur / total if total > 0 else 0)
-                st.info(
-                    f"Running: `{run_status['current_condition']}` — "
-                    f"Task {cur}/{total}"
-                )
+                st.progress(cur / total if total > 0 else 0, text=f"Overall: {cur}/{total} tasks")
+
+                # Per-condition status table
+                cond_status = run_status.get("condition_status", {})
+                if cond_status:
+                    st.markdown("**Condition Status:**")
+                    cond_rows = []
+                    for cid, cs in cond_status.items():
+                        status_emoji = {
+                            "pending": "Pending",
+                            "running": "Running...",
+                            "done": "Done",
+                            "stopped": "Stopped",
+                        }.get(cs["status"], cs["status"])
+                        pct = f"{cs['completed']}/{cs['total']}" if cs["total"] > 0 else "—"
+                        cond_rows.append({
+                            "Condition": cid,
+                            "Status": status_emoji,
+                            "Progress": pct,
+                            "Resolved": cs["resolved"],
+                            "Failed": cs["failed"],
+                        })
+                    # Sort: running first, then done, then pending
+                    order = {"running": 0, "done": 1, "pending": 2, "stopped": 3}
+                    cond_rows.sort(key=lambda r: order.get(r["Status"].lower().rstrip("."), 9))
+                    st.dataframe(pd.DataFrame(cond_rows), use_container_width=True, hide_index=True, height=min(300, 35 * len(cond_rows) + 38))
+
+                # Recent logs
                 if run_status["logs"]:
-                    with st.container():
-                        for line in run_status["logs"][-15:]:
+                    with st.expander("Live Log", expanded=False):
+                        for line in run_status["logs"][-20:]:
                             st.text(line)
+
                 # Auto-refresh while running
                 import time
                 time.sleep(1)
                 st.rerun()
 
             elif status_val == "done":
+                import pandas as pd
+
                 st.success("Run complete!")
+
+                # Show final condition results
+                cond_status = run_status.get("condition_status", {})
+                if cond_status:
+                    st.markdown("**Final Results:**")
+                    final_rows = []
+                    for cid, cs in cond_status.items():
+                        resolve_rate = cs["resolved"] / cs["total"] if cs["total"] > 0 else 0
+                        final_rows.append({
+                            "Condition": cid,
+                            "Status": "Done",
+                            "Tasks": cs["total"],
+                            "Resolved": cs["resolved"],
+                            "Failed": cs["failed"],
+                            "Resolve Rate": f"{resolve_rate:.0%}",
+                        })
+                    st.dataframe(pd.DataFrame(final_rows), use_container_width=True, hide_index=True)
+
                 if pipeline_step == 2:
                     st.session_state.pipeline_step = 3
                     st.rerun()
