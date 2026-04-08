@@ -2,7 +2,7 @@
 # (Ghi nhan qua trinh code va test)
 
 > **Ngay bat dau:** 07/04/2026
-> **Trang thai:** Phase 7 — Unified Pipeline Flow (NEXT)
+> **Trang thai:** Phase 8 — Real Mode voi Ollama Local (NEXT)
 > **Vi tri:** `NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/`
 
 ---
@@ -844,6 +844,46 @@ sweagent run-batch \
 - `.streamlit/config.toml` — wide layout, theme config
 - Tong cong: 167 tests, 100% pass
 
+### 7.7. Session 7 (08/04/2026) — Phase 7 Complete + Ollama Setup
+
+**Da lam:**
+- Phase 7 Unified Pipeline Flow — HOAN THANH:
+  - Highlight conditions trong table (sort by match score)
+  - Multi-select voi checkbox + "Run Selected" button
+  - "Run All 27 Conditions" button voi auto-parallel
+  - "Run Active" button cho single condition quick-run
+  - Pipeline column trong 27-condition table (Pending/Running/Done per condition)
+  - Pipeline tab → "Run Monitor" (live per-condition status table + full log)
+  - Per-condition status tracking trong RunManager (resolved/failed counts)
+  - Pipeline banner tren tat ca tabs
+  - Cross-tab navigation hints
+  - Reset Pipeline button
+- Fix bugs:
+  - Compare tab: handle ca path va label format trong compare_logs
+  - Log Viewer: TTL=5s cache + Refresh button (fix "No trajectory files found")
+  - RunManager: clear() race condition, missing condition_status in start()
+  - XSS: html.escape() trong log lines
+  - Dedup: extracted shared pipeline banner to st_utils/ui_helpers.py
+- Parallel execution mode:
+  - ThreadPoolExecutor trong RunManager
+  - Parallel Mode toggle + Workers slider trong Config Builder
+  - Auto-parallel khi >= 10 conditions (4 workers dry-run, 3 real)
+  - Benchmark: 27 conds x 8 tasks parallel = 0.43s
+- Realistic synthetic data:
+  - Task difficulty varies per task_id (random intercept)
+  - Tool largest effect (~7% eta²), Context medium (~2.3%), Backend small (~1%)
+  - Interaction effects: minimal+summary penalty, full+full synergy
+  - ANOVA produces significant results (Tool p<0.001 ***)
+  - Cohen's d full vs minimal = 0.67 (medium-large)
+- Default mode = Real (dry-run la opt-in)
+- Ollama local setup:
+  - Ollama 0.20.3 installed voi qwen2.5:7b, qwen2.5:1.5b, deepseek-r1:1.5b
+  - SWE-Agent be_ollama.yaml config san sang
+  - Docker image dang pull (can cho real mode tren Windows)
+- .env file cho API keys (.gitignored)
+- Code review: 7 bugs fixed, 8 UX issues noted, 7 enhancements identified
+- Xoa dummy trajectory files, clean trajectories/ dir
+
 ---
 
 ## 8. Trang thai hien tai — DA HOAN THANH
@@ -852,28 +892,29 @@ sweagent run-batch \
 
 ```
 DA XONG:
-├── harness_eval/               # Python toolkit (167 tests pass)
+├── harness_eval/               # Python toolkit
 │   ├── configs/                # 27 conditions = 3x3x3
 │   ├── metrics/                # 7 metrics (M1.1-M3.2)
 │   ├── parsers/trajectory.py   # SWE-Agent log parser
 │   ├── pipeline/
 │   │   ├── analysis.py         # ANOVA 3-way, Cohen's d, Tukey HSD, GLMM
-│   │   └── runner.py           # Pipeline runner (dry-run + SWE-Agent subprocess)
+│   │   └── runner.py           # Pipeline runner (dry-run + SWE-Agent subprocess + realistic synthetic)
 │   ├── harness/
 │   │   ├── interfaces.py       # 3 ABC + 9 concrete providers
 │   │   └── factory.py          # HarnessConfig, create_harness_config, generate commands
 │   └── cli.py                  # harness-eval info/pilot/run/convert/analyze
-├── streamlit_app.py            # Streamlit dashboard entry point (thay the Flask)
+├── streamlit_app.py            # Streamlit dashboard entry point
 ├── st_pages/                   # 5 tab modules
-│   ├── config_builder.py       # Tab 1: Config Builder
-│   ├── pipeline_viewer.py      # Tab 2: Pipeline Viewer
-│   ├── log_viewer.py           # Tab 3: Log Viewer
-│   ├── compare.py              # Tab 4: Compare
-│   └── anova.py                # Tab 5: ANOVA + GLMM
+│   ├── config_builder.py       # Tab 1: Config Builder (factors + run panel + conditions table)
+│   ├── pipeline_viewer.py      # Tab 2: Run Monitor (live status + log + data summary)
+│   ├── log_viewer.py           # Tab 3: Log Viewer (turn-by-turn + metrics)
+│   ├── compare.py              # Tab 4: Compare (multi-select + portability)
+│   └── anova.py                # Tab 5: ANOVA + GLMM + paper export
 ├── st_utils/                   # Dashboard utilities
 │   ├── data_loader.py          # Cached trajectory scanning + metrics
 │   ├── charts.py               # Plotly + Matplotlib chart helpers
-│   └── run_manager.py          # Background subprocess + threading
+│   ├── run_manager.py          # Background subprocess + threading + parallel (ThreadPoolExecutor)
+│   └── ui_helpers.py           # Shared UI: pipeline banner, html escape
 ├── tests/                      # 167 tests, 100% pass
 │   ├── test_configs.py         # 36 tests
 │   ├── test_metrics.py         # 38 tests
@@ -883,15 +924,16 @@ DA XONG:
 │   ├── test_cli.py             # 10 tests
 │   ├── test_data_loader.py     # 7 tests
 │   └── test_run_manager.py     # 9 tests
-├── trajectories/               # JSON trajectory data (8 conditions, 41 files)
-├── SWE-agent/                  # SWE-Agent clone (.gitignored)
-│   └── config/harness_eval/    # 10 YAML configs for ablation
-├── app/                        # Flask UI (backup — replaced by Streamlit)
+├── trajectories/               # JSON trajectory data (generated by runs)
+├── .env                        # API keys (.gitignored)
+├── SWE-agent/                  # SWE-Agent 1.1.0 clone (.gitignored)
+│   └── config/harness_eval/    # 12 YAML configs (base + 3 tool + 3 ctx + 3 be + 2 ollama)
 ├── .streamlit/config.toml      # Streamlit config
-├── scripts/generate_samples.py # Sample data generator
-├── dashboard.html              # Overview dashboard
+├── app/                        # Flask UI (legacy backup)
+├── docs/superpowers/           # Design specs + implementation plans
+├── pyproject.toml              # Package config (streamlit, plotly, harness_eval)
 ├── index.html                  # PDF de cuong render
-└── pyproject.toml              # Package config (streamlit, plotly added)
+└── dashboard.html              # Overview dashboard
 ```
 
 ### 8.2. Nhung gi CHUA CODE (next steps)
@@ -910,181 +952,89 @@ DA XONG:
 | 10 | **Equivalence verification** | CAO | Chay 50 tasks, verify ±3% vs SWE-Agent default |
 | 11 | ~~Connect runner to SWE-Agent~~ | ~~CAO~~ | **DONE** — subprocess integration + .traj parsing |
 | 12 | ~~CLI pilot/full commands~~ | ~~TRUNG BINH~~ | **DONE** — info, pilot, run, convert, analyze |
-| 13 | **Install SWE-Agent deps** | CAO | pip install -e SWE-agent/, setup Docker env |
+| 13 | ~~Install SWE-Agent deps~~ | ~~CAO~~ | **DONE** — SWE-Agent 1.1.0 installed, Docker 29.2.1, Ollama 0.20.3 |
+| 14 | ~~Streamlit Dashboard~~ | ~~CAO~~ | **DONE** — 5 tabs, parallel mode, per-condition tracking |
+| 15 | ~~Phase 7 Unified Pipeline~~ | ~~CAO~~ | **DONE** — multi-select, Run All 27, Run Monitor, pipeline banner |
+| 16 | **Docker image pull** | CAO | `docker pull sweagent/swe-agent:latest` (dang pull, mang cham) |
+| 17 | **Real mode test voi Ollama** | CAO | Chay SWE-Agent + Ollama qwen2.5:7b qua Docker |
+| 18 | **Equivalence verification** | CAO | Chay 50 tasks, verify ±3% vs SWE-Agent default |
 
-### 8.3. Phase 7 — Unified Pipeline Flow (BUOC TIEP THEO)
+### 8.3. Phase 7 — Unified Pipeline Flow — DA HOAN THANH
 
-**Muc tieu:** Thong nhat UI de moi buoc trong pipeline duoc dieu khien tu dashboard,
-data tu buoc truoc tu dong chay vao buoc sau.
+**Tat ca 8 cai tien da implement:**
 
-#### 8.3.1. Tong quan Unified Flow
+| # | Cai tien | Status |
+|---|----------|--------|
+| 1 | Highlight conditions (sort by match score) | DONE |
+| 2 | Multi-select + "Run Selected" + "Run Active" | DONE |
+| 3 | YAML flow Config → Run Monitor | DONE |
+| 4 | Pipeline → Run Monitor (per-condition status table) | DONE |
+| 5 | Auto-scan + auto-metrics | DONE |
+| 6 | Cross-tab navigation hints | DONE |
+| 7 | Parallel run (ThreadPoolExecutor, 4 workers) | DONE |
+| 8 | Pipeline banner on all tabs | DONE |
+| + | "Run All 27 Conditions" button | DONE |
+| + | Pipeline column trong conditions table | DONE |
+| + | Realistic synthetic data (ANOVA significant) | DONE |
+| + | Default = Real mode (dry-run opt-in) | DONE |
+| + | Code review fixes (7 bugs, XSS, race condition) | DONE |
 
+### 8.4. Phase 8 — Real Mode voi Ollama Local (BUOC TIEP THEO)
+
+**Prerequisites (da co):**
 ```
-USER chon Config (Tab 1)
-    │
-    ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 1: Config Builder                                       │
-│  - Chon Tool / Context / Backend                             │
-│  - Highlight matching conditions trong 27-condition table    │
-│  - Hien thi condition summary + tool chips                   │
-│  - Generate YAML config → luu vao session_state              │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ session_state.active_config (YAML dict)
-                       │ session_state.selected_conditions (list)
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 2: Config Load (trong Pipeline tab)                     │
-│  - Hien thi YAML config da chon tu Step 1                    │
-│  - Hien thi SWE-Agent composed command                       │
-│  - Validate config (tools exist, backend reachable)          │
-│  - Button "Load Config" → trang thai chuyen sang LOADED      │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ session_state.loaded_config
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 3: Run Agent (trong Pipeline tab)                       │
-│  - Mode: Dry-Run / Real                                      │
-│  - Max tasks slider                                          │
-│  - Button "Run" → start background thread                    │
-│  - Live progress bar + scrolling log                         │
-│  - Output: trajectory JSON files → trajectories/             │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ trajectories/<condition_id>/*.json
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 4: Collect Logs (auto sau khi Run xong)                 │
-│  - Auto-scan trajectories/ folder                            │
-│  - Parse JSON → ParsedTrajectory objects                     │
-│  - Hien thi summary: X tasks resolved, Y failed              │
-│  - Link sang Tab 3 (Log Viewer) de xem chi tiet              │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ session_state.last_run_results
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 5: Compute Metrics (auto hoac manual)                   │
-│  - Auto-compute 7 metrics cho moi trajectory                 │
-│  - Hien thi aggregate metrics per condition                  │
-│  - Link sang Tab 4 (Compare) de so sanh                      │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ session_state.computed_metrics
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 6: ANOVA Analysis (trong Tab 5)                         │
-│  - Auto-load data tu trajectories/                           │
-│  - Button "Run ANOVA" → compute + hien thi table             │
-│  - Variance charts + Hypothesis evaluation                   │
-│  - GLMM robustness check                                     │
-│  - Export paper figures                                       │
-└─────────────────────────────────────────────────────────────┘
+Ollama 0.20.3:    qwen2.5:7b (4.7GB), qwen2.5:1.5b (986MB), deepseek-r1:1.5b (1.1GB)
+SWE-Agent 1.1.0:  config/harness_eval/be_ollama.yaml san sang
+Docker 29.2.1:    Can pull sweagent/swe-agent:latest image
+.env:             DEEPSEEK_API_KEY (insufficient balance)
 ```
 
-#### 8.3.2. Session State Flow (data chuyen giua cac tab)
+**Thu tu:**
+```
+BUOC 1: Pull Docker image ← DANG LAM
+  docker pull sweagent/swe-agent:latest
+  Doi download xong (~2GB)
 
-```python
-# Tab 1 (Config Builder) sets:
-st.session_state.active_condition   = "full_full_claude"
-st.session_state.active_config      = {yaml_dict}        # Generated YAML
-st.session_state.selected_conditions = ["full_full_claude", ...]  # Multi-select tu table
+BUOC 2: Test 1 task voi Ollama + Docker
+  sweagent run \
+    --config config/harness_eval/base.yaml \
+    --config config/harness_eval/tool_minimal.yaml \
+    --config config/harness_eval/ctx_full.yaml \
+    --config config/harness_eval/be_ollama.yaml \
+    --agent.tools.parse_function.type thought_action \
+    --agent.model.per_instance_cost_limit 0 \
+    --agent.model.max_input_tokens 0 \
+    --env.deployment.type docker \
+    --env.deployment.docker.image sweagent/swe-agent:latest \
+    --env.repo.github_url https://github.com/SWE-agent/test-repo \
+    --problem_statement.github_url https://github.com/SWE-agent/test-repo/issues/1
+  Luu y: Docker container goi Ollama qua http://host.docker.internal:11434
 
-# Tab 2 (Pipeline) reads active_config, shows loaded config, manages run:
-st.session_state.loaded_config      = {yaml_dict}        # Confirmed config
-st.session_state.pipeline_step      = 1-6                # Current step
-st.session_state.run_manager        = RunManager()       # Singleton
+BUOC 3: Wire dashboard real mode → SWE-Agent + Ollama
+  - Update runner.py: set PYTHONIOENCODING=utf-8 trong subprocess env
+  - Update be_ollama.yaml: api_base = http://host.docker.internal:11434
+  - Add ollama backend option trong Config Builder dropdown
+  - Test: Dashboard → Config Builder → chon ollama → Run Active
 
-# Tab 3 (Log Viewer) reads from trajectories/ folder:
-st.session_state.selected_log_path  = "trajectories/full_full_claude/task-0.json"
+BUOC 4: Equivalence Verification (±3%)
+  Dashboard → chon full/full/ollama
+  Run 10 tasks → check resolve rate
+  So sanh voi dry-run baseline
 
-# Tab 4 (Compare) collects from Log Viewer:
-st.session_state.compare_logs       = [path1, path2, ...]
-
-# Tab 5 (ANOVA) reads all trajectories:
-st.session_state.anova_results      = [ANOVAResult, ...]
-st.session_state.anova_df           = DataFrame
+BUOC 5: Pilot Study voi Ollama
+  Dashboard → tick 3-5 conditions voi ollama backend
+  Run Selected → 10 tasks moi condition
+  Log Viewer → xem chi tiet
+  ANOVA → compare ollama vs synthetic baseline
 ```
 
-#### 8.3.3. Cai tien cu the can implement
-
-| # | Cai tien | Tab | Chi tiet |
-|---|----------|-----|----------|
-| 1 | **Highlight conditions trong table** | Config | Khi chon Tool/Context/Backend, highlight hang tuong ung trong 27-condition table (background color khac). Neu chon 1 factor → highlight 9 conditions. Chon 2 → 3 conditions. Chon 3 → 1 condition. |
-| 2 | **Multi-select conditions** | Config | Them checkbox column trong 27-condition table. User tick nhieu conditions → luu vao `selected_conditions`. Button "Run Selected" chay tat ca conditions da chon. |
-| 3 | **YAML → Pipeline tab** | Config→Pipeline | YAML tu Config tab tu dong hien thi trong Pipeline tab Step 2 "Config Load". Khong can copy/paste. |
-| 4 | **Pipeline step tracking** | Pipeline | Moi step co trang thai riet (PENDING→LOADED→RUNNING→DONE). Step hien tai duoc highlight xanh. Steps da xong duoc highlight xanh la. |
-| 5 | **Auto-scan sau Run** | Pipeline | Sau khi Run xong (step 3), tu dong scan trajectories/ va hien thi summary (step 4). Tu dong compute metrics (step 5). |
-| 6 | **Link giua tabs** | All | Button "View Logs →" trong Pipeline tab navigates sang Log Viewer tab. Button "Compare →" trong Log Viewer navigates sang Compare tab. Button "Run ANOVA →" trong Compare navigates sang ANOVA tab. |
-| 7 | **Run nhieu conditions** | Config→Pipeline | Khi chon nhieu conditions tu table, Run panel chay sequential: cond 1 → cond 2 → ... Progress bar hien thi overall progress. |
-| 8 | **Pipeline context banner** | Pipeline | Hien thi trang thai toan bo pipeline: "Config: full_full_claude | Step: 3/6 Running | Tasks: 15/20 | Cost: $5.25" |
-
-#### 8.3.4. Thu tu implement
+### 8.5. Sau Phase 8 (khi co API keys / budget)
 
 ```
-BUOC 1: Highlight conditions trong table ← BUOC TIEP THEO
-  - Dung pandas Styler hoac column_config de highlight rows matching selected factors
-  - Khi chon full/full/claude → highlight dong "full_full_claude" mau xanh
-  - Khi chi chon tool=full → highlight 9 dong co tool=full
-
-BUOC 2: Multi-select conditions + "Run Selected"
-  - Them st.data_editor voi checkbox column thay vi st.dataframe
-  - Luu selected conditions vao session_state
-  - Button "Run Selected" → goi run_manager.start(conditions=selected_list)
-
-BUOC 3: YAML flow Config → Pipeline
-  - Config tab luu yaml dict vao st.session_state.active_config
-  - Pipeline tab Step 2 doc va hien thi yaml + SWE-Agent command
-  - Button "Load Config" → confirm va chuyen sang step 3
-
-BUOC 4: Pipeline step tracking
-  - session_state.pipeline_step = int (1-6)
-  - Moi step: render voi mau tuong ung (gray/blue/green)
-  - Auto-advance khi buoc truoc xong
-
-BUOC 5: Auto-scan + auto-metrics sau Run
-  - Khi run_manager status = "done", tu dong:
-    1. scan_trajectories() → hien thi summary
-    2. compute_metrics_for_log() cho moi file → aggregate
-    3. Hien thi bang condition summary (resolve rate, avg cost)
-  - pipeline_step chuyen sang 4 → 5 → 6
-
-BUOC 6: Cross-tab navigation
-  - st.session_state dung de "navigate" giua tabs
-  - Button "View in Log Viewer" set session_state va st.rerun()
-  - Streamlit st.tabs khong co native tab switching API,
-    nen dung workaround: set flag → render target tab content
-
-BUOC 7: Run nhieu conditions
-  - run_manager.start() nhan list conditions
-  - Progress: "Condition 2/5 — full_full_claude — Task 8/20"
-  - Moi condition xong → update summary table
-
-BUOC 8: Pipeline context banner
-  - Sticky banner o top cua moi tab showing pipeline state
-  - "Active: full_full_claude | Step 3: Running | 8/20 tasks | $2.80"
-```
-
-### 8.4. Sau Phase 7 (production pipeline)
-
-```
-BUOC A: Install SWE-Agent + Setup Docker
-  cd SWE-agent && pip install -e .
-  Docker: docker pull sweagent/swe-agent:latest
-  Set API keys: export ANTHROPIC_API_KEY=...
-
-BUOC B: Equivalence Verification (±3%)
-  Mo dashboard → Config tab → chon full/full/gpt
-  Run 50 tasks (real mode) → so sanh voi SWE-Agent default
-
-BUOC C: Pilot Study (200 evals)
-  Mo dashboard → Config tab → tick 5 critical conditions
-  Run Selected → 20 tasks x 2 runs
-  Tab 3 Log Viewer → xem chi tiet
-  Tab 5 ANOVA → run analysis
-
-BUOC D: Full Ablation (7,050 evals)
-  Mo dashboard → Config tab → tick all 27 conditions
-  Run Selected → 150 tasks
-  Tab 5 ANOVA → evaluate H1-H4
-  Export paper figures
+BUOC A: Nap tien DeepSeek / lay API key OpenAI/Anthropic
+BUOC B: Pilot Study (200 evals) — 5 critical conditions x 20 tasks x 2 runs
+BUOC C: Full Ablation (7,050 evals) — 27 conditions x 150 tasks
+BUOC D: ANOVA → evaluate H1-H4 → export paper figures
 ```
 
 ---
@@ -1129,10 +1079,11 @@ harness-eval convert path/to/file.traj  # convert .traj → JSON
 
 ### De tiep tuc CODE:
 ```
-1. Doc muc 8.3 (Phase 7 — Unified Pipeline Flow)
-2. Buoc tiep theo: Highlight conditions trong table
-3. Sau do: Multi-select + YAML flow + Pipeline step tracking
-4. Sau do: Install SWE-Agent → Equivalence → Pilot → Full
+1. Doc muc 8.4 (Phase 8 — Real Mode voi Ollama Local)
+2. Buoc tiep theo: docker pull sweagent/swe-agent:latest (doi download)
+3. Sau do: Test 1 task Ollama + Docker
+4. Sau do: Wire dashboard → real mode
+5. Sau do: Equivalence verification → Pilot → Full
 ```
 
 ### Thong tin ky thuat:
@@ -1140,6 +1091,9 @@ harness-eval convert path/to/file.traj  # convert .traj → JSON
 Working dir:  D:\MSA-FPT\Methods of Learnning and scientific research
 Python:       3.12
 Dependencies: numpy, pandas, scipy, statsmodels, click, streamlit, plotly, pytest
-SWE-Agent:    SWE-agent/ (cloned, .gitignored)
-Dashboard:    streamlit run streamlit_app.py (thay the Flask app)
+SWE-Agent:    SWE-agent/ 1.1.0 (cloned, .gitignored)
+Ollama:       0.20.3 (qwen2.5:7b, qwen2.5:1.5b, deepseek-r1:1.5b)
+Docker:       29.2.1 (image dang pull)
+Dashboard:    streamlit run streamlit_app.py
+API keys:     .env (DEEPSEEK_API_KEY — insufficient balance)
 ```
