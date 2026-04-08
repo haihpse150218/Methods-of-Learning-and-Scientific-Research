@@ -389,6 +389,26 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
         st.rerun()
 
 
+def _render_data_overview() -> None:
+    """Show aggregate data stats at a glance."""
+    entries = scan_trajectories(TRAJECTORIES_DIR) if TRAJECTORIES_DIR.exists() else []
+    if not entries:
+        return
+
+    conditions = set(e["condition_id"] for e in entries)
+    resolved = sum(1 for e in entries if e["resolved"])
+    total = len(entries)
+    resolve_rate = resolved / total if total > 0 else 0
+
+    st.markdown("---")
+    st.markdown("#### Data Overview")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Trajectories", f"{total}", help="Total trajectory files")
+    m2.metric("Conditions", f"{len(conditions)}/27", help="Conditions with data")
+    m3.metric("Resolved", f"{resolved}/{total}", f"{resolve_rate:.0%}")
+    m4.metric("Missing", f"{27 - len(conditions)}", help="Conditions without data")
+
+
 def _render_conditions_table(tool: str, context: str, backend: str) -> None:
     """Render the 27-condition table with sorting by match score and multi-select."""
     import pandas as pd
@@ -614,5 +634,8 @@ def render_config_builder() -> None:
     # 4. Run panel
     _render_run_panel(tool, context, backend)
 
-    # 5. 27-condition table (receives current selection for sorting/pre-check)
+    # 5. Data overview (quick stats)
+    _render_data_overview()
+
+    # 6. 27-condition table (receives current selection for sorting/pre-check)
     _render_conditions_table(tool, context, backend)
