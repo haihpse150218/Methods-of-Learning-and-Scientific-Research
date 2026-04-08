@@ -253,7 +253,14 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
     # Controls (disabled while running)
     col_a, col_b, col_c = st.columns([1, 1, 1])
     with col_a:
-        dry_run = st.toggle("Dry Run Mode", value=False, key="cb_dry_run", disabled=is_running)
+        run_mode = st.selectbox(
+            "Run Mode",
+            ["ollama", "dry-run", "real"],
+            index=0,
+            key="cb_run_mode",
+            disabled=is_running,
+            help="ollama = local LLM (free), dry-run = synthetic data, real = SWE-Agent + API",
+        )
     with col_b:
         max_tasks = st.number_input(
             "Max tasks per condition",
@@ -272,14 +279,35 @@ def _render_run_panel(tool: str, context: str, backend: str) -> None:
         else:
             max_workers = 1
 
+    # Mode-specific settings
+    ollama_model: str | None = None
     sweagent_dir: str | None = None
-    if not dry_run:
+
+    if run_mode == "ollama":
+        from st_utils.ollama_runner import list_models, check_ollama
+        if check_ollama():
+            models = list_models()
+            model_names = [m["name"] for m in models]
+            if model_names:
+                ollama_model = st.selectbox(
+                    "Ollama Model",
+                    model_names,
+                    key="cb_ollama_model",
+                    disabled=is_running,
+                    help="Local LLM model running on Ollama",
+                )
+            else:
+                st.warning("Ollama is running but no models found. Run: `ollama pull qwen2.5:7b`")
+        else:
+            st.error("Ollama is not running. Start it with: `ollama serve`")
+
+    elif run_mode == "real":
         sweagent_dir = st.text_input(
-            "SWE-Agent directory (required for real mode)",
+            "SWE-Agent directory",
             value="./SWE-agent",
             key="cb_sweagent_dir",
             disabled=is_running,
-            help="Path to SWE-Agent installation. Required when Dry Run is OFF.",
+            help="Path to SWE-Agent installation.",
         )
 
     condition_id = f"{tool}_{context}_{backend}"
@@ -501,34 +529,39 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
         )
 
     def _start_run(condition_list: list[str]) -> None:
-        dry_run = st.session_state.get("cb_dry_run", False)
+        mode = st.session_state.get("cb_run_mode", "ollama")
         max_tasks = int(st.session_state.get("cb_max_tasks", 5))
         sweagent_dir_str = st.session_state.get("cb_sweagent_dir")
         is_parallel = st.session_state.get("cb_parallel", False)
         n_workers = int(st.session_state.get("cb_workers", 4))
+        selected_ollama_model = st.session_state.get("cb_ollama_model", "qwen2.5:7b")
 
         # Validate real mode requirements
-        if not dry_run and not sweagent_dir_str:
-            st.error(
-                "**Real mode requires SWE-Agent directory.** "
-                "Set the path above, or enable **Dry Run Mode** for synthetic data."
-            )
+        if mode == "real" and not sweagent_dir_str:
+            st.error("**Real mode requires SWE-Agent directory.**")
             return
 
-        # Auto-enable parallel for large runs
-        if len(condition_list) >= 10 and not is_parallel:
+        if mode == "ollama":
+            from st_utils.ollama_runner import check_ollama
+            if not check_ollama():
+                st.error("**Ollama is not running.** Start with: `ollama serve`")
+                return
+
+        # Auto-enable parallel for large dry-run/real runs
+        if mode != "ollama" and len(condition_list) >= 10 and not is_parallel:
             is_parallel = True
-            n_workers = 4 if dry_run else 3  # 3 for real to avoid rate limits
+            n_workers = 4 if mode == "dry-run" else 3
 
         try:
             run_mgr.start(
                 conditions=condition_list,
-                mode="dry-run" if dry_run else "real",
+                mode=mode,
                 max_tasks=max_tasks,
                 output_dir=TRAJECTORIES_DIR,
                 sweagent_dir=Path(sweagent_dir_str) if sweagent_dir_str else None,
                 parallel=is_parallel,
                 max_workers=n_workers,
+                ollama_model=selected_ollama_model if mode == "ollama" else None,
             )
             st.rerun()
         except RuntimeError as exc:

@@ -47,6 +47,7 @@ class RunManager:
         sweagent_dir: Path | None = None,
         parallel: bool = False,
         max_workers: int = 4,
+        ollama_model: str | None = None,
     ) -> None:
         """Start the experiment in a background thread.
 
@@ -78,12 +79,19 @@ class RunManager:
                 "condition_status": {},
             }
 
-        target = self._run_thread_parallel if parallel else self._run_thread
+        if mode == "ollama":
+            target = self._run_thread_ollama
+            thread_args = (conditions, ollama_model or "qwen2.5:7b", max_tasks, output_dir)
+        elif parallel:
+            target = self._run_thread_parallel
+            thread_args = (conditions, mode, max_tasks, output_dir, sweagent_dir, max_workers)
+        else:
+            target = self._run_thread
+            thread_args = (conditions, mode, max_tasks, output_dir, sweagent_dir)
+
         self._thread = threading.Thread(
             target=target,
-            args=(conditions, mode, max_tasks, output_dir, sweagent_dir)
-            if not parallel
-            else (conditions, mode, max_tasks, output_dir, sweagent_dir, max_workers),
+            args=thread_args,
             daemon=True,
             name="RunManager-thread",
         )
@@ -384,6 +392,80 @@ class RunManager:
                 self._log(f"All {len(selected_conditions)} conditions complete ({self._completed_counter}/{total_tasks} tasks)")
             else:
                 self._set_status("stopped")
+
+        except Exception as exc:  # noqa: BLE001
+            self._log(f"ERROR: {exc}")
+            self._set_status("failed")
+
+    # ------------------------------------------------------------------
+    # Ollama local thread
+    # ------------------------------------------------------------------
+
+    def _run_thread_ollama(
+        self,
+        conditions: list[str],
+        model: str,
+        max_tasks: int,
+        output_dir: Path,
+    ) -> None:
+        """Run tasks using Ollama local LLM (no Docker/SWE-Agent needed)."""
+        try:
+            from st_utils.ollama_runner import run_single_task, get_tasks
+            import json
+
+            tasks = get_tasks(max_tasks)
+            total = len(conditions) * len(tasks)
+            completed = 0
+            self._set_progress(0, total)
+            self._log(f"Starting OLLAMA run: {len(conditions)} conditions x {len(tasks)} tasks (model={model})")
+
+            for cond_id in conditions:
+                if self._stop_event.is_set():
+                    self._set_status("stopped")
+                    return
+
+                # Parse condition_id to get tool_level and context_strategy
+                parts = cond_id.split("_")
+                tool_level = parts[0] if len(parts) >= 1 else "minimal"
+                context_strategy = "_".join(parts[1:-1]) if len(parts) >= 3 else "full"
+
+                self._init_condition(cond_id, len(tasks))
+                self._set_condition(cond_id)
+                self._set_condition_status(cond_id, "running")
+                self._log(f"[{cond_id}] Starting with {model}...")
+
+                for task in tasks:
+                    if self._stop_event.is_set():
+                        self._set_condition_status(cond_id, "stopped")
+                        self._set_status("stopped")
+                        return
+
+                    traj = run_single_task(
+                        task=task,
+                        model=model,
+                        tool_level=tool_level,
+                        context_strategy=context_strategy,
+                        max_turns=5,
+                    )
+                    traj["condition_id"] = cond_id
+
+                    # Save trajectory
+                    out_dir = output_dir / cond_id
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    out_path = out_dir / f"{traj['task_id']}.json"
+                    out_path.write_text(
+                        json.dumps(traj, indent=2, ensure_ascii=False), encoding="utf-8"
+                    )
+
+                    pass_fail = "PASS" if traj["resolved"] else "FAIL"
+                    self._log(f"[{cond_id}] {traj['task_id']}: {pass_fail} ({traj['duration_seconds']:.1f}s)")
+
+                    self._update_condition(cond_id, traj["resolved"])
+                    completed += 1
+                    self._set_progress(completed, total)
+
+            self._set_status("done")
+            self._log(f"OLLAMA run complete: {completed}/{total} tasks")
 
         except Exception as exc:  # noqa: BLE001
             self._log(f"ERROR: {exc}")
