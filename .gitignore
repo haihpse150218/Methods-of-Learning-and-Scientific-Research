@@ -7,3 +7,15 @@
 *.fls
 *.log
 *.synctex.gz
+
+# SWE-Agent clone (large repo, clone locally)
+NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/SWE-agent/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Superpowers brainstorm sessions
+.superpowers/
