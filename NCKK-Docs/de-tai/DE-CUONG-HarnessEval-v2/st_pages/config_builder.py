@@ -371,6 +371,11 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
 
     active_cid = f"{tool}_{context}_{backend}"
 
+    # Get per-condition run status from RunManager
+    run_mgr = _get_run_manager()
+    run_st = run_mgr.get_status()
+    cond_status_map = run_st.get("condition_status", {})
+
     rows = []
     for cond in all_conditions:
         cid = cond.condition_id
@@ -389,16 +394,28 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
         match_score = int(matches_tool) + int(matches_ctx) + int(matches_be)
         is_active = cid == active_cid
 
+        # Pipeline status for this condition
+        cs = cond_status_map.get(cid)
+        if cs:
+            pipe_status = cs["status"].capitalize()
+            if cs["status"] == "done":
+                pipe_status = f"Done ({cs['resolved']}/{cs['total']})"
+            elif cs["status"] == "running":
+                pipe_status = f"Running ({cs['completed']}/{cs['total']})"
+        elif data_n > 0:
+            pipe_status = f"Data ({data_n})"
+        else:
+            pipe_status = "—"
+
         rows.append(
             {
-                "Select": is_active,  # Pre-select the active condition
+                "Select": is_active,
                 "Condition": cid,
                 "Tool": tool_val,
                 "Context": ctx_val,
                 "Backend": be_val,
                 "Critical": "Yes" if is_crit else "",
-                "Runs": runs,
-                "Est Cost ($)": round(est_cost, 0),
+                "Pipeline": pipe_status,
                 "Data": data_n,
                 "_match_score": match_score,
                 "_is_active": is_active,
@@ -420,17 +437,16 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
         display_df,
         use_container_width=True,
         hide_index=True,
-        disabled=["Condition", "Tool", "Context", "Backend", "Critical", "Runs", "Est Cost ($)", "Data"],
+        disabled=["Condition", "Tool", "Context", "Backend", "Critical", "Pipeline", "Data"],
         column_config={
-            "Select": st.column_config.CheckboxColumn("Select", default=False, width="small"),
+            "Select": st.column_config.CheckboxColumn("", default=False, width="small"),
             "Condition": st.column_config.TextColumn("Condition", width="medium"),
             "Tool": st.column_config.TextColumn("Tool", width="small"),
-            "Context": st.column_config.TextColumn("Context", width="medium"),
+            "Context": st.column_config.TextColumn("Context", width="small"),
             "Backend": st.column_config.TextColumn("Backend", width="small"),
-            "Critical": st.column_config.TextColumn("Critical", width="small"),
-            "Runs": st.column_config.NumberColumn("Runs", width="small"),
-            "Est Cost ($)": st.column_config.NumberColumn("Est Cost ($)", format="$%.0f", width="small"),
-            "Data": st.column_config.NumberColumn("Data", width="small"),
+            "Critical": st.column_config.TextColumn("Crit", width="small"),
+            "Pipeline": st.column_config.TextColumn("Pipeline", width="medium"),
+            "Data": st.column_config.NumberColumn("Files", width="small"),
         },
         key="conditions_editor",
     )
@@ -440,6 +456,13 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
     st.session_state.selected_conditions = selected if selected else [active_cid]
 
     n_selected = len(st.session_state.selected_conditions)
+
+    # Auto-refresh table while running
+    if run_st["status"] == "running":
+        import time
+        time.sleep(1)
+        st.rerun()
+
     st.caption(f"{n_selected} condition(s) selected  |  active: `{active_cid}`")
 
     # Action buttons
@@ -447,7 +470,16 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
     status = run_mgr.get_status()
     is_busy = status["status"] == "running"
 
-    btn_col_sel, btn_col_all, btn_col_spacer = st.columns([2, 2, 4])
+    btn_col_active, btn_col_sel, btn_col_all, btn_col_spacer = st.columns([2, 2, 2, 2])
+
+    # "Run Active" — quick single condition run
+    with btn_col_active:
+        run_active = st.button(
+            f"Run Active",
+            disabled=is_busy,
+            key="run_active_btn",
+            help=f"Run only the active condition: {active_cid}",
+        )
 
     # "Run Selected" button
     with btn_col_sel:
@@ -461,10 +493,10 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
     # "Run All 27" button
     with btn_col_all:
         run_all = st.button(
-            "Run All 27 Conditions",
+            "Run All 27",
             disabled=is_busy,
             key="run_all_btn",
-            help="Auto-run all 27 conditions in parallel (4 workers). Dry-run: ~1s. Real mode: uses rate-limited workers.",
+            help="Auto-run all 27 conditions in parallel (4 workers)",
         )
 
     def _start_run(condition_list: list[str]) -> None:
@@ -492,6 +524,9 @@ def _render_conditions_table(tool: str, context: str, backend: str) -> None:
             st.rerun()
         except RuntimeError as exc:
             st.error(str(exc))
+
+    if run_active:
+        _start_run([active_cid])
 
     if run_selected:
         _start_run(st.session_state.selected_conditions)
