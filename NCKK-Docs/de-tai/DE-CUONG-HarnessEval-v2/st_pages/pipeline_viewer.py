@@ -57,10 +57,20 @@ def render_pipeline_viewer():
     st.subheader("Pipeline")
 
     # -----------------------------------------------------------------------
-    # Session state defaults
+    # Session state defaults + Reset button
     # -----------------------------------------------------------------------
     if "pipeline_step" not in st.session_state:
         st.session_state.pipeline_step = 0
+
+    # Reset pipeline button (top-right)
+    _, reset_col = st.columns([8, 1])
+    with reset_col:
+        if st.button("Reset", key="pipeline_reset", help="Reset pipeline to step 1"):
+            st.session_state.pipeline_step = 0
+            rm = st.session_state.get("run_manager")
+            if rm:
+                rm.clear()
+            st.rerun()
 
     # -----------------------------------------------------------------------
     # Read shared state

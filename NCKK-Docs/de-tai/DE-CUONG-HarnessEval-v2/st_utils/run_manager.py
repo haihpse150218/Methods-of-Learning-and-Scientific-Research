@@ -31,6 +31,8 @@ class RunManager:
         self._state: dict[str, Any] = self._idle_state()
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
+        self._completed_counter: int = 0
+        self._total_tasks: int = 0
 
     # ------------------------------------------------------------------
     # Public API
@@ -112,7 +114,8 @@ class RunManager:
             }
 
     def clear(self) -> None:
-        """Reset to idle state. Safe to call at any time (does not stop a running thread)."""
+        """Reset to idle state. Signals any running thread to stop first."""
+        self._stop_event.set()
         with self._lock:
             self._state = self._idle_state()
 

@@ -119,6 +119,8 @@ def _get_run_manager() -> RunManager:
 
 def _log_line_html(line: str) -> str:
     """Wrap a log line in the appropriate CSS class based on content."""
+    import html
+    safe = html.escape(line)
     upper = line.upper()
     if "PASS" in upper or "DONE" in upper:
         css = "log-line-pass"
@@ -128,7 +130,7 @@ def _log_line_html(line: str) -> str:
         css = "log-line-info"
     else:
         css = "log-line"
-    return f'<span class="{css}">{line}</span>'
+    return f'<span class="{css}">{safe}</span>'
 
 
 # ---------------------------------------------------------------------------

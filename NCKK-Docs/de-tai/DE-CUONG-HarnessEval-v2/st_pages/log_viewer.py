@@ -13,6 +13,7 @@ import streamlit as st
 
 from st_utils.data_loader import scan_trajectories, load_trajectory, compute_metrics_for_log
 from st_utils.charts import plotly_metrics_bar
+from st_utils.ui_helpers import render_pipeline_banner, escape_html
 
 TRAJECTORIES_DIR = Path(__file__).parent.parent / "trajectories"
 
@@ -91,28 +92,8 @@ def _cached_scan(base_dir: str) -> list[dict]:
     return results
 
 
-def _render_pipeline_banner():
-    """Show pipeline context at top of tab."""
-    active = st.session_state.get("active_condition", "—")
-    step = st.session_state.get("pipeline_step", 0)
-    step_names = ["Task Selection", "Config Load", "Run Agent", "Collect Logs", "Compute Metrics", "ANOVA"]
-    step_label = step_names[min(step, 5)] if step < 6 else "Complete"
-    n_conds = len(st.session_state.get("selected_conditions", []))
-
-    rm = st.session_state.get("run_manager")
-    run_status = rm.get_status()["status"] if rm else "idle"
-
-    parts = [f"Condition: `{active}`", f"Step {step+1}/6: {step_label}"]
-    if n_conds > 1:
-        parts.append(f"{n_conds} conditions selected")
-    if run_status == "running":
-        parts.append("Running...")
-
-    st.caption(" | ".join(parts))
-
-
 def render_log_viewer():
-    _render_pipeline_banner()
+    render_pipeline_banner()
 
     # ── Guard: trajectories directory must exist ─────────────────────────────
     if not TRAJECTORIES_DIR.exists():

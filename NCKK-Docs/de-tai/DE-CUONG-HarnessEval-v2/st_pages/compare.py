@@ -17,6 +17,7 @@ import streamlit as st
 
 from st_utils.data_loader import compute_metrics_for_log, load_trajectory, scan_trajectories
 from st_utils.charts import plotly_grouped_comparison
+from st_utils.ui_helpers import render_pipeline_banner
 from harness_eval.metrics.backend_portability import cross_backend_stddev, min_max_ratio
 
 # ---------------------------------------------------------------------------
@@ -69,31 +70,11 @@ def _build_comparison_row(label: str, item: dict, log: dict, metrics: dict) -> d
 # ---------------------------------------------------------------------------
 
 
-def _render_pipeline_banner():
-    """Show pipeline context at top of tab."""
-    active = st.session_state.get("active_condition", "—")
-    step = st.session_state.get("pipeline_step", 0)
-    step_names = ["Task Selection", "Config Load", "Run Agent", "Collect Logs", "Compute Metrics", "ANOVA"]
-    step_label = step_names[min(step, 5)] if step < 6 else "Complete"
-    n_conds = len(st.session_state.get("selected_conditions", []))
-
-    rm = st.session_state.get("run_manager")
-    run_status = rm.get_status()["status"] if rm else "idle"
-
-    parts = [f"Condition: `{active}`", f"Step {step+1}/6: {step_label}"]
-    if n_conds > 1:
-        parts.append(f"{n_conds} conditions selected")
-    if run_status == "running":
-        parts.append("Running...")
-
-    st.caption(" | ".join(parts))
-
-
 def render_compare() -> None:
     theme = st.session_state.get("theme", "dark")
 
     st.markdown("#### Compare Trajectories")
-    _render_pipeline_banner()
+    render_pipeline_banner()
     st.caption(
         "Select 2 or more trajectory logs to compare side-by-side metrics, "
         "view a grouped bar chart, and inspect cross-backend portability."
