@@ -2,7 +2,7 @@
 # (Ghi nhan qua trinh code va test)
 
 > **Ngay bat dau:** 07/04/2026
-> **Trang thai:** Phase 8 — Real Mode voi Ollama Local (NEXT)
+> **Trang thai:** Phase 9 — Equivalence Verification + Production (NEXT)
 > **Vi tri:** `NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2/`
 
 ---
@@ -884,6 +884,40 @@ sweagent run-batch \
 - Code review: 7 bugs fixed, 8 UX issues noted, 7 enhancements identified
 - Xoa dummy trajectory files, clean trajectories/ dir
 
+### 7.8. Session 8 (08/04/2026) — SWE-bench Realistic Dry-Run + UI Redesign
+
+**Da lam:**
+- Realistic dry-run voi SWE-bench Verified data:
+  - Embed 150 curated tasks tu SWE-bench Verified (12 repos, 4 difficulty levels)
+  - `harness_eval/data/loader.py` — TaskMetadata, get_task_ids(), get_task(), get_repo_file_paths()
+  - `harness_eval/data/swe_bench_tasks.json` — 150 tasks voi instance_id, repo, difficulty, problem_snippet
+  - Difficulty distribution: easy=45, medium=60, hard=30, expert=15
+  - Difficulty-aware resolve rates: easy=75%, medium=55%, hard=30%, expert=15%
+  - Phased trajectory generation: exploration → analysis → modification → verification
+  - Real repo file paths (django/db/models/query.py, sklearn/pipeline.py, etc.)
+  - Problem statement snippets in first turn output
+  - Difficulty-aware turn count, cost, duration
+  - Backward compatible: falls back to 8 legacy IDs if JSON missing
+- Ollama local mode trong dashboard:
+  - `st_utils/ollama_runner.py` — 8 mini coding tasks, goi Ollama API truc tiep
+  - RunManager mode="ollama" — _run_thread_ollama() voi per-condition tracking
+  - Config Builder: Run Mode dropdown (ollama/dry-run/real) + model picker auto-detect
+  - Test: qwen2.5:7b = 4/5 resolved (80%), qwen2.5:1.5b = 1/5 (20%)
+- Compare tab redesign:
+  - So sanh theo **condition** (khong phai individual files)
+  - Quick modes: By Tool Level, By Context, By Backend
+  - Metric-centric table: rows=metrics, columns=conditions, voi Delta + auto-generated Insights
+  - Aggregated metrics per condition (resolve_rate, M1.1-M2.2, cost, turns)
+  - Condition summary cards
+- Config Builder improvements:
+  - Data Overview section (trajectories, conditions, resolved, missing)
+  - Run Mode dropdown thay dry-run toggle
+- One-click setup scripts:
+  - `start_harness_eval.sh` (bash) + `start_harness_eval.bat` (Windows)
+  - `.env.example` template voi all API key slots
+  - Auto-check Python, venv, deps, .env, Ollama, directories
+- Bug fixes: dry_run→run_mode, RunManager instance cache, port conflicts
+
 ---
 
 ## 8. Trang thai hien tai — DA HOAN THANH
@@ -892,48 +926,47 @@ sweagent run-batch \
 
 ```
 DA XONG:
-├── harness_eval/               # Python toolkit
+├── harness_eval/               # Python toolkit (167 tests)
 │   ├── configs/                # 27 conditions = 3x3x3
 │   ├── metrics/                # 7 metrics (M1.1-M3.2)
 │   ├── parsers/trajectory.py   # SWE-Agent log parser
 │   ├── pipeline/
 │   │   ├── analysis.py         # ANOVA 3-way, Cohen's d, Tukey HSD, GLMM
-│   │   └── runner.py           # Pipeline runner (dry-run + SWE-Agent subprocess + realistic synthetic)
+│   │   └── runner.py           # Pipeline runner (realistic dry-run + SWE-Agent + Ollama)
 │   ├── harness/
 │   │   ├── interfaces.py       # 3 ABC + 9 concrete providers
 │   │   └── factory.py          # HarnessConfig, create_harness_config, generate commands
+│   ├── data/
+│   │   ├── loader.py           # TaskMetadata, get_task_ids(), get_task(), get_repo_file_paths()
+│   │   └── swe_bench_tasks.json # 150 curated SWE-bench Verified tasks (12 repos, 4 difficulties)
 │   └── cli.py                  # harness-eval info/pilot/run/convert/analyze
 ├── streamlit_app.py            # Streamlit dashboard entry point
 ├── st_pages/                   # 5 tab modules
-│   ├── config_builder.py       # Tab 1: Config Builder (factors + run panel + conditions table)
-│   ├── pipeline_viewer.py      # Tab 2: Run Monitor (live status + log + data summary)
-│   ├── log_viewer.py           # Tab 3: Log Viewer (turn-by-turn + metrics)
-│   ├── compare.py              # Tab 4: Compare (multi-select + portability)
-│   └── anova.py                # Tab 5: ANOVA + GLMM + paper export
+│   ├── config_builder.py       # Tab 1: Config Builder + Data Overview + Run Panel + Conditions
+│   ├── pipeline_viewer.py      # Tab 2: Run Monitor (per-condition status + log)
+│   ├── log_viewer.py           # Tab 3: Log Viewer (turn-by-turn + metrics + Refresh)
+│   ├── compare.py              # Tab 4: Compare (condition-centric, metric insights, quick modes)
+│   └── anova.py                # Tab 5: ANOVA + GLMM + hypotheses + paper export
 ├── st_utils/                   # Dashboard utilities
 │   ├── data_loader.py          # Cached trajectory scanning + metrics
 │   ├── charts.py               # Plotly + Matplotlib chart helpers
-│   ├── run_manager.py          # Background subprocess + threading + parallel (ThreadPoolExecutor)
+│   ├── run_manager.py          # Background: dry-run + real + ollama + parallel
+│   ├── ollama_runner.py        # Ollama local: 8 mini tasks, direct API calls
 │   └── ui_helpers.py           # Shared UI: pipeline banner, html escape
+├── scripts/
+│   ├── run_ollama_task.py      # CLI: run coding tasks with Ollama local LLM
+│   └── generate_samples.py     # Generate sample trajectory data
 ├── tests/                      # 167 tests, 100% pass
-│   ├── test_configs.py         # 36 tests
-│   ├── test_metrics.py         # 38 tests
-│   ├── test_analysis.py        # 18 tests (ANOVA + GLMM)
-│   ├── test_parser.py          # 22 tests
-│   ├── test_runner.py          # 27 tests (dry-run + SWE-Agent mock)
-│   ├── test_cli.py             # 10 tests
-│   ├── test_data_loader.py     # 7 tests
-│   └── test_run_manager.py     # 9 tests
 ├── trajectories/               # JSON trajectory data (generated by runs)
+├── .env.example                # API key template (tracked)
 ├── .env                        # API keys (.gitignored)
-├── SWE-agent/                  # SWE-Agent 1.1.0 clone (.gitignored)
-│   └── config/harness_eval/    # 12 YAML configs (base + 3 tool + 3 ctx + 3 be + 2 ollama)
+├── start_harness_eval.sh       # One-click setup (bash)
+├── start_harness_eval.bat      # One-click setup (Windows)
 ├── .streamlit/config.toml      # Streamlit config
-├── app/                        # Flask UI (legacy backup)
-├── docs/superpowers/           # Design specs + implementation plans
-├── pyproject.toml              # Package config (streamlit, plotly, harness_eval)
-├── index.html                  # PDF de cuong render
-└── dashboard.html              # Overview dashboard
+├── SWE-agent/                  # SWE-Agent 1.1.0 (.gitignored)
+│   └── config/harness_eval/    # 12 YAML configs
+├── docs/superpowers/           # Design specs + plans
+└── pyproject.toml              # Package config
 ```
 
 ### 8.2. Nhung gi CHUA CODE (next steps)
@@ -955,9 +988,15 @@ DA XONG:
 | 13 | ~~Install SWE-Agent deps~~ | ~~CAO~~ | **DONE** — SWE-Agent 1.1.0 installed, Docker 29.2.1, Ollama 0.20.3 |
 | 14 | ~~Streamlit Dashboard~~ | ~~CAO~~ | **DONE** — 5 tabs, parallel mode, per-condition tracking |
 | 15 | ~~Phase 7 Unified Pipeline~~ | ~~CAO~~ | **DONE** — multi-select, Run All 27, Run Monitor, pipeline banner |
-| 16 | **Docker image pull** | CAO | `docker pull sweagent/swe-agent:latest` (dang pull, mang cham) |
-| 17 | **Real mode test voi Ollama** | CAO | Chay SWE-Agent + Ollama qwen2.5:7b qua Docker |
-| 18 | **Equivalence verification** | CAO | Chay 50 tasks, verify ±3% vs SWE-Agent default |
+| 16 | ~~Docker image pull~~ | ~~CAO~~ | Docker dang pull (mang cham); co the dung Ollama truc tiep |
+| 17 | ~~Ollama local mode~~ | ~~CAO~~ | **DONE** — ollama_runner.py + dashboard integration |
+| 18 | ~~Realistic dry-run~~ | ~~CAO~~ | **DONE** — 150 SWE-bench tasks, difficulty-aware, phased trajectories |
+| 19 | ~~Compare tab redesign~~ | ~~CAO~~ | **DONE** — condition-centric, metric insights, quick modes |
+| 20 | ~~One-click setup~~ | ~~TRUNG BINH~~ | **DONE** — start_harness_eval.sh/bat + .env.example |
+| 21 | **Equivalence verification** | CAO | Chay Ollama real tasks vs dry-run baseline |
+| 22 | **LLM classifier** (M2.2) | TRUNG BINH | Can API key + prompt design |
+| 23 | **BERTScore** (M2.1) | TRUNG BINH | Can torch + paired runs |
+| 24 | **CI/CD** GitHub Actions | THAP | Can repo setup |
 
 ### 8.3. Phase 7 — Unified Pipeline Flow — DA HOAN THANH
 
@@ -979,7 +1018,22 @@ DA XONG:
 | + | Default = Real mode (dry-run opt-in) | DONE |
 | + | Code review fixes (7 bugs, XSS, race condition) | DONE |
 
-### 8.4. Phase 8 — Real Mode voi Ollama Local (BUOC TIEP THEO)
+### 8.4. Phase 8 — Real Mode + SWE-bench Dry-Run — DA HOAN THANH
+
+| # | Cai tien | Status |
+|---|----------|--------|
+| 1 | 150 SWE-bench Verified tasks embedded | DONE |
+| 2 | Difficulty-aware resolve rates (easy=75%, expert=15%) | DONE |
+| 3 | Phased trajectories (explore→analyze→modify→verify) | DONE |
+| 4 | Real repo file paths (12 repos, 10-20 paths each) | DONE |
+| 5 | Problem statement in first turn | DONE |
+| 6 | Ollama local mode (3 models, no Docker needed) | DONE |
+| 7 | Compare tab redesign (condition-centric + insights) | DONE |
+| 8 | Data Overview section in Config Builder | DONE |
+| 9 | One-click setup scripts (sh + bat) | DONE |
+| 10 | Run Mode dropdown (ollama/dry-run/real) | DONE |
+
+### 8.5. Phase 9 — Equivalence Verification + Production (BUOC TIEP THEO)
 
 **Prerequisites (da co):**
 ```
@@ -1077,13 +1131,20 @@ harness-eval analyze trajectories/  # ANOVA tren results
 harness-eval convert path/to/file.traj  # convert .traj → JSON
 ```
 
+### De setup tu dau (ai clone repo):
+```bash
+cd "NCKK-Docs/de-tai/DE-CUONG-HarnessEval-v2"
+chmod +x start_harness_eval.sh
+./start_harness_eval.sh        # auto: Python check, venv, deps, .env, Ollama, launch
+```
+
 ### De tiep tuc CODE:
 ```
-1. Doc muc 8.4 (Phase 8 — Real Mode voi Ollama Local)
-2. Buoc tiep theo: docker pull sweagent/swe-agent:latest (doi download)
-3. Sau do: Test 1 task Ollama + Docker
-4. Sau do: Wire dashboard → real mode
-5. Sau do: Equivalence verification → Pilot → Full
+1. Doc muc 8.5 (Phase 9 — Equivalence Verification)
+2. Buoc tiep theo: Chay Ollama tasks nhieu hon de co data that
+3. Sau do: So sanh real (Ollama) vs dry-run → verify ANOVA patterns
+4. Sau do: Nap tien API → chay real SWE-bench
+5. Sau do: Full ablation 27 conditions → paper
 ```
 
 ### Thong tin ky thuat:
@@ -1093,7 +1154,9 @@ Python:       3.12
 Dependencies: numpy, pandas, scipy, statsmodels, click, streamlit, plotly, pytest
 SWE-Agent:    SWE-agent/ 1.1.0 (cloned, .gitignored)
 Ollama:       0.20.3 (qwen2.5:7b, qwen2.5:1.5b, deepseek-r1:1.5b)
-Docker:       29.2.1 (image dang pull)
-Dashboard:    streamlit run streamlit_app.py
-API keys:     .env (DEEPSEEK_API_KEY — insufficient balance)
+Docker:       29.2.1 (sweagent/swe-agent image dang pull)
+Dashboard:    streamlit run streamlit_app.py (hoac ./start_harness_eval.sh)
+SWE-bench:    150 tasks embedded (harness_eval/data/swe_bench_tasks.json)
+API keys:     .env (template: .env.example)
+Run modes:    ollama (local, free) | dry-run (synthetic) | real (SWE-Agent + API)
 ```
