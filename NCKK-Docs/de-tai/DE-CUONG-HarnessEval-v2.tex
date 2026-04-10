@@ -2,7 +2,8 @@
 
 % ===== PACKAGES =====
 \usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\usepackage[T5,T1]{fontenc}   % T5 = Vietnamese, T1 = default (last listed)
+\usepackage{vntex}             % Vietnamese glyph support (Lê, Vĩnh, Tỷ, Hữu, Khương, ...)
 \usepackage{times}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{graphicx}
@@ -33,15 +34,27 @@
     urlcolor=blue!70!black
 }
 
+\setlength{\headheight}{14pt}
 \pagestyle{fancy}
 \fancyhf{}
 \rhead{\small HarnessEval --- Research Proposal}
-\lhead{\small FPT University --- MSE-AI Program}
+\lhead{\small FPT University --- FSB --- MSE-AI}
 \cfoot{\thepage}
 
 \titleformat{\section}{\Large\bfseries}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\large\bfseries}{\thesubsection.}{0.5em}{}
 \titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection.}{0.5em}{}
+
+% ===== VIETNAMESE LABELS (auto-generated LaTeX strings) =====
+\renewcommand{\contentsname}{Mục lục}
+\renewcommand{\listfigurename}{Danh mục hình}
+\renewcommand{\listtablename}{Danh mục bảng}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\refname}{Tài liệu tham khảo}
+\renewcommand{\bibname}{Tài liệu tham khảo}
+\renewcommand{\abstractname}{Tóm tắt}
+\renewcommand{\appendixname}{Phụ lục}
 
 % ===== DOCUMENT =====
 \begin{document}
@@ -52,21 +65,30 @@
 \vspace*{1cm}
 
 {\large\textbf{FPT UNIVERSITY}}\\[0.3cm]
-{\large Graduate School of Information Technology}\\[0.3cm]
-{\normalsize Master of Software Engineering --- Artificial Intelligence}\\[2cm]
+{\large FPT School of Business and Technology (FSB)}\\[0.3cm]
+{\normalsize Master of Software Engineering --- Artificial Intelligence}\\[1.8cm]
 
 \rule{\textwidth}{1.5pt}\\[0.6cm]
 {\LARGE\textbf{HarnessEval: Evaluating Coding Agent Scaffolds\\[0.3cm] Through Ablation-Driven Multi-Dimensional Analysis}}\\[0.6cm]
-\rule{\textwidth}{1.5pt}\\[1.5cm]
+\rule{\textwidth}{1.5pt}\\[1.2cm]
 
-{\large\textbf{Research Proposal}}\\[0.5cm]
-{\normalsize Course: Methods of Learning and Scientific Research}\\[2cm]
+{\large\textbf{Research Proposal}}\\[0.4cm]
+{\normalsize Course: Methods of Learning and Scientific Research}\\[1.4cm]
+
+{\normalsize\textbf{Research Team}}\\[0.3cm]
+\begin{tabular}{ll}
+Lê Lâm Vĩnh          & 25MS23328 \\
+Hoàng Phi Hải        & 25MS23323 \\
+Đỗ Hoàng Tỷ Phú      & 25MS23327 \\
+Trịnh Hữu Tuấn       & 25MS23315 \\
+Trần Quang Tuấn      & 25MS23331 \\
+\end{tabular}\\[1.0cm]
 
 \begin{tabular}{ll}
-\textbf{Student:} & [Student Name] \\
-\textbf{Student ID:} & [Student ID] \\
-\textbf{Supervisor:} & [Supervisor Name] \\
-\textbf{Date:} & April 2026 \\
+\textbf{Supervisor:} & Assoc. Prof. Dr. Hồ Văn Khương \\
+                     & \small\textit{Faculty of Electrical and Electronics Engineering,} \\
+                     & \small\textit{Ho Chi Minh City University of Technology (HCMUT)} \\
+\textbf{Date:}       & April 2026 \\
 \end{tabular}
 
 \vfill
@@ -566,8 +588,8 @@ Contingency (20\%) & & \$500 \\
 % REFERENCES
 % ====================================================================
 \newpage
-\section*{References}
-\addcontentsline{toc}{section}{References}
+\section*{Tài liệu tham khảo}
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
 
 \begin{thebibliography}{99}
 
