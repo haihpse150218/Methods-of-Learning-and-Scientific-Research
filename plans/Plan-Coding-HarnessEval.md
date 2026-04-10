@@ -1138,6 +1138,28 @@ chmod +x start_harness_eval.sh
 ./start_harness_eval.sh        # auto: Python check, venv, deps, .env, Ollama, launch
 ```
 
+### Session 9 (08/04/2026) — Folder Rename + ANOVA Fix
+
+**Da lam:**
+- Rename `DE-CUONG-HarnessEval-v2/` → `harness-eval/` (commit ef6d7b8)
+  - Git detect 100% rename cho tat ca 73 source files
+  - Them `trajectories-test/` data (27 conditions x 5 tasks = 135 files)
+  - Cap nhat `.gitignore` paths cho folder moi
+- Fix ANOVA bug: "must have at least one row in constraint matrix"
+  - **Root cause:** statsmodels OLS `C(factor)` voi 1 level → khong tao duoc contrast matrix → crash
+  - **Fix:** `compute_three_way_anova()` tu dong detect factors co >1 level
+  - Build formula dong (chi include factors co >=2 levels), map source names dong
+  - Raise ValueError neu khong co factor nao co >1 level
+  - Handle graceful: 1 factor → one-way, 2 factors → two-way, 3 factors → full three-way
+  - 17/17 analysis tests pass, 167/167 full suite pass, khong break gi
+- Update .gitignore: ignore `trajectories/`, `trajectories*.zip` (khop pattern experiment outputs co san)
+- Ket qua ANOVA voi trajectories/ hien tai (360 obs, 18 conditions, 2 backends: claude+sonnet, haiku trong):
+  - Tool: eta²=0.054, F=10.26, p<0.001 *** (significant)
+  - Context: eta²=0.025, F=4.72, p=0.0095 ** (significant)
+  - Backend: eta²=0.0025, F=0.96, p=0.33 (khong significant — chi 2 levels)
+  - Interactions: tat ca khong significant
+  - **Phan khoi:** H1 duoc ho tro (Tool > Context), Tool co effect lon nhat
+
 ### De tiep tuc CODE:
 ```
 1. Doc muc 8.5 (Phase 9 — Equivalence Verification)

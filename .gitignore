@@ -14,7 +14,9 @@ NCKK-Docs/de-tai/harness-eval/SWE-agent/
 # Pilot/experiment outputs (large, regenerable)
 NCKK-Docs/de-tai/harness-eval/pilot_real/
 NCKK-Docs/de-tai/harness-eval/pilot_smoke/
+NCKK-Docs/de-tai/harness-eval/trajectories/
 NCKK-Docs/de-tai/harness-eval/trajectories_*/
+NCKK-Docs/de-tai/harness-eval/trajectories*.zip
 
 # VS Code
 .vscode/

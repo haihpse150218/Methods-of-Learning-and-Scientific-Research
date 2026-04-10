@@ -32,6 +32,9 @@ class ANOVAResult:
 def compute_three_way_anova(df: pd.DataFrame) -> list[ANOVAResult]:
     """Three-way ANOVA: Tool (3) x Context (3) x Backend (3).
 
+    Automatically adapts the model when some factors have only one level
+    (e.g., all data is from a single backend).
+
     Args:
         df: DataFrame with columns:
             - tool_config: str ("full", "medium", "minimal")
@@ -48,26 +51,49 @@ def compute_three_way_anova(df: pd.DataFrame) -> list[ANOVAResult]:
     except ImportError:
         raise ImportError("statsmodels is required: pip install statsmodels")
 
-    model = ols(
-        "resolve_rate ~ C(tool_config) * C(context_strategy) * C(backend)",
-        data=df,
-    ).fit()
+    # Determine which factors have >1 level
+    factors = []
+    factor_labels = {}
+    for col, label in [
+        ("tool_config", "Tool"),
+        ("context_strategy", "Context"),
+        ("backend", "Backend"),
+    ]:
+        if col in df.columns and df[col].nunique() > 1:
+            factors.append(f"C({col})")
+            factor_labels[f"C({col})"] = label
 
+    if not factors:
+        raise ValueError(
+            "ANOVA requires at least one factor with multiple levels. "
+            f"Unique levels: tool_config={df['tool_config'].nunique() if 'tool_config' in df.columns else 0}, "
+            f"context_strategy={df['context_strategy'].nunique() if 'context_strategy' in df.columns else 0}, "
+            f"backend={df['backend'].nunique() if 'backend' in df.columns else 0}"
+        )
+
+    # Build formula with interactions only for available factors
+    formula = "resolve_rate ~ " + " * ".join(factors)
+
+    model = ols(formula, data=df).fit()
     anova_table = sm.stats.anova_lm(model, typ=2)
     total_ss = anova_table["sum_sq"].sum()
 
-    results = []
-    source_names = {
-        "C(tool_config)": "Tool",
-        "C(context_strategy)": "Context",
-        "C(backend)": "Backend",
-        "C(tool_config):C(context_strategy)": "Tool x Context",
-        "C(tool_config):C(backend)": "Tool x Backend",
-        "C(context_strategy):C(backend)": "Context x Backend",
-        "C(tool_config):C(context_strategy):C(backend)": "Tool x Context x Backend",
-        "Residual": "Error",
-    }
+    # Build source name mapping dynamically
+    source_names = {}
+    source_names["Residual"] = "Error"
+    for f in factors:
+        source_names[f] = factor_labels[f]
+    # Two-way interactions
+    for i, f1 in enumerate(factors):
+        for f2 in factors[i + 1 :]:
+            key = f"{f1}:{f2}"
+            source_names[key] = f"{factor_labels[f1]} x {factor_labels[f2]}"
+    # Three-way interaction
+    if len(factors) == 3:
+        key = ":".join(factors)
+        source_names[key] = " x ".join(factor_labels[f] for f in factors)
 
+    results = []
     for idx, row in anova_table.iterrows():
         name = source_names.get(idx, idx)
         ss = row["sum_sq"]
