@@ -21,6 +21,9 @@ NCKK-Docs/de-tai/harness-eval/trajectories*.zip
 # VS Code
 .vscode/
 
+# Office lock files (PowerPoint/Word/Excel temp files when docs are open)
+~$*
+
 # LaTeX output
 *.out
 *.toc
