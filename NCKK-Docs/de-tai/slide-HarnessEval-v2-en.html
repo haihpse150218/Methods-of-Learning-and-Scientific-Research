@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HarnessEval v2 — Defense Slides</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<style>
+  :root {
+    --brand: #0066cc;
+    --accent: #cc3333;
+    --ok: #2e7d32;
+    --warn: #e65100;
+    --muted: #555;
+    --bg-card: #fafbfd;
+    --border: #dcdfe6;
+  }
+  .reveal { font-family: 'Segoe UI', system-ui, sans-serif; color: #1a1a2e; }
+  .reveal .slides section { text-align: left; }
+  .reveal h1 { color: var(--brand); font-size: 2.0em; }
+  .reveal h2 { color: var(--brand); font-size: 1.5em; margin-bottom: 0.4em; }
+  .reveal h3 { color: var(--accent); font-size: 1.1em; margin: 0.6em 0 0.3em; }
+  .reveal p, .reveal li { font-size: 0.72em; line-height: 1.5; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .reveal strong { color: #000; }
+  .reveal table { font-size: 0.62em; width: 100%; border-collapse: collapse; margin: 0.4em 0; }
+  .reveal table th { background: #f0f2f5; color: #222; padding: 6px 10px; border: 1px solid var(--border); font-weight: 700; text-align: center; }
+  .reveal table td { padding: 6px 10px; border: 1px solid var(--border); vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #f8f9fc; }
+
+  .title-slide { text-align: center !important; }
+  .title-slide h1 { font-size: 2.2em; margin-bottom: 0.3em; }
+  .title-slide .subtitle { font-size: 1.0em; color: var(--muted); margin-bottom: 1.2em; }
+  .title-slide .meta { font-size: 0.75em; color: var(--muted); }
+
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.6em; font-weight: 700; margin-right: 4px; }
+  .tag-new { background: #e3f2fd; color: #1565c0; }
+  .tag-ok { background: #e8f5e9; color: #2e7d32; }
+  .tag-warn { background: #fff3e0; color: #e65100; }
+  .tag-bad { background: #ffebee; color: #c62828; }
+
+  .note { background: #f0f7ff; border-left: 4px solid var(--brand); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 0.66em; }
+  .note-ok { background: #f0f9f0; border-left-color: var(--ok); }
+  .note-warn { background: #fff8f0; border-left-color: var(--warn); }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 0.68em; }
+  .card .card-title { font-weight: 700; color: var(--brand); margin-bottom: 4px; font-size: 1em; }
+
+  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+  .kpi .item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 8px; text-align: center; }
+  .kpi .num { font-size: 1.5em; font-weight: 800; color: var(--brand); }
+  .kpi .label { font-size: 0.55em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .layer-stack { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+  .layer { border: 2px solid var(--border); border-radius: 10px; padding: 8px 14px; background: var(--bg-card); font-size: 0.72em; }
+  .layer strong { color: var(--brand); }
+  .layer.l1 { border-color: #cc3333; }
+  .layer.l2 { border-color: #ff9800; }
+  .layer.l3 { border-color: #4caf50; }
+  .layer.muted { opacity: 0.45; }
+
+  .footer { position: absolute; bottom: 10px; right: 20px; font-size: 0.45em; color: #888; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .highlight-box { background: #fff8e1; border: 1.5px solid #ffa000; border-radius: 10px; padding: 10px 14px; margin: 8px 0; font-size: 0.72em; }
+  .result-box { background: #f0f9f0; border: 1.5px solid var(--ok); border-radius: 10px; padding: 10px 14px; margin: 8px 0; font-size: 0.72em; }
+  .result-box code { background: rgba(46,125,50,0.1); padding: 1px 5px; border-radius: 4px; }
+
+  .center { text-align: center; }
+  .small { font-size: 0.6em; color: var(--muted); }
+
+  .reveal .progress { color: var(--brand); }
+  .reveal .slide-number { background: rgba(0,102,204,0.7); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============ SLIDE 1: TITLE ============ -->
+<section class="title-slide" data-background-color="#ffffff">
+  <h1 style="margin-bottom:0.2em;">HarnessEval</h1>
+  <div class="subtitle" style="margin-bottom:0.6em;">Evaluating Coding Agent Scaffolds Through<br>Ablation-Driven Multi-Dimensional Analysis</div>
+  <p style="font-size:0.55em; color:#888; margin:0.3em 0 0.8em;">
+    <em>A unified framework for decomposing harness quality from base LLM capability</em>
+  </p>
+  <div class="meta" style="font-size:0.62em;">
+    Methods of Learning &amp; Scientific Research<br>
+    <strong>FPT School of Business and Technology (FSB)</strong><br>
+    <span style="color:#bbb;">April 2026</span>
+  </div>
+  <p class="small" style="margin-top:0.6em;">
+    <span class="tag tag-new">v2</span> Revised after committee review
+  </p>
+</section>
+
+<!-- ============ SLIDE 1b: TEAM ============ -->
+<section class="title-slide" data-background-color="#ffffff">
+  <h2 style="text-align:center; color:#0066cc; margin-bottom:0.6em;">Research Team</h2>
+
+  <h3 style="text-align:center; color:#cc3333; margin-top:0.6em;">Supervisor</h3>
+  <p style="text-align:center; font-size:0.78em; margin:0.3em 0;">
+    <strong>[Supervisor name &mdash; please provide]</strong><br>
+    <span class="small">FPT School of Business and Technology (FSB)</span>
+  </p>
+
+  <h3 style="text-align:center; color:#cc3333; margin-top:1.2em;">Team Members</h3>
+  <table style="margin:0.4em auto; width:75%; font-size:0.66em;">
+    <thead>
+      <tr><th style="width:55%">Full Name</th><th>Student ID</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>L&ecirc; L&acirc;m V&#297;nh</td><td>25MS23328</td></tr>
+      <tr><td>Ho&agrave;ng Phi H&#7843;i</td><td>25MS23323</td></tr>
+      <tr><td>&#272;&#7895; Ho&agrave;ng T&#7927; Ph&uacute;</td><td>25MS23327</td></tr>
+      <tr><td>Tr&#7883;nh H&#7919;u Tu&#7845;n</td><td>25MS23315</td></tr>
+      <tr><td>Tr&#7847;n Quang Tu&#7845;n</td><td>25MS23331</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SLIDE 2: OUTLINE ============ -->
+<section>
+  <h2>Outline</h2>
+  <div class="two-col">
+    <ol>
+      <li><strong>Problem</strong> &mdash; the evaluation paradox</li>
+      <li><strong>Research gap</strong> &mdash; three reasons</li>
+      <li><strong>Aim</strong> &amp; 5 objectives</li>
+      <li><strong>Hypotheses</strong> H1&ndash;H4</li>
+      <li><strong>Taxonomy</strong> 3 dimensions, 7 metrics</li>
+      <li><strong>Modular Harness architecture</strong></li>
+      <li><strong>Methodology</strong> &mdash; 4 phases</li>
+      <li><strong>Ablation design</strong> 27x150</li>
+    </ol>
+    <ol start="9">
+      <li><strong>Two-way ANOVA</strong> &mdash; decomposing harness vs LLM</li>
+      <li><strong>Threats &amp; Risks</strong></li>
+      <li><strong>Timeline</strong> &amp; budget</li>
+      <li><strong>Implementation status</strong> &mdash; <em>167 tests, 9 phases</em></li>
+      <li><strong>Preliminary results</strong> (empirical ANOVA)</li>
+      <li><strong>Contributions</strong> &amp; publishability</li>
+      <li><strong>Q&amp;A</strong></li>
+    </ol>
+  </div>
+  <div class="footer">Slide 3 / 18</div>
+</section>
+
+<!-- ============ SLIDE 3: PROBLEM ============ -->
+<section>
+  <h2>1. Problem: The Evaluation Paradox</h2>
+  <p>The performance of a <strong>coding agent</strong> depends on two factors:</p>
+  <div class="two-col" style="margin:8px 0;">
+    <div class="card">
+      <div class="card-title">A. Base LLM</div>
+      Claude, GPT, DeepSeek, Qwen...<br>
+      <span class="small">Many benchmarks already evaluate this</span>
+    </div>
+    <div class="card">
+      <div class="card-title">B. Harness / Scaffold</div>
+      Tool system, context manager, orchestration...<br>
+      <span class="small">"The operating system of the agent" [A1]</span>
+    </div>
+  </div>
+  <div class="highlight-box">
+    <strong>Evidence:</strong> Lou et al. (2026) [A2] show <em>a small model with a good harness</em>
+    can beat <em>a large model with a weak harness</em>, reducing invalid actions by 100%.
+    Bui et al. (2026) [A1]: Adaptive Context Compaction cuts token usage by <strong>54%</strong>.
+  </div>
+  <div class="note note-warn">
+    <strong>The paradox:</strong> When we report "Agent A scored 70%," we
+    <em>do not know</em> which harness component contributed to that result.
+  </div>
+  <div class="footer">Slide 3 / 17</div>
+</section>
+
+<!-- ============ SLIDE 4: RESEARCH GAP ============ -->
+<section>
+  <h2>2. Research Gap: Three Genuine Reasons It Exists</h2>
+  <p>We analyzed <strong>49 papers</strong> (2023&ndash;2026): <em>no work systematically evaluates</em> the harness itself [S5].</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">1. Role mismatch</div>
+      Princeton (SWE-Agent), Anthropic (Claude Code) are <em>developers</em> &mdash; incentivized to ship new harnesses, not to compare systems as <em>evaluators</em>.
+      <br><span class="small">Analogy: car makers vs Euro NCAP / IIHS</span>
+    </div>
+    <div class="card">
+      <div class="card-title">2. Field moving too fast</div>
+      2023&ndash;2026: from a handful of harnesses to dozens. <em>Nobody has paused</em> to meta-evaluate while still racing to build.
+    </div>
+    <div class="card">
+      <div class="card-title">3. Only indirect evidence</div>
+      Lou et al. compared harnesses on <em>game tasks</em> [A2]. Robeyns et al. self-improved a harness but <em>did not measure each component</em> [B10].
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <strong>Research gap:</strong> No framework exists to (a) measure the quality of individual harness components, (b) decompose harness vs base-LLM contribution, and (c) compare harnesses on unified quality dimensions.
+  </div>
+  <div class="footer">Slide 4 / 17</div>
+</section>
+
+<!-- ============ SLIDE 5: GAP TABLE ============ -->
+<section>
+  <h2>2.1. What Exists vs What Is Missing</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:30%">Aspect</th>
+        <th style="width:35%">What exists</th>
+        <th style="width:35%">What is missing</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Measuring agent <em>output</em></td>
+        <td>SWE-bench, SWE-Compass, AgentBoard</td>
+        <td>&mdash;</td>
+      </tr>
+      <tr>
+        <td>Tool accuracy in isolation</td>
+        <td>ToolLLM, AnyTool, Gorilla</td>
+        <td><em>Tool use INSIDE a coding harness</em></td>
+      </tr>
+      <tr>
+        <td>Memory in isolation</td>
+        <td>Mem0, A-MEM (on chatbots)</td>
+        <td><em>Memory INSIDE a coding harness</em></td>
+      </tr>
+      <tr>
+        <td>Harness design description</td>
+        <td>OpenDev, AutoHarness</td>
+        <td><em>Measuring harness quality</em></td>
+      </tr>
+      <tr>
+        <td><strong>Cross-backend comparison</strong></td>
+        <td>&mdash;</td>
+        <td><strong style="color:#c62828;">Completely unaddressed</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Separating harness vs LLM</strong></td>
+        <td>&mdash;</td>
+        <td><strong style="color:#c62828;">Completely unaddressed</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="footer">Slide 5 / 17</div>
+</section>
+
+<!-- ============ SLIDE 6: OBJECTIVES ============ -->
+<section>
+  <h2>3. Aim + 5 Objectives</h2>
+  <div class="highlight-box">
+    <strong>Aim:</strong> Build the <em>first unified evaluation framework</em> for coding-agent harnesses, enabling decomposition and quantification of each harness component's contribution to agent performance, <em>independent of the base LLM</em>.
+  </div>
+
+  <table>
+    <thead><tr><th style="width:10%">Obj.</th><th>Description</th><th style="width:20%">Success criterion</th></tr></thead>
+    <tbody>
+      <tr><td><strong>O1</strong></td><td>Taxonomy: 3 dimensions, 7 metrics, validated by 5 experts</td><td>Fleiss kappa &ge; 0.6</td></tr>
+      <tr><td><strong>O2</strong></td><td>Fork &amp; refactor SWE-Agent into a modular harness</td><td>+/- 3% of original SWE-Agent</td></tr>
+      <tr><td><strong>O3</strong></td><td>Ablation: 150 tasks x 27 conditions (3x3x3) + pilot study</td><td>7,050 evaluations</td></tr>
+      <tr><td><strong>O4</strong></td><td>Two-way ANOVA decomposing harness vs LLM variance</td><td>p &lt; 0.05 (Bonferroni)</td></tr>
+      <tr><td><strong>O5</strong></td><td>Release open-source toolkit on GitHub</td><td>Docs + CI/CD</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <span class="tag tag-new">v2</span> Reduced from 5 dimensions &rarr; <strong>3</strong>, 80 &rarr; <strong>27 conditions</strong>, added pilot study, added two-way ANOVA (committee's question).
+  </div>
+  <div class="footer">Slide 6 / 17</div>
+</section>
+
+<!-- ============ SLIDE 7: HYPOTHESES ============ -->
+<section>
+  <h2>4. Research Hypotheses</h2>
+  <div class="cards">
+    <div class="card" style="border-color:#0066cc;">
+      <div class="card-title">H1</div>
+      <strong>Tool system</strong> has the <em>largest effect size</em> (Cohen's d &gt; 0.5) among the three harness components on resolve rate.
+    </div>
+    <div class="card" style="border-color:#0066cc;">
+      <div class="card-title">H2</div>
+      <strong>Context management</strong> has a <em>medium effect size</em> (Cohen's d 0.3 &ndash; 0.5).
+    </div>
+    <div class="card" style="border-color:#0066cc;">
+      <div class="card-title">H3</div>
+      <strong>Harness configuration</strong> explains <em>at least 20%</em> of resolve-rate variance (eta&sup2; &ge; 0.20), independent of the LLM backend.
+    </div>
+    <div class="card" style="border-color:#0066cc;">
+      <div class="card-title">H4</div>
+      Variance across LLM backends <em>decreases</em> when harness quality is higher (statistically significant <em>interaction effect</em>).
+    </div>
+  </div>
+  <div class="note note-ok">
+    <strong>Neutral framing:</strong> No specific numbers predicted ("30&ndash;40%"). Only testable directions &rarr; avoid confirmation bias. <em>Supporting or refuting a hypothesis is equally valuable.</em>
+  </div>
+  <div class="footer">Slide 7 / 17</div>
+</section>
+
+<!-- ============ SLIDE 8: TAXONOMY ============ -->
+<section>
+  <h2>5. Taxonomy: 3 Dimensions &mdash; 7 Metrics</h2>
+  <table style="font-size:0.55em;">
+    <thead>
+      <tr><th>Dimension</th><th>Metric</th><th>Definition</th><th>Measurement</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="3" style="background:#ffebee;"><strong>D1<br>Tool<br>Dispatch</strong></td>
+        <td><strong>M1.1</strong> Correct Selection Rate</td>
+        <td>% tool calls picking a tool from the <em>acceptable set</em></td>
+        <td>2 annotators, Fleiss kappa</td>
+      </tr>
+      <tr>
+        <td><strong>M1.2</strong> Redundant Call Rate</td>
+        <td>% calls whose output is not used within the next 3 turns</td>
+        <td>Automatic log analysis</td>
+      </tr>
+      <tr>
+        <td><strong>M1.3</strong> Utilization Breadth</td>
+        <td>unique tools used / total available</td>
+        <td>Automatic log analysis</td>
+      </tr>
+      <tr>
+        <td rowspan="2" style="background:#fff3e0;"><strong>D2<br>Context<br>Utilization</strong></td>
+        <td><strong>M2.1</strong> Info Retention</td>
+        <td>BERTScore between full-context and compacted-context output</td>
+        <td>30 pairs of human preference</td>
+      </tr>
+      <tr>
+        <td><strong>M2.2</strong> Effective Token Ratio</td>
+        <td>% tokens relevant to the current task</td>
+        <td>LLM classifier (Haiku) + 200 human labels</td>
+      </tr>
+      <tr>
+        <td rowspan="2" style="background:#e3f2fd;"><strong>D3<br>Backend<br>Portability</strong></td>
+        <td><strong>M3.1</strong> Cross-Backend StdDev</td>
+        <td>std(resolve rate) across 3 LLM backends</td>
+        <td>Direct</td>
+      </tr>
+      <tr>
+        <td><strong>M3.2</strong> Min/Max Ratio</td>
+        <td>min(RR) / max(RR)</td>
+        <td>Higher = more portable</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <span class="tag tag-new">v2</span> M1.1: changed "single ground truth" &rarr; <em>acceptable-tool set</em> (committee Q#4). M2.2: changed vague "token waste" &rarr; <em>LLM classifier + human validation</em> (committee Q#9).
+  </div>
+  <div class="footer">Slide 8 / 17</div>
+</section>
+
+<!-- ============ SLIDE 9: MODULAR HARNESS ============ -->
+<section>
+  <h2>6. Modular Harness Architecture &mdash; 3 Swappable Layers</h2>
+  <div class="layer-stack">
+    <div class="layer l1">
+      <strong>LAYER 1: Tool Dispatch</strong> &mdash; <code>ToolProvider</code>
+      <br><span class="small">Full (12 tools) &nbsp;|&nbsp; Medium (8) &nbsp;|&nbsp; Minimal (5)</span>
+    </div>
+    <div class="layer l2">
+      <strong>LAYER 2: Context Management</strong> &mdash; <code>ContextStrategy</code>
+      <br><span class="small">Full History &nbsp;|&nbsp; Sliding Window (50K) &nbsp;|&nbsp; Summary / ACC (2K)</span>
+    </div>
+    <div class="layer l3">
+      <strong>LAYER 3: LLM Backend</strong> &mdash; <code>LLMBackend</code>
+      <br><span class="small">Claude Sonnet 4 &nbsp;|&nbsp; GPT-4o &nbsp;|&nbsp; DeepSeek-V3</span>
+    </div>
+    <div class="layer muted">
+      <span class="small">L4 Safety &amp; Permission &mdash; future work</span>
+    </div>
+    <div class="layer muted">
+      <span class="small">L5 Orchestration &mdash; kept unchanged from SWE-Agent</span>
+    </div>
+  </div>
+  <p class="small"><strong>Techniques:</strong> Strategy Pattern + Dependency Injection + Factory Pattern. Each layer is swapped via a <code>YAML config</code>. Forked from SWE-Agent (MIT, ~15k LOC).</p>
+  <div class="footer">Slide 9 / 17</div>
+</section>
+
+<!-- ============ SLIDE 10: METHOD ============ -->
+<section>
+  <h2>7. Methodology &mdash; Four Experimental Phases</h2>
+  <div class="cards" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="card">
+      <div class="card-title">P1<br>Taxonomy</div>
+      5 experts validate, Fleiss kappa &ge; 0.6
+      <br><span class="small">Weeks 1&ndash;6</span>
+    </div>
+    <div class="card" style="border-color:#ffa000;">
+      <div class="card-title">P1.5<br>Pilot <span class="tag tag-new">v2</span></div>
+      5 cond x 20 tasks x 2 runs = <strong>200 evals</strong>. ~$80.
+      <br><span class="small">Weeks 7&ndash;8</span>
+    </div>
+    <div class="card">
+      <div class="card-title">P2<br>Modular Fork</div>
+      SWE-Agent refactor, verify +/- 3% on 50 tasks
+      <br><span class="small">Weeks 9&ndash;11</span>
+    </div>
+    <div class="card">
+      <div class="card-title">P3<br>Full Ablation</div>
+      27 cond x 150 tasks = <strong>7,050 evals</strong>
+      <br><span class="small">Weeks 12&ndash;18</span>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Why a pilot?</strong> Validate that metrics actually discriminate between conditions, estimate cost accurately, debug the pipeline, and compute preliminary effect sizes for power analysis. <em>Prevents blind commitment</em> to the expensive full experiment.
+  </div>
+  <div class="footer">Slide 10 / 17</div>
+</section>
+
+<!-- ============ SLIDE 11: ABLATION DESIGN ============ -->
+<section>
+  <h2>8. Ablation Design: 27 Conditions = 3 x 3 x 3</h2>
+  <div class="kpi">
+    <div class="item"><div class="num">27</div><div class="label">Conditions</div></div>
+    <div class="item"><div class="num">150</div><div class="label">Tasks</div></div>
+    <div class="item"><div class="num">7,050</div><div class="label">Evaluations</div></div>
+    <div class="item"><div class="num">~$2.5k</div><div class="label">Budget</div></div>
+  </div>
+
+  <table style="font-size:0.58em;">
+    <thead><tr><th>Factor</th><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tool Config</strong></td><td>Full (12)</td><td>Medium (8)</td><td>Minimal (5)</td></tr>
+      <tr><td><strong>Context Strategy</strong></td><td>Full History</td><td>Sliding Window 50K</td><td>Summary / ACC 2K</td></tr>
+      <tr><td><strong>LLM Backend</strong></td><td>Claude Sonnet 4</td><td>GPT-4o</td><td>DeepSeek-V3</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Dataset:</strong> 150 tasks from SWE-bench Verified, <em>stratified random sampling</em> by difficulty.
+    <strong>Runs:</strong> 10 critical conditions x 3 runs + 17 conditions x 1 run.
+    <strong>Power analysis:</strong> alpha = 0.05, power &ge; 0.80.
+  </div>
+  <div class="footer">Slide 11 / 17</div>
+</section>
+
+<!-- ============ SLIDE 12: ANOVA ============ -->
+<section>
+  <h2>9. Two-Way ANOVA &mdash; Decomposing Harness vs LLM</h2>
+  <div class="highlight-box">
+    "Independent of the LLM" does <strong>not</strong> mean harness and LLM are uncorrelated.
+    It means we can <em>decompose</em> the variance due to harness vs the variance due to LLM.
+  </div>
+
+  <p><strong>Statistical model:</strong></p>
+  <pre style="font-size:0.58em; background:#f5f7fa; padding:10px; border-radius:8px; border:1px solid #ddd;"><code>Total Variance = Var(Harness) + Var(LLM) + Var(Harness x LLM) + Error
+
+Factor A: Harness config   (9 levels: 3 tools x 3 contexts)
+Factor B: LLM backend      (3 levels: Claude, GPT, DeepSeek)
+DV:        Resolve rate
+
+If Var(Harness) is significant    --&gt; harness has an INDEPENDENT effect
+If Var(H x LLM) is significant    --&gt; there is an INTERACTION
+eta-squared                       --&gt; % of variance explained per factor</code></pre>
+
+  <div class="note note-ok">
+    <strong>Main theoretical contribution:</strong> Formalizing how to <em>separate harness quality from LLM quality</em>.
+    Post-hoc: Tukey HSD pairwise, Cohen's d effect sizes, Bonferroni correction for 7 metrics.
+  </div>
+  <div class="footer">Slide 12 / 17</div>
+</section>
+
+<!-- ============ SLIDE 13: THREATS & RISKS ============ -->
+<section>
+  <h2>10. Threats to Validity &amp; Risk Analysis</h2>
+  <div class="two-col">
+    <div>
+      <h3>Threats</h3>
+      <table style="font-size:0.52em;">
+        <thead><tr><th>Type</th><th>Mitigation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Internal:</strong> tool-removal confound</td><td>Reduce 12&rarr;8&rarr;5; log which tools each task needs</td></tr>
+          <tr><td><strong>Internal:</strong> LLM non-determinism</td><td><em>Temperature = 0</em>, 3 runs for critical conds</td></tr>
+          <tr><td><strong>External:</strong> Python only</td><td>Caution when generalizing</td></tr>
+          <tr><td><strong>Construct:</strong> M1.1 annotator-dependent</td><td>2 annotators, Fleiss kappa</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Top Risks</h3>
+      <table style="font-size:0.52em;">
+        <thead><tr><th>Risk</th><th>P</th><th>Mitigation</th></tr></thead>
+        <tbody>
+          <tr><td>API cost overrun</td><td><span class="tag tag-bad">High</span></td><td>Pilot estimates, DeepSeek cheap</td></tr>
+          <tr><td>Docker env instability</td><td><span class="tag tag-warn">Med</span></td><td>Pre-filter, retry x2</td></tr>
+          <tr><td>Metrics not discriminative</td><td><span class="tag tag-warn">Med</span></td><td>Detected early via pilot</td></tr>
+          <tr><td>DeepSeek API unstable</td><td><span class="tag tag-ok">Low</span></td><td>Backup: Qwen2.5-72B</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="note note-warn"><span class="tag tag-new">v2</span> V1 had no Threats or Risk Analysis &mdash; the committee explicitly requested this.</div>
+  <div class="footer">Slide 13 / 17</div>
+</section>
+
+<!-- ============ SLIDE 14: TIMELINE ============ -->
+<section>
+  <h2>11. Timeline (24 weeks) &amp; Budget</h2>
+  <table style="font-size:0.6em;">
+    <thead><tr><th>Phase</th><th>Weeks</th><th>Content</th><th>Deliverable</th></tr></thead>
+    <tbody>
+      <tr><td>P1</td><td>1&ndash;6</td><td>Taxonomy + expert validation</td><td>Taxonomy v1.0, kappa report</td></tr>
+      <tr style="background:#fff8e1;"><td><strong>P1.5</strong></td><td>7&ndash;8</td><td><strong>Pilot study</strong> (200 evals)</td><td>Metrics validation, cost estimate</td></tr>
+      <tr><td>P2</td><td>9&ndash;11</td><td>Fork SWE-Agent + modular refactor</td><td>Modular harness v1.0</td></tr>
+      <tr><td>P3</td><td>12&ndash;18</td><td>Full ablation (7,050 evals)</td><td>Raw data, ANOVA results</td></tr>
+      <tr><td>P4</td><td>19&ndash;22</td><td>Analysis + guidelines + thesis writing</td><td>Draft thesis</td></tr>
+      <tr><td>P5</td><td>23&ndash;24</td><td>Review, revisions, toolkit release</td><td>Final + GitHub release</td></tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Estimated budget</div>
+      Pilot: ~$80<br>
+      Full experiment: ~$2,500<br>
+      Contingency: ~$500<br>
+      <strong>Total: $2,500 &ndash; $3,100</strong>
+    </div>
+    <div class="card">
+      <div class="card-title">v1 vs v2 comparison</div>
+      v1: $800&ndash;1,200 (<em>unrealistic</em>)<br>
+      v2: $2,500&ndash;3,100 (<em>includes retry + pilot</em>)<br>
+      Evaluations: 16,000 &rarr; 7,050 (-56%)
+    </div>
+  </div>
+  <div class="footer">Slide 14 / 17</div>
+</section>
+
+<!-- ============ SLIDE 15: CODE STATUS ============ -->
+<section>
+  <h2>12. Implementation Status &mdash; <span style="color:#2e7d32;">ALREADY BUILT</span></h2>
+  <div class="kpi">
+    <div class="item"><div class="num">167</div><div class="label">Tests passing</div></div>
+    <div class="item"><div class="num">9</div><div class="label">Phases done</div></div>
+    <div class="item"><div class="num">27</div><div class="label">Conditions generated</div></div>
+    <div class="item"><div class="num">360</div><div class="label">Trajectories collected</div></div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3>Toolkit <code>harness_eval/</code></h3>
+      <ul style="font-size:0.62em;">
+        <li><code>configs/</code> &mdash; 27 conditions (3x3x3)</li>
+        <li><code>metrics/</code> &mdash; 7 metrics M1.1&ndash;M3.2</li>
+        <li><code>parsers/trajectory.py</code> &mdash; SWE-Agent log parser</li>
+        <li><code>pipeline/analysis.py</code> &mdash; ANOVA, Cohen's d, GLMM</li>
+        <li><code>pipeline/runner.py</code> &mdash; Dry-run + SWE-Agent + Ollama</li>
+        <li><code>harness/</code> &mdash; 3 ABCs + 9 providers + factory</li>
+        <li><code>cli.py</code> &mdash; info / pilot / run / analyze / convert</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Streamlit Dashboard</h3>
+      <ul style="font-size:0.62em;">
+        <li>5 tabs: Config / Run Monitor / Logs / Compare / ANOVA</li>
+        <li>Run modes: <em>ollama</em> / <em>dry-run</em> / <em>real</em></li>
+        <li>Parallel ThreadPoolExecutor (4 workers)</li>
+        <li>150 SWE-bench tasks embedded (difficulty-aware)</li>
+        <li>Ollama: qwen2.5:7b, deepseek-r1:1.5b</li>
+        <li>One-click setup: <code>start_harness_eval.sh</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">Slide 15 / 17</div>
+</section>
+
+<!-- ============ SLIDE 16: PRELIMINARY RESULTS ============ -->
+<section>
+  <h2>13. Preliminary Results &mdash; Empirical ANOVA</h2>
+  <p class="small">Run on the current <strong>trajectories/</strong> folder: 360 observations, 18 conditions (2 backends: claude + sonnet)</p>
+
+  <table style="font-size:0.65em;">
+    <thead>
+      <tr><th>Source</th><th>eta&sup2;</th><th>F</th><th>p-value</th><th>Sig?</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background:#e8f5e9;">
+        <td><strong>Tool</strong></td><td>0.0539</td><td>10.264</td><td><strong>&lt; 0.001</strong></td><td><strong>***</strong></td>
+      </tr>
+      <tr style="background:#f1f8e9;">
+        <td><strong>Context</strong></td><td>0.0248</td><td>4.723</td><td><strong>0.0095</strong></td><td><strong>**</strong></td>
+      </tr>
+      <tr>
+        <td>Backend</td><td>0.0025</td><td>0.959</td><td>0.3282</td><td>&mdash;</td>
+      </tr>
+      <tr><td>Tool x Context</td><td>0.0058</td><td>0.550</td><td>0.6988</td><td>&mdash;</td></tr>
+      <tr><td>Tool x Backend</td><td>0.0069</td><td>1.314</td><td>0.2701</td><td>&mdash;</td></tr>
+      <tr><td>Context x Backend</td><td>0.0069</td><td>1.314</td><td>0.2701</td><td>&mdash;</td></tr>
+      <tr><td>Error</td><td>0.8979</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+
+  <div class="result-box">
+    <strong>Preliminary observations:</strong>
+    <ul style="margin-top:4px;">
+      <li><span class="tag tag-ok">H1 direction</span> <strong>Tool</strong> has the largest effect (eta&sup2; = 0.054 &gt; Context = 0.025)</li>
+      <li><span class="tag tag-ok">H2 direction</span> <strong>Context</strong> has a medium, <em>statistically significant</em> effect</li>
+      <li><span class="tag tag-warn">Need more data</span> Backend has only 2 levels (haiku empty); H4 requires the full design</li>
+    </ul>
+  </div>
+  <div class="small"><em>Note:</em> Current data is realistic dry-run, not yet real SWE-bench runs. Empirical results will follow after Phase P3.</div>
+  <div class="footer">Slide 16 / 17</div>
+</section>
+
+<!-- ============ SLIDE 17: CONTRIBUTIONS ============ -->
+<section>
+  <h2>14. Contributions &amp; Publishability</h2>
+  <div class="three-col">
+    <div class="card">
+      <div class="card-title">Theoretical</div>
+      Formalizing how to separate <em>harness quality from LLM quality</em> via two-way ANOVA.
+    </div>
+    <div class="card">
+      <div class="card-title">Empirical</div>
+      First quantitative decomposition of each harness component (Tool / Context / Backend).
+    </div>
+    <div class="card">
+      <div class="card-title">Toolkit</div>
+      Reusable evaluation framework &mdash; open-source on GitHub, docs, CI/CD.
+    </div>
+  </div>
+
+  <h3>Practical impact</h3>
+  <ul>
+    <li><strong>Developers:</strong> know which harness component to prioritize for improvement</li>
+    <li><strong>Researchers:</strong> standard framework to compare new harnesses</li>
+    <li><strong>Industry:</strong> data-driven guidelines for harness design</li>
+  </ul>
+
+  <h3>Publishability</h3>
+  <table style="font-size:0.58em;">
+    <thead><tr><th>Venue</th><th>Type</th><th>Fit</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ICSE 2027 NIER</strong></td><td>Conference (New Ideas)</td><td><span class="tag tag-ok">Strong fit</span></td></tr>
+      <tr><td>MSR 2027</td><td>Conference</td><td><span class="tag tag-ok">Fit</span></td></tr>
+      <tr><td>LLM Agents Workshop (NeurIPS/ICML)</td><td>Workshop</td><td><span class="tag tag-ok">Fit</span></td></tr>
+      <tr><td>EMNLP Demo Track</td><td>Demo</td><td><span class="tag tag-ok">Fit</span></td></tr>
+    </tbody>
+  </table>
+  <div class="footer">Slide 17 / 17</div>
+</section>
+
+<!-- ============ SLIDE 18: Q&A ============ -->
+<section class="title-slide" data-background-color="#f5f7fa">
+  <h1 style="font-size:3em; color:#0066cc;">Q&amp;A</h1>
+  <p style="font-size:1.1em; color:#555; margin:1.5em 0;">
+    Thank you for your attention<br>
+    and thoughtful questions
+  </p>
+  <div class="small" style="margin-top:2em;">
+    <strong>Resources:</strong><br>
+    <code>NCKK-Docs/de-tai/de-cuong/DE-CUONG-HarnessEval-v2.md</code><br>
+    <code>NCKK-Docs/de-tai/harness-eval/</code> &mdash; toolkit + 167 tests<br>
+    <code>plans/Plan-Coding-HarnessEval.md</code> &mdash; session log
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    width: 1280,
+    height: 800,
+    margin: 0.06,
+    plugins: [ RevealHighlight, RevealNotes ]
+  });
+</script>
+</body>
+</html>
